@@ -48,10 +48,7 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email
             </label>
             <input
@@ -103,9 +100,7 @@ const LoginPage = () => {
 
         {/* Credenciais para teste */}
         <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-50 rounded-lg">
-          <p className="text-xs font-semibold mb-2">
-            Credenciais para teste:
-          </p>
+          <p className="text-xs font-semibold mb-2">Credenciais para teste:</p>
           <div className="text-xs opacity-80 space-y-1">
             <p className="break-all">
               • <strong>Admin:</strong> admin@manager.com / 123456

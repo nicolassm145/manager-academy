@@ -13,9 +13,15 @@ const paddingClasses = {
   large: "p-6 sm:p-8",
 };
 
-export function CardComponent({ children, className = "", padding = "medium" }: CardProps) {
+export function CardComponent({
+  children,
+  className = "",
+  padding = "medium",
+}: CardProps) {
   return (
-    <div className={`bg-white rounded-xl shadow-md border ${paddingClasses[padding]} ${className}`}>
+    <div
+      className={`bg-white rounded-xl shadow-md border ${paddingClasses[padding]} ${className}`}
+    >
       {children}
     </div>
   );

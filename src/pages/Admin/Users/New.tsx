@@ -56,10 +56,7 @@ const NewUserPage = () => {
         >
           {/* Nome */}
           <div>
-            <label
-              htmlFor="nome"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="nome" className="block text-sm font-medium mb-2">
               Nome Completo *
             </label>
             <input
@@ -77,10 +74,7 @@ const NewUserPage = () => {
           {/* Email e Senha */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email *
               </label>
               <input
@@ -117,10 +111,7 @@ const NewUserPage = () => {
 
           {/* Perfil */}
           <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="role" className="block text-sm font-medium mb-2">
               Perfil de Acesso *
             </label>
             <select
@@ -216,9 +207,7 @@ const NewUserPage = () => {
 
           {/* Info sobre permissões */}
           <div className="bg-gray-50 border rounded-lg p-4">
-            <p className="text-sm font-semibold mb-2">
-              Sobre os Perfis:
-            </p>
+            <p className="text-sm font-semibold mb-2">Sobre os Perfis:</p>
             <ul className="text-xs opacity-80 space-y-1">
               <li>
                 • <strong>Administrador:</strong> Gerencia usuários, equipes e
@@ -243,10 +232,7 @@ const NewUserPage = () => {
 
           {/* Botões */}
           <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              className="btn btn-primary flex-1"
-            >
+            <button type="submit" className="btn btn-primary flex-1">
               Criar Usuário
             </button>
             <button

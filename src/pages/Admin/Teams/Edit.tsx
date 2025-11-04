@@ -76,10 +76,7 @@ const EditTeamPage = () => {
           className="bg-white rounded-xl shadow-md p-8 border space-y-6"
         >
           <div>
-            <label
-              htmlFor="nome"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="nome" className="block text-sm font-medium mb-2">
               Nome da Equipe *
             </label>
             <input
@@ -112,10 +109,7 @@ const EditTeamPage = () => {
           </div>
 
           <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="status" className="block text-sm font-medium mb-2">
               Status *
             </label>
             <select
@@ -135,10 +129,7 @@ const EditTeamPage = () => {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              className="btn btn-primary flex-1"
-            >
+            <button type="submit" className="btn btn-primary flex-1">
               Salvar Alterações
             </button>
             <button

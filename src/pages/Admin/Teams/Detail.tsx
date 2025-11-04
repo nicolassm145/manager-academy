@@ -29,10 +29,7 @@ const TeamDetailPage = () => {
       <Layout>
         <div className="text-center py-12">
           <p className="opacity-60">Equipe não encontrada</p>
-          <Link
-            to="/admin/teams"
-            className="btn btn-link mt-4"
-          >
+          <Link to="/admin/teams" className="btn btn-link mt-4">
             Voltar para listagem
           </Link>
         </div>

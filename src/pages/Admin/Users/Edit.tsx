@@ -86,10 +86,7 @@ const EditUserPage = () => {
           className="bg-white rounded-xl shadow-md p-8 border space-y-6"
         >
           <div>
-            <label
-              htmlFor="nome"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="nome" className="block text-sm font-medium mb-2">
               Nome Completo *
             </label>
             <input
@@ -104,10 +101,7 @@ const EditUserPage = () => {
           </div>
 
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email *
             </label>
             <input
@@ -123,10 +117,7 @@ const EditUserPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="role" className="block text-sm font-medium mb-2">
                 Perfil de Acesso *
               </label>
               <select
@@ -193,10 +184,7 @@ const EditUserPage = () => {
           )}
 
           <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              className="btn btn-primary flex-1"
-            >
+            <button type="submit" className="btn btn-primary flex-1">
               Salvar Alterações
             </button>
             <button

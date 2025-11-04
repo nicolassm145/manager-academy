@@ -58,9 +58,8 @@ export function Layout({ children }: LayoutProps) {
   const menuItems = useMemo(() => {
     if (!permissions) return [];
     return allMenuItems.filter((item) => {
-
       if (item.path === "/dashboard") return true;
- 
+
       if (item.permission) {
         return (permissions as any)[item.permission];
       }
@@ -132,9 +131,7 @@ export function Layout({ children }: LayoutProps) {
           <div className="p-4 border-t">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {user?.nome}
-                </p>
+                <p className="text-sm font-medium truncate">{user?.nome}</p>
                 <p className="text-xs opacity-60 truncate">{user?.email}</p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
                   {user?.role === "admin" && "Administrador"}

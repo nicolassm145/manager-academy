@@ -131,11 +131,8 @@ const SettingsPage = () => {
           </div>
         )}
 
-
         <div className="bg-white rounded-xl shadow-md border p-6">
-          <h2 className="text-lg font-semibold mb-4">
-            Informações do Perfil
-          </h2>
+          <h2 className="text-lg font-semibold mb-4">Informações do Perfil</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium opacity-60 mb-1">
@@ -166,21 +163,15 @@ const SettingsPage = () => {
           </div>
         </div>
 
-
         <div className="bg-white rounded-xl shadow-md border p-6">
           <div className="flex items-center gap-3 mb-4">
             <EnvelopeIcon className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-semibold">
-              Alterar Email
-            </h2>
+            <h2 className="text-lg font-semibold">Alterar Email</h2>
           </div>
 
           <form onSubmit={handleEmailSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Novo Email *
               </label>
               <input
@@ -195,10 +186,7 @@ const SettingsPage = () => {
               />
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-            >
+            <button type="submit" className="btn btn-primary w-full">
               Atualizar Email
             </button>
           </form>
@@ -207,9 +195,7 @@ const SettingsPage = () => {
         <div className="bg-white rounded-xl shadow-md border p-6">
           <div className="flex items-center gap-3 mb-4">
             <LockClosedIcon className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-semibold">
-              Alterar Senha
-            </h2>
+            <h2 className="text-lg font-semibold">Alterar Senha</h2>
           </div>
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -270,10 +256,7 @@ const SettingsPage = () => {
               />
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-            >
+            <button type="submit" className="btn btn-primary w-full">
               Atualizar Senha
             </button>
           </form>

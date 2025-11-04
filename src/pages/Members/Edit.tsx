@@ -64,9 +64,7 @@ const EditMemberPage = () => {
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            Editar Membro
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Editar Membro</h1>
           <p className="text-sm sm:text-base opacity-60 mt-1">
             {member.nome} - {member.matricula}
           </p>
@@ -114,10 +112,7 @@ const EditMemberPage = () => {
 
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email *
             </label>
             <input
@@ -133,10 +128,7 @@ const EditMemberPage = () => {
 
           {/* Curso */}
           <div>
-            <label
-              htmlFor="curso"
-              className="block text-sm font-medium mb-2"
-            >
+            <label htmlFor="curso" className="block text-sm font-medium mb-2">
               Curso *
             </label>
             <select
@@ -190,10 +182,7 @@ const EditMemberPage = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="cargo"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="cargo" className="block text-sm font-medium mb-2">
                 Cargo *
               </label>
               <select
@@ -213,10 +202,7 @@ const EditMemberPage = () => {
 
           {/* Botões */}
           <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              className="btn btn-primary flex-1"
-            >
+            <button type="submit" className="btn btn-primary flex-1">
               Salvar Alterações
             </button>
             <button

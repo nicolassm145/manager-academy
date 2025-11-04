@@ -17,10 +17,7 @@ const MemberDetailPage = () => {
       <Layout>
         <div className="text-center py-12">
           <p className="opacity-60">Membro não encontrado</p>
-          <Link
-            to="/members"
-            className="btn btn-link mt-4"
-          >
+          <Link to="/members" className="btn btn-link mt-4">
             Voltar para listagem
           </Link>
         </div>
@@ -98,30 +95,22 @@ const MemberDetailPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm opacity-60 mb-1">Matrícula</p>
-              <p className="text-lg font-semibold">
-                {member.matricula}
-              </p>
+              <p className="text-lg font-semibold">{member.matricula}</p>
             </div>
 
             <div>
               <p className="text-sm opacity-60 mb-1">Curso</p>
-              <p className="text-lg font-semibold">
-                {member.curso}
-              </p>
+              <p className="text-lg font-semibold">{member.curso}</p>
             </div>
 
             <div>
               <p className="text-sm opacity-60 mb-1">Equipe</p>
-              <p className="text-lg font-semibold">
-                {member.equipe}
-              </p>
+              <p className="text-lg font-semibold">{member.equipe}</p>
             </div>
 
             <div>
               <p className="text-sm opacity-60 mb-1">Cargo</p>
-              <p className="text-lg font-semibold">
-                {member.cargo}
-              </p>
+              <p className="text-lg font-semibold">{member.cargo}</p>
             </div>
 
             <div>
@@ -135,9 +124,7 @@ const MemberDetailPage = () => {
 
         {/* Histórico (mockado) */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
-          <h2 className="text-xl font-bold mb-4">
-            Histórico de Mudanças
-          </h2>
+          <h2 className="text-xl font-bold mb-4">Histórico de Mudanças</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-4 pb-4 border-b">
               <div className="w-2 h-2 rounded-full bg-blue-600 mt-2"></div>

@@ -22,10 +22,7 @@ const UserDetailPage = () => {
       <Layout>
         <div className="text-center py-12">
           <p className="opacity-60">Usuário não encontrado</p>
-          <Link
-            to="/admin/users"
-            className="btn btn-link mt-4"
-          >
+          <Link to="/admin/users" className="btn btn-link mt-4">
             Voltar para listagem
           </Link>
         </div>
@@ -110,9 +107,7 @@ const UserDetailPage = () => {
         <div className="bg-white rounded-xl shadow-md p-8 border">
           <div className="flex items-center mb-8 pb-6 border-b">
             <div className="w-20 h-20 rounded-full bg-base-200 flex items-center justify-center mr-6">
-              <span className="text-3xl font-bold">
-                {user.nome.charAt(0)}
-              </span>
+              <span className="text-3xl font-bold">{user.nome.charAt(0)}</span>
             </div>
             <div>
               <h1 className="text-3xl font-bold">{user.nome}</h1>
@@ -141,17 +136,13 @@ const UserDetailPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm opacity-60 mb-1">Perfil de Acesso</p>
-              <p className="text-lg font-semibold">
-                {getRoleName(user.role)}
-              </p>
+              <p className="text-lg font-semibold">{getRoleName(user.role)}</p>
             </div>
 
             {user.equipe && (
               <div>
                 <p className="text-sm opacity-60 mb-1">Equipe</p>
-                <p className="text-lg font-semibold">
-                  {user.equipe}
-                </p>
+                <p className="text-lg font-semibold">{user.equipe}</p>
               </div>
             )}
 
@@ -164,9 +155,7 @@ const UserDetailPage = () => {
 
             <div>
               <p className="text-sm opacity-60 mb-1">Status</p>
-              <p className="text-lg font-semibold">
-                {user.status}
-              </p>
+              <p className="text-lg font-semibold">{user.status}</p>
             </div>
 
             {membroVinculado && (
@@ -179,9 +168,7 @@ const UserDetailPage = () => {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold">
-                      {membroVinculado.nome}
-                    </p>
+                    <p className="font-semibold">{membroVinculado.nome}</p>
                     <p className="text-sm opacity-60">
                       {membroVinculado.matricula} - {membroVinculado.cargo}
                     </p>

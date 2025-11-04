@@ -132,9 +132,7 @@ const AdminUsersPage = () => {
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm mb-1">
-                      {user.nome}
-                    </p>
+                    <p className="font-medium text-sm mb-1">{user.nome}</p>
                     <p className="text-xs opacity-60 mb-2 truncate">
                       {user.email}
                     </p>
@@ -236,12 +234,8 @@ const AdminUsersPage = () => {
                           </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium">
-                            {user.nome}
-                          </div>
-                          <div className="text-sm opacity-60">
-                            {user.email}
-                          </div>
+                          <div className="text-sm font-medium">{user.nome}</div>
+                          <div className="text-sm opacity-60">{user.email}</div>
                         </div>
                       </div>
                     </td>
