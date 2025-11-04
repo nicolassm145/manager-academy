@@ -70,17 +70,17 @@ const AdminUsersPage = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold">
               Usuários do Sistema (Login)
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">
+            <p className="text-sm sm:text-base opacity-60 mt-1">
               Gerencie contas de acesso, permissões e credenciais de login
             </p>
           </div>
           {can("canCreateUser") && (
             <Link
               to="/admin/users/new"
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex items-center gap-2"
             >
               <PlusIcon className="w-5 h-5" />
               Novo Usuário
@@ -89,7 +89,7 @@ const AdminUsersPage = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {/* Busca */}
             <div className="relative">
@@ -99,7 +99,7 @@ const AdminUsersPage = () => {
                 placeholder="Buscar por nome ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -107,7 +107,7 @@ const AdminUsersPage = () => {
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Todos os Perfis</option>
               <option value="admin">Administrador</option>
@@ -120,22 +120,22 @@ const AdminUsersPage = () => {
         </div>
 
         {/* Tabela */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md border overflow-hidden">
           {/* Mobile Cards */}
           <div className="block lg:hidden divide-y divide-gray-200">
             {filteredUsers.map((user) => (
               <div key={user.id} className="p-4 hover:bg-gray-50">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-blue-600 font-semibold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center flex-shrink-0">
+                    <span className="font-semibold text-sm">
                       {user.nome.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm mb-1">
+                    <p className="font-medium text-sm mb-1">
                       {user.nome}
                     </p>
-                    <p className="text-xs text-gray-500 mb-2 truncate">
+                    <p className="text-xs opacity-60 mb-2 truncate">
                       {user.email}
                     </p>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -157,8 +157,8 @@ const AdminUsersPage = () => {
                       </span>
                     </div>
                     {user.equipe && (
-                      <p className="text-xs text-gray-600 mb-2">
-                        <span className="text-gray-500">Equipe:</span>
+                      <p className="text-xs mb-2">
+                        <span className="opacity-60">Equipe:</span>
                         <span className="ml-1 font-medium">{user.equipe}</span>
                       </p>
                     )}
@@ -173,14 +173,14 @@ const AdminUsersPage = () => {
                     <div className="flex gap-2">
                       <Link
                         to={`/admin/users/${user.id}`}
-                        className="flex-1 text-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs font-medium hover:bg-blue-100"
+                        className="btn btn-primary btn-sm flex-1"
                       >
                         Ver Detalhes
                       </Link>
                       {can("canEditUser") && (
                         <Link
                           to={`/admin/users/${user.id}/edit`}
-                          className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
+                          className="btn btn-ghost btn-sm"
                         >
                           <PencilIcon className="w-4 h-4" />
                         </Link>
@@ -188,7 +188,7 @@ const AdminUsersPage = () => {
                       {can("canDeleteUser") && (
                         <button
                           onClick={() => handleDelete(user.id, user.nome)}
-                          className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                          className="btn btn-error btn-sm"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
@@ -203,7 +203,7 @@ const AdminUsersPage = () => {
           {/* Tabela Desktop */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Usuário
@@ -230,16 +230,16 @@ const AdminUsersPage = () => {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                          <span className="text-blue-600 font-semibold">
+                        <div className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center mr-3">
+                          <span className="font-semibold">
                             {user.nome.charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium">
                             {user.nome}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm opacity-60">
                             {user.email}
                           </div>
                         </div>
@@ -254,7 +254,7 @@ const AdminUsersPage = () => {
                         {getRoleName(user.role)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {user.equipe || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -272,14 +272,14 @@ const AdminUsersPage = () => {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           to={`/admin/users/${user.id}`}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="btn btn-primary btn-xs"
                         >
                           Ver
                         </Link>
                         {can("canEditUser") && (
                           <Link
                             to={`/admin/users/${user.id}/edit`}
-                            className="text-gray-600 hover:text-gray-900"
+                            className="btn btn-ghost btn-xs"
                           >
                             <PencilIcon className="w-5 h-5" />
                           </Link>
@@ -287,7 +287,7 @@ const AdminUsersPage = () => {
                         {can("canDeleteUser") && (
                           <button
                             onClick={() => handleDelete(user.id, user.nome)}
-                            className="text-red-600 hover:text-red-900"
+                            className="btn btn-error btn-xs"
                           >
                             <TrashIcon className="w-5 h-5" />
                           </button>
@@ -303,7 +303,7 @@ const AdminUsersPage = () => {
           {/* Empty State */}
           {filteredUsers.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-sm sm:text-base text-gray-500">
+              <p className="text-sm sm:text-base opacity-60">
                 Nenhum usuário encontrado
               </p>
             </div>

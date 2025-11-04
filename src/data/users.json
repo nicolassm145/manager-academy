@@ -14,7 +14,7 @@
     "email": "lider@manager.com",
     "password": "123456",
     "role": "lider",
-    "equipe": "Baja",
+    "equipe": "DevU",
     "membroVinculadoId": "1",
     "status": "ativo",
     "dataCriacao": "2024-01-15"
@@ -25,7 +25,7 @@
     "email": "membro@manager.com",
     "password": "123456",
     "role": "membro",
-    "equipe": "Aerodesign",
+    "equipe": "Byron",
     "membroVinculadoId": "3",
     "status": "ativo",
     "dataCriacao": "2024-02-01"

@@ -21,10 +21,10 @@ const UserDetailPage = () => {
     return (
       <Layout>
         <div className="text-center py-12">
-          <p className="text-gray-500">Usuário não encontrado</p>
+          <p className="opacity-60">Usuário não encontrado</p>
           <Link
             to="/admin/users"
-            className="text-blue-600 hover:underline mt-4 inline-block"
+            className="btn btn-link mt-4"
           >
             Voltar para listagem
           </Link>
@@ -76,7 +76,7 @@ const UserDetailPage = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate("/admin/users")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className="btn btn-ghost flex items-center gap-2"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Voltar
@@ -84,21 +84,21 @@ const UserDetailPage = () => {
           <div className="flex gap-3">
             <button
               onClick={handleResetPassword}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
+              className="btn btn-warning flex items-center gap-2"
             >
               <KeyIcon className="w-5 h-5" />
               Resetar Senha
             </button>
             <Link
               to={`/admin/users/${id}/edit`}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex items-center gap-2"
             >
               <PencilIcon className="w-5 h-5" />
               Editar
             </Link>
             <button
               onClick={handleDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              className="btn btn-error flex items-center gap-2"
             >
               <TrashIcon className="w-5 h-5" />
               Excluir
@@ -107,16 +107,16 @@ const UserDetailPage = () => {
         </div>
 
         {/* Card do Usuário */}
-        <div className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-md p-8 border">
           <div className="flex items-center mb-8 pb-6 border-b">
-            <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mr-6">
-              <span className="text-3xl text-blue-600 font-bold">
+            <div className="w-20 h-20 rounded-full bg-base-200 flex items-center justify-center mr-6">
+              <span className="text-3xl font-bold">
                 {user.nome.charAt(0)}
               </span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{user.nome}</h1>
-              <p className="text-gray-600 mt-1">{user.email}</p>
+              <h1 className="text-3xl font-bold">{user.nome}</h1>
+              <p className="opacity-60 mt-1">{user.email}</p>
               <div className="flex items-center gap-3 mt-3">
                 <span
                   className={`px-3 py-1 text-sm font-semibold rounded-full ${getRoleColor(
@@ -140,55 +140,55 @@ const UserDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Perfil de Acesso</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-sm opacity-60 mb-1">Perfil de Acesso</p>
+              <p className="text-lg font-semibold">
                 {getRoleName(user.role)}
               </p>
             </div>
 
             {user.equipe && (
               <div>
-                <p className="text-sm text-gray-500 mb-1">Equipe</p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm opacity-60 mb-1">Equipe</p>
+                <p className="text-lg font-semibold">
                   {user.equipe}
                 </p>
               </div>
             )}
 
             <div>
-              <p className="text-sm text-gray-500 mb-1">Data de Criação</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-sm opacity-60 mb-1">Data de Criação</p>
+              <p className="text-lg font-semibold">
                 {new Date(user.dataCriacao).toLocaleDateString("pt-BR")}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-500 mb-1">Status</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-sm opacity-60 mb-1">Status</p>
+              <p className="text-lg font-semibold">
                 {user.status}
               </p>
             </div>
 
             {membroVinculado && (
               <div className="md:col-span-2">
-                <p className="text-sm text-gray-500 mb-1">Membro Vinculado</p>
-                <div className="flex items-center gap-3 mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-sm">
+                <p className="text-sm opacity-60 mb-1">Membro Vinculado</p>
+                <div className="flex items-center gap-3 mt-2 p-3 bg-blue-50 border rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center">
+                    <span className="font-semibold text-sm">
                       {membroVinculado.nome.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold">
                       {membroVinculado.nome}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm opacity-60">
                       {membroVinculado.matricula} - {membroVinculado.cargo}
                     </p>
                   </div>
                   <Link
                     to={`/members/${membroVinculado.id}`}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="btn btn-link btn-sm"
                   >
                     Ver Perfil →
                   </Link>
@@ -199,7 +199,7 @@ const UserDetailPage = () => {
         </div>
 
         {/* Permissões */}
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-md p-6 border">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             Permissões do Perfil
           </h2>

@@ -90,12 +90,11 @@ export const PERMISSIONS = {
 
 export type Permission = keyof typeof PERMISSIONS.admin;
 
-// Hook para verificar permissões
+
 export function hasPermission(role: UserRole, permission: Permission): boolean {
   return PERMISSIONS[role][permission];
 }
 
-// Função para obter todas as permissões de um cargo
 export function getPermissions(role: UserRole) {
   return PERMISSIONS[role];
 }

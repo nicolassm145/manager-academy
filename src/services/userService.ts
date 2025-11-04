@@ -3,7 +3,6 @@ import usersData from "../data/users.json";
 
 const STORAGE_KEY = "manager_academy_users";
 
-// Inicializa dados do JSON no localStorage
 const initUsers = (): SystemUser[] => {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
@@ -13,24 +12,20 @@ const initUsers = (): SystemUser[] => {
   return JSON.parse(stored) as SystemUser[];
 };
 
-// GET - Listar todos
 export const getUsers = (): SystemUser[] => {
   return initUsers();
 };
 
-// GET - Buscar por ID
 export const getUserById = (id: string): SystemUser | undefined => {
   const users = getUsers();
   return users.find((u) => u.id === id);
 };
 
-// GET - Buscar por email (para login)
 export const getUserByEmail = (email: string): SystemUser | undefined => {
   const users = getUsers();
   return users.find((u) => u.email === email);
 };
 
-// POST - Criar novo
 export const createUser = (
   user: Omit<SystemUser, "id" | "dataCriacao">
 ): SystemUser => {
@@ -45,7 +40,6 @@ export const createUser = (
   return newUser;
 };
 
-// PUT - Atualizar existente
 export const updateUser = (
   id: string,
   data: Partial<SystemUser>
@@ -59,14 +53,12 @@ export const updateUser = (
   return users[index];
 };
 
-// DELETE - Remover
 export const deleteUser = (id: string): void => {
   const users = getUsers();
   const filtered = users.filter((u) => u.id !== id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 };
 
-// FILTER - Buscar com filtros
 export const filterUsers = (filters: {
   searchTerm?: string;
   role?: string;

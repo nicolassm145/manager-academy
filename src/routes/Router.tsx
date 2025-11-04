@@ -2,14 +2,16 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "../components/ProtectedRouteComponent";
 import LoginPage from "../pages/Auth";
 import DashboardPage from "../pages/Dashboard";
+import SettingsPage from "../pages/Settings";
+import NotFoundPage from "../pages/NotFound";
 
-// Members (CRUD COMPLETO - Release 01)
+// Crud dos Membros
 import MembersPage from "../pages/Members";
 import NewMemberPage from "../pages/Members/New";
 import MemberDetailPage from "../pages/Members/Detail";
 import EditMemberPage from "../pages/Members/Edit";
 
-// Admin (CRUD COMPLETO - Release 01)
+// Crud dos administradores
 import AdminUsersPage from "../pages/Admin/Users/index";
 import NewUserPage from "../pages/Admin/Users/New";
 import UserDetailPage from "../pages/Admin/Users/Detail";
@@ -18,7 +20,6 @@ import AdminTeamsPage from "../pages/Admin/Teams/index";
 import NewTeamPage from "../pages/Admin/Teams/New";
 import TeamDetailPage from "../pages/Admin/Teams/Detail";
 import EditTeamPage from "../pages/Admin/Teams/Edit";
-import NotFoundPage from "../pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,15 @@ const router = createBrowserRouter([
   },
 
   {
+    path: "/settings",
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
     path: "/members",
     element: (
       <ProtectedRoute requiredPermission="canViewMembers">
@@ -48,6 +58,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/members/new",
     element: (
@@ -56,6 +67,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/members/:id",
     element: (
@@ -64,6 +76,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/members/:id/edit",
     element: (
@@ -81,6 +94,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/users/new",
     element: (
@@ -89,6 +103,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/users/:id",
     element: (
@@ -97,6 +112,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/users/:id/edit",
     element: (
@@ -114,6 +130,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/teams/new",
     element: (
@@ -122,6 +139,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/teams/:id",
     element: (
@@ -130,6 +148,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/admin/teams/:id/edit",
     element: (
@@ -139,7 +158,6 @@ const router = createBrowserRouter([
     ),
   },
 
-  // 404
   {
     path: "*",
     element: <NotFoundPage />,

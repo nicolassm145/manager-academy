@@ -1,10 +1,9 @@
 import type { Member } from "../types/member";
 import membersData from "../data/members.json";
 
-// Simula localStorage como banco de dados
+// Usando localStorage enquanto n fazem o back
 const STORAGE_KEY = "manager_academy_members";
 
-// Inicializa dados do JSON no localStorage se não existir
 const initMembers = (): Member[] => {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
@@ -14,30 +13,39 @@ const initMembers = (): Member[] => {
   return JSON.parse(stored) as Member[];
 };
 
-// GET - Listar todos
 export const getMembers = (): Member[] => {
   return initMembers();
 };
 
-// GET - Buscar por ID
 export const getMemberById = (id: string): Member | undefined => {
   const members = getMembers();
   return members.find((m) => m.id === id);
 };
 
-// POST - Criar novo
 export const createMember = (member: Omit<Member, "id">): Member => {
   const members = getMembers();
+
+  if (
+    !member.matricula ||
+    member.matricula.length !== 10 ||
+    !/^\d{10}$/.test(member.matricula)
+  ) {
+    throw new Error("Matrícula inválida! Deve conter exatamente 10 dígitos.");
+  }
+
+  if (members.some((m) => m.matricula === member.matricula)) {
+    throw new Error("Esta matrícula já está cadastrada!");
+  }
+
   const newMember: Member = {
     ...member,
-    id: Date.now().toString(), // Gera ID único
+    id: Date.now().toString(),
   };
   members.push(newMember);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
   return newMember;
 };
 
-// PUT - Atualizar existente
 export const updateMember = (id: string, data: Partial<Member>): Member => {
   const members = getMembers();
   const index = members.findIndex((m) => m.id === id);
@@ -48,14 +56,12 @@ export const updateMember = (id: string, data: Partial<Member>): Member => {
   return members[index];
 };
 
-// DELETE - Remover
 export const deleteMember = (id: string): void => {
   const members = getMembers();
   const filtered = members.filter((m) => m.id !== id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 };
 
-// FILTER - Buscar com filtros
 export const filterMembers = (filters: {
   searchTerm?: string;
   equipe?: string;

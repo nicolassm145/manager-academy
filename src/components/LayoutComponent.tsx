@@ -4,10 +4,12 @@ import { useState, useMemo } from "react";
 import {
   HomeIcon,
   UsersIcon,
-  CogIcon,
+  UserGroupIcon,
+  Cog8ToothIcon,
   Bars3Icon,
   XMarkIcon,
-  ArrowRightOnRectangleIcon,
+  QueueListIcon,
+  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";
@@ -24,7 +26,7 @@ interface MenuItem {
 }
 
 const allMenuItems: MenuItem[] = [
-  { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+  { name: "Home", path: "/dashboard", icon: HomeIcon },
   {
     name: "Membros das Equipes",
     path: "/members",
@@ -34,15 +36,16 @@ const allMenuItems: MenuItem[] = [
   {
     name: "Usuários (Login)",
     path: "/admin/users",
-    icon: CogIcon,
+    icon: UserGroupIcon,
     permission: "canViewUsers",
   },
   {
     name: "Equipes",
     path: "/admin/teams",
-    icon: UsersIcon,
+    icon: QueueListIcon,
     permission: "canViewTeams",
   },
+  { name: "Configurações", path: "/settings", icon: Cog8ToothIcon },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -52,14 +55,12 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Filtra os itens do menu baseado nas permissões
   const menuItems = useMemo(() => {
     if (!permissions) return [];
-
     return allMenuItems.filter((item) => {
-      // Dashboard sempre visível
+
       if (item.path === "/dashboard") return true;
-      // Se tem permissão definida, verifica
+ 
       if (item.permission) {
         return (permissions as any)[item.permission];
       }
@@ -75,10 +76,10 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white shadow-md z-50 flex items-center justify-between px-4">
-        <h1 className="text-lg font-bold text-gray-800">Manager Academy</h1>
+        <h1 className="text-lg font-bold">League Manager</h1>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-gray-600 hover:text-gray-900"
+          className="btn btn-ghost btn-sm"
         >
           {sidebarOpen ? (
             <XMarkIcon className="w-6 h-6" />
@@ -102,7 +103,7 @@ export function Layout({ children }: LayoutProps) {
       >
         <div className="flex flex-col h-full">
           <div className="hidden lg:flex items-center justify-center h-16 border-b">
-            <h1 className="text-xl font-bold text-gray-800">Manager Academy</h1>
+            <h1 className="text-xl font-bold">League Manager</h1>
           </div>
 
           <nav className="flex-1 px-4 py-6 space-y-2 mt-16 lg:mt-0 overflow-y-auto">
@@ -117,8 +118,8 @@ export function Layout({ children }: LayoutProps) {
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-primary/10 text-primary font-semibold"
+                      : "hover:bg-base-200"
                   }`}
                 >
                   <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -131,10 +132,10 @@ export function Layout({ children }: LayoutProps) {
           <div className="p-4 border-t">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium truncate">
                   {user?.nome}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs opacity-60 truncate">{user?.email}</p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
                   {user?.role === "admin" && "Administrador"}
                   {user?.role === "lider" && "Líder de Equipe"}
@@ -145,10 +146,10 @@ export function Layout({ children }: LayoutProps) {
               </div>
               <button
                 onClick={handleLogout}
-                className="ml-3 p-2 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+                className="btn btn-ghost btn-sm ml-3 flex-shrink-0"
                 title="Sair"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <ArrowRightStartOnRectangleIcon className="w-6 h-6" />
               </button>
             </div>
           </div>

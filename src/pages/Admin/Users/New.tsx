@@ -45,20 +45,20 @@ const NewUserPage = () => {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Novo Usuário</h1>
-          <p className="text-gray-600 mt-1">Crie um novo usuário do sistema</p>
+          <h1 className="text-3xl font-bold">Novo Usuário</h1>
+          <p className="opacity-60 mt-1">Crie um novo usuário do sistema</p>
         </div>
 
         {/* Formulário */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-md p-8 border border-gray-100 space-y-6"
+          className="bg-white rounded-xl shadow-md p-8 border space-y-6"
         >
           {/* Nome */}
           <div>
             <label
               htmlFor="nome"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Nome Completo *
             </label>
@@ -69,7 +69,7 @@ const NewUserPage = () => {
               required
               value={formData.nome}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="João Silva"
             />
           </div>
@@ -79,7 +79,7 @@ const NewUserPage = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Email *
               </label>
@@ -90,7 +90,7 @@ const NewUserPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="joao@example.com"
               />
             </div>
@@ -98,7 +98,7 @@ const NewUserPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Senha *
               </label>
@@ -109,7 +109,7 @@ const NewUserPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
               />
             </div>
@@ -119,7 +119,7 @@ const NewUserPage = () => {
           <div>
             <label
               htmlFor="role"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Perfil de Acesso *
             </label>
@@ -129,7 +129,7 @@ const NewUserPage = () => {
               required
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Selecione um perfil</option>
               <option value="admin">
@@ -150,11 +150,11 @@ const NewUserPage = () => {
 
           {/* Equipe (condicional) */}
           {needsTeam && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+            <div className="bg-blue-50 border rounded-lg p-4 space-y-4">
               <div>
                 <label
                   htmlFor="equipe"
-                  className="block text-sm font-medium text-blue-900 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Equipe *
                 </label>
@@ -164,22 +164,21 @@ const NewUserPage = () => {
                   required
                   value={formData.equipe}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Selecione uma equipe</option>
-                  <option value="Baja">Baja</option>
-                  <option value="Fórmula SAE">Fórmula SAE</option>
-                  <option value="Aerodesign">Aerodesign</option>
-                  <option value="Eficiência Energética">
-                    Eficiência Energética
-                  </option>
+                  <option value="DevU">DevU</option>
+                  <option value="Byron">Byron</option>
+                  <option value="Exmachima">Exmachima</option>
+                  <option value="Asimov">Asimov</option>
+                  <option value="BlackBee">BlackBee</option>
                 </select>
               </div>
 
               <div>
                 <label
                   htmlFor="membroVinculadoId"
-                  className="block text-sm font-medium text-blue-900 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Vincular a um Membro (Opcional)
                 </label>
@@ -188,7 +187,7 @@ const NewUserPage = () => {
                   name="membroVinculadoId"
                   value={formData.membroVinculadoId}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Sem vínculo</option>
                   {members
@@ -216,11 +215,11 @@ const NewUserPage = () => {
           )}
 
           {/* Info sobre permissões */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-sm font-semibold text-gray-900 mb-2">
+          <div className="bg-gray-50 border rounded-lg p-4">
+            <p className="text-sm font-semibold mb-2">
               Sobre os Perfis:
             </p>
-            <ul className="text-xs text-gray-600 space-y-1">
+            <ul className="text-xs opacity-80 space-y-1">
               <li>
                 • <strong>Administrador:</strong> Gerencia usuários, equipes e
                 configurações
@@ -246,14 +245,14 @@ const NewUserPage = () => {
           <div className="flex gap-4 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex-1"
             >
               Criar Usuário
             </button>
             <button
               type="button"
               onClick={() => navigate("/admin/users")}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              className="btn btn-ghost"
             >
               Cancelar
             </button>

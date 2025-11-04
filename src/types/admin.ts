@@ -5,7 +5,7 @@ export interface SystemUser {
   password: string;
   role: "admin" | "lider" | "professor" | "diretor" | "membro";
   equipe?: string;
-  membroVinculadoId?: string; // ID do membro vinculado (se for role=lider ou role=membro)
+  membroVinculadoId?: string; 
   status: "ativo" | "inativo";
   dataCriacao: string;
 }
@@ -17,6 +17,3 @@ export interface Team {
   status: "ativa" | "inativa";
   dataCriacao: string;
 }
-
-// Dados movidos para src/data/*.json
-// Use os services em src/services/*.ts para acessar/manipular

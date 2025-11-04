@@ -36,10 +36,10 @@ const LoginPage = () => {
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
             Manager Academy
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base opacity-60">
             Faça login para continuar
           </p>
         </div>
@@ -50,7 +50,7 @@ const LoginPage = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Email
             </label>
@@ -60,7 +60,7 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               placeholder="seu@email.com"
             />
           </div>
@@ -69,7 +69,7 @@ const LoginPage = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Senha
             </label>
@@ -79,14 +79,14 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               placeholder="••••••••"
             />
           </div>
 
           {/* Erro */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-3 bg-red-50 border rounded-lg">
               <p className="text-xs sm:text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -95,7 +95,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary w-full"
           >
             {isLoading ? "Entrando..." : "Entrar"}
           </button>
@@ -103,10 +103,10 @@ const LoginPage = () => {
 
         {/* Credenciais para teste */}
         <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-50 rounded-lg">
-          <p className="text-xs font-semibold text-gray-700 mb-2">
+          <p className="text-xs font-semibold mb-2">
             Credenciais para teste:
           </p>
-          <div className="text-xs text-gray-600 space-y-1">
+          <div className="text-xs opacity-80 space-y-1">
             <p className="break-all">
               • <strong>Admin:</strong> admin@manager.com / 123456
             </p>

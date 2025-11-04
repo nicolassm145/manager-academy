@@ -25,7 +25,7 @@ export function ProtectedRoute({
     return <Navigate to="/login" replace />;
   }
 
-  // Se uma permissão específica é necessária, verifica
+  
   if (
     requiredPermission &&
     user &&

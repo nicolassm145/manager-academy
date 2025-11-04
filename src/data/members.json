@@ -2,10 +2,10 @@
   {
     "id": "1",
     "nome": "João Silva",
-    "matricula": "2021001",
+    "matricula": "2021000001",
     "email": "joao.silva@example.com",
     "curso": "Engenharia Mecânica",
-    "equipe": "Baja",
+    "equipe": "DevU",
     "cargo": "Líder",
     "dataInicio": "2021-03-15",
     "status": "ativo"
@@ -13,10 +13,10 @@
   {
     "id": "2",
     "nome": "Ana Costa",
-    "matricula": "2021002",
+    "matricula": "2021000002",
     "email": "ana.costa@example.com",
     "curso": "Engenharia Elétrica",
-    "equipe": "Fórmula SAE",
+    "equipe": "Byron",
     "cargo": "Vice-Líder",
     "dataInicio": "2021-04-01",
     "status": "ativo"
@@ -24,10 +24,10 @@
   {
     "id": "3",
     "nome": "Maria Santos",
-    "matricula": "2022003",
+    "matricula": "2022000003",
     "email": "maria.santos@example.com",
     "curso": "Engenharia Aeroespacial",
-    "equipe": "Aerodesign",
+    "equipe": "Exmachima",
     "cargo": "Membro",
     "dataInicio": "2022-02-10",
     "status": "ativo"
@@ -35,12 +35,23 @@
   {
     "id": "4",
     "nome": "Pedro Oliveira",
-    "matricula": "2020004",
+    "matricula": "2020000004",
     "email": "pedro.oliveira@example.com",
     "curso": "Engenharia de Produção",
-    "equipe": "Eficiência Energética",
+    "equipe": "Asimov",
     "cargo": "Membro",
     "dataInicio": "2020-08-20",
-    "status": "inativo"
+    "status": "ativo"
+  },
+  {
+    "id": "5",
+    "nome": "Carlos Mendes",
+    "matricula": "2023000005",
+    "email": "carlos.mendes@example.com",
+    "curso": "Engenharia de Computação",
+    "equipe": "BlackBee",
+    "cargo": "Membro",
+    "dataInicio": "2023-03-10",
+    "status": "ativo"
   }
 ]

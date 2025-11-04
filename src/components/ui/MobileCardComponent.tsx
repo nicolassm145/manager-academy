@@ -8,7 +8,7 @@ interface MobileCardProps {
 export function MobileCard({ children, className = "" }: MobileCardProps) {
   return (
     <div
-      className={`bg-white rounded-lg shadow-md p-4 border border-gray-100 ${className}`}
+      className={`bg-white rounded-lg shadow-md p-4 border ${className}`}
     >
       {children}
     </div>
@@ -40,7 +40,7 @@ interface MobileCardActionsProps {
 
 export function MobileCardActions({ children }: MobileCardActionsProps) {
   return (
-    <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+    <div className="flex gap-2 mt-4 pt-4 border-t">
       {children}
     </div>
   );

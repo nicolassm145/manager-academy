@@ -9,6 +9,3 @@ export interface Member {
   dataInicio: string;
   status: "ativo" | "inativo";
 }
-
-// Dados movidos para src/data/members.json
-// Use memberService em src/services/memberService.ts para acessar/manipular

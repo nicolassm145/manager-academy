@@ -30,20 +30,20 @@ const NewTeamPage = () => {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nova Equipe</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold">Nova Equipe</h1>
+          <p className="opacity-60 mt-1">
             Cadastre uma nova equipe no sistema
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-md p-8 border border-gray-100 space-y-6"
+          className="bg-white rounded-xl shadow-md p-8 border space-y-6"
         >
           <div>
             <label
               htmlFor="nome"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Nome da Equipe *
             </label>
@@ -54,7 +54,7 @@ const NewTeamPage = () => {
               required
               value={formData.nome}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Ex: Baja, Fórmula SAE, Aerodesign"
             />
           </div>
@@ -62,7 +62,7 @@ const NewTeamPage = () => {
           <div>
             <label
               htmlFor="descricao"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Descrição *
             </label>
@@ -73,7 +73,7 @@ const NewTeamPage = () => {
               value={formData.descricao}
               onChange={handleChange}
               rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Descreva o propósito e atividades da equipe..."
             />
           </div>
@@ -81,14 +81,14 @@ const NewTeamPage = () => {
           <div className="flex gap-4 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex-1"
             >
               Criar Equipe
             </button>
             <button
               type="button"
               onClick={() => navigate("/admin/teams")}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              className="btn btn-ghost"
             >
               Cancelar
             </button>

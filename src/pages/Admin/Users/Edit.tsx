@@ -67,7 +67,7 @@ const EditUserPage = () => {
     return (
       <Layout>
         <div className="text-center py-12">
-          <p className="text-gray-500">Usuário não encontrado</p>
+          <p className="opacity-60">Usuário não encontrado</p>
         </div>
       </Layout>
     );
@@ -77,18 +77,18 @@ const EditUserPage = () => {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Editar Usuário</h1>
-          <p className="text-gray-600 mt-1">{user.email}</p>
+          <h1 className="text-3xl font-bold">Editar Usuário</h1>
+          <p className="opacity-60 mt-1">{user.email}</p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-md p-8 border border-gray-100 space-y-6"
+          className="bg-white rounded-xl shadow-md p-8 border space-y-6"
         >
           <div>
             <label
               htmlFor="nome"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Nome Completo *
             </label>
@@ -99,14 +99,14 @@ const EditUserPage = () => {
               required
               value={formData.nome}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Email *
             </label>
@@ -117,7 +117,7 @@ const EditUserPage = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -125,7 +125,7 @@ const EditUserPage = () => {
             <div>
               <label
                 htmlFor="role"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Perfil de Acesso *
               </label>
@@ -135,7 +135,7 @@ const EditUserPage = () => {
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="admin">Administrador</option>
                 <option value="lider">Líder de Equipe</option>
@@ -148,7 +148,7 @@ const EditUserPage = () => {
             <div>
               <label
                 htmlFor="status"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Status *
               </label>
@@ -158,7 +158,7 @@ const EditUserPage = () => {
                 required
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="ativo">Ativo</option>
                 <option value="inativo">Inativo</option>
@@ -167,10 +167,10 @@ const EditUserPage = () => {
           </div>
 
           {needsTeam && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border rounded-lg p-4">
               <label
                 htmlFor="equipe"
-                className="block text-sm font-medium text-blue-900 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Equipe *
               </label>
@@ -180,15 +180,14 @@ const EditUserPage = () => {
                 required
                 value={formData.equipe}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Selecione uma equipe</option>
-                <option value="Baja">Baja</option>
-                <option value="Fórmula SAE">Fórmula SAE</option>
-                <option value="Aerodesign">Aerodesign</option>
-                <option value="Eficiência Energética">
-                  Eficiência Energética
-                </option>
+                <option value="DevU">DevU</option>
+                <option value="Byron">Byron</option>
+                <option value="Exmachima">Exmachima</option>
+                <option value="Asimov">Asimov</option>
+                <option value="BlackBee">BlackBee</option>
               </select>
             </div>
           )}
@@ -196,14 +195,14 @@ const EditUserPage = () => {
           <div className="flex gap-4 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex-1"
             >
               Salvar Alterações
             </button>
             <button
               type="button"
               onClick={() => navigate(`/admin/users/${id}`)}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              className="btn btn-ghost"
             >
               Cancelar
             </button>

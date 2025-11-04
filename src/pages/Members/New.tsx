@@ -18,9 +18,14 @@ const NewMemberPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMember(formData);
-    alert("Membro cadastrado com sucesso!");
-    navigate("/members");
+    
+    try {
+      createMember(formData);
+      alert("Membro cadastrado com sucesso!");
+      navigate("/members");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao cadastrar membro");
+    }
   };
 
   const handleChange = (
@@ -37,10 +42,10 @@ const NewMemberPage = () => {
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             Novo Membro
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
+          <p className="text-sm sm:text-base opacity-60 mt-1">
             Cadastre um novo membro da equipe
           </p>
         </div>
@@ -48,13 +53,13 @@ const NewMemberPage = () => {
         {/* Formulário */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 space-y-4 sm:space-y-6"
+          className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border space-y-4 sm:space-y-6"
         >
           {/* Nome */}
           <div>
             <label
               htmlFor="nome"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Nome Completo *
             </label>
@@ -65,7 +70,7 @@ const NewMemberPage = () => {
               required
               value={formData.nome}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="João Silva"
             />
           </div>
@@ -75,7 +80,7 @@ const NewMemberPage = () => {
             <div>
               <label
                 htmlFor="matricula"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Matrícula *
               </label>
@@ -86,15 +91,20 @@ const NewMemberPage = () => {
                 required
                 value={formData.matricula}
                 onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="2021001"
+                maxLength={10}
+                pattern="\d{10}"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Ex: 2021000001"
               />
+              <p className="text-xs opacity-60 mt-1">
+                10 dígitos: AAAA (ano) + 6 dígitos sequenciais
+              </p>
             </div>
 
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Email *
               </label>
@@ -105,7 +115,7 @@ const NewMemberPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="joao@example.com"
               />
             </div>
@@ -115,7 +125,7 @@ const NewMemberPage = () => {
           <div>
             <label
               htmlFor="curso"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Curso *
             </label>
@@ -125,7 +135,7 @@ const NewMemberPage = () => {
               required
               value={formData.curso}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Selecione um curso</option>
               <option value="Engenharia Mecânica">Engenharia Mecânica</option>
@@ -145,7 +155,7 @@ const NewMemberPage = () => {
             <div>
               <label
                 htmlFor="equipe"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Equipe *
               </label>
@@ -155,22 +165,21 @@ const NewMemberPage = () => {
                 required
                 value={formData.equipe}
                 onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Selecione uma equipe</option>
-                <option value="Baja">Baja</option>
-                <option value="Fórmula SAE">Fórmula SAE</option>
-                <option value="Aerodesign">Aerodesign</option>
-                <option value="Eficiência Energética">
-                  Eficiência Energética
-                </option>
+                <option value="DevU">DevU</option>
+                <option value="Byron">Byron</option>
+                <option value="Exmachima">Exmachima</option>
+                <option value="Asimov">Asimov</option>
+                <option value="BlackBee">BlackBee</option>
               </select>
             </div>
 
             <div>
               <label
                 htmlFor="cargo"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
               >
                 Cargo *
               </label>
@@ -180,7 +189,7 @@ const NewMemberPage = () => {
                 required
                 value={formData.cargo}
                 onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Selecione um cargo</option>
                 <option value="Líder">Líder</option>
@@ -194,7 +203,7 @@ const NewMemberPage = () => {
           <div>
             <label
               htmlFor="dataInicio"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium mb-2"
             >
               Data de Início *
             </label>
@@ -205,7 +214,7 @@ const NewMemberPage = () => {
               required
               value={formData.dataInicio}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -213,14 +222,14 @@ const NewMemberPage = () => {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary flex-1"
             >
               Cadastrar Membro
             </button>
             <button
               type="button"
               onClick={() => navigate("/members")}
-              className="px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-50 transition-colors"
+              className="btn btn-ghost"
             >
               Cancelar
             </button>
