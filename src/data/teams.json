@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "nome": "Baja",
+    "descricao": "Equipe de Baja SAE - Desenvolvimento de veículos off-road",
+    "status": "ativa",
+    "dataCriacao": "2020-03-01"
+  },
+  {
+    "id": "2",
+    "nome": "Fórmula SAE",
+    "descricao": "Equipe de Fórmula SAE - Desenvolvimento de veículos de corrida",
+    "status": "ativa",
+    "dataCriacao": "2019-08-15"
+  },
+  {
+    "id": "3",
+    "nome": "Aerodesign",
+    "descricao": "Equipe de Aerodesign - Projeto e construção de aeronaves",
+    "status": "ativa",
+    "dataCriacao": "2021-01-10"
+  },
+  {
+    "id": "4",
+    "nome": "Eficiência Energética",
+    "descricao": "Equipe focada em projetos de eficiência energética e sustentabilidade",
+    "status": "ativa",
+    "dataCriacao": "2022-05-20"
+  }
+]

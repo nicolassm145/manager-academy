@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "nome": "João Silva",
+    "matricula": "2021001",
+    "email": "joao.silva@example.com",
+    "curso": "Engenharia Mecânica",
+    "equipe": "Baja",
+    "cargo": "Líder",
+    "dataInicio": "2021-03-15",
+    "status": "ativo"
+  },
+  {
+    "id": "2",
+    "nome": "Ana Costa",
+    "matricula": "2021002",
+    "email": "ana.costa@example.com",
+    "curso": "Engenharia Elétrica",
+    "equipe": "Fórmula SAE",
+    "cargo": "Vice-Líder",
+    "dataInicio": "2021-04-01",
+    "status": "ativo"
+  },
+  {
+    "id": "3",
+    "nome": "Maria Santos",
+    "matricula": "2022003",
+    "email": "maria.santos@example.com",
+    "curso": "Engenharia Aeroespacial",
+    "equipe": "Aerodesign",
+    "cargo": "Membro",
+    "dataInicio": "2022-02-10",
+    "status": "ativo"
+  },
+  {
+    "id": "4",
+    "nome": "Pedro Oliveira",
+    "matricula": "2020004",
+    "email": "pedro.oliveira@example.com",
+    "curso": "Engenharia de Produção",
+    "equipe": "Eficiência Energética",
+    "cargo": "Membro",
+    "dataInicio": "2020-08-20",
+    "status": "inativo"
+  }
+]

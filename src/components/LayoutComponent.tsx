@@ -1,0 +1,130 @@
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
+import {
+  HomeIcon,
+  UsersIcon,
+  CogIcon,
+  Bars3Icon,
+  XMarkIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+interface MenuItem {
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const menuItems: MenuItem[] = [
+  { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
+  { name: "Membros das Equipes", path: "/members", icon: UsersIcon },
+  { name: "Usuários (Login)", path: "/admin/users", icon: CogIcon },
+  { name: "Equipes", path: "/admin/teams", icon: UsersIcon },
+];
+
+export function Layout({ children }: LayoutProps) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white shadow-md z-50 flex items-center justify-between px-4">
+        <h1 className="text-lg font-bold text-gray-800">Manager Academy</h1>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 text-gray-600 hover:text-gray-900"
+        >
+          {sidebarOpen ? (
+            <XMarkIcon className="w-6 h-6" />
+          ) : (
+            <Bars3Icon className="w-6 h-6" />
+          )}
+        </button>
+      </div>
+
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
+        <div className="flex flex-col h-full">
+          <div className="hidden lg:flex items-center justify-center h-16 border-b">
+            <h1 className="text-xl font-bold text-gray-800">Manager Academy</h1>
+          </div>
+
+          <nav className="flex-1 px-4 py-6 space-y-2 mt-16 lg:mt-0 overflow-y-auto">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname.startsWith(item.path);
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.nome}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs text-blue-600 font-medium mt-1">
+                  {user?.role === "admin" && "Administrador"}
+                  {user?.role === "lider" && "Líder de Equipe"}
+                  {user?.role === "professor" && "Professor"}
+                  {user?.role === "diretor" && "Diretor Financeiro"}
+                  {user?.role === "membro" && "Membro"}
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="ml-3 p-2 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+                title="Sair"
+              >
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+      </main>
+    </div>
+  );
+}
