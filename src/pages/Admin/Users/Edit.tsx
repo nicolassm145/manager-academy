@@ -20,7 +20,7 @@ const EditUserPage = () => {
     if (id) {
       const foundUser = getUserById(id);
       setUser(foundUser);
-      
+
       if (foundUser) {
         setFormData({
           nome: foundUser.nome,

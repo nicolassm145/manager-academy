@@ -48,10 +48,14 @@ const MembersPage = () => {
   // Filtros (incluindo filtro de equipe para líder)
   const filteredMembers = members.filter((member) => {
     // Se for líder, só mostra membros da sua equipe
-    if (user?.role === "lider" && user?.equipe && member.equipe !== user.equipe) {
+    if (
+      user?.role === "lider" &&
+      user?.equipe &&
+      member.equipe !== user.equipe
+    ) {
       return false;
     }
-    
+
     const matchSearch =
       member.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.matricula.includes(searchTerm) ||
@@ -69,11 +73,15 @@ const MembersPage = () => {
         <PageHeader
           title="Membros das Equipes"
           description="Cadastro de alunos participantes dos projetos (não precisam ter acesso ao sistema)"
-          actionButton={can("canCreateMember") ? {
-            label: "Novo Membro",
-            to: "/members/new",
-            icon: PlusIcon,
-          } : undefined}
+          actionButton={
+            can("canCreateMember")
+              ? {
+                  label: "Novo Membro",
+                  to: "/members/new",
+                  icon: PlusIcon,
+                }
+              : undefined
+          }
         />
 
         <Card>
@@ -218,7 +226,9 @@ const MembersPage = () => {
                           )}
                           {can("canDeleteMember") && (
                             <button
-                              onClick={() => handleDelete(member.id, member.nome)}
+                              onClick={() =>
+                                handleDelete(member.id, member.nome)
+                              }
                               className="text-red-600 hover:text-red-900 p-1"
                             >
                               <TrashIcon className="w-5 h-5" />

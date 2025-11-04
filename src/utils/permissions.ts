@@ -18,7 +18,7 @@ export const PERMISSIONS = {
     canEditTeam: true,
     canDeleteTeam: true,
   },
-  
+
   // Líder pode gerenciar membros e ver equipes
   lider: {
     canViewDashboard: true,
@@ -35,7 +35,7 @@ export const PERMISSIONS = {
     canEditTeam: false,
     canDeleteTeam: false,
   },
-  
+
   // Professor pode ver e editar membros
   professor: {
     canViewDashboard: true,
@@ -52,7 +52,7 @@ export const PERMISSIONS = {
     canEditTeam: false,
     canDeleteTeam: false,
   },
-  
+
   // Diretor pode ver relatórios e membros
   diretor: {
     canViewDashboard: true,
@@ -69,7 +69,7 @@ export const PERMISSIONS = {
     canEditTeam: false,
     canDeleteTeam: false,
   },
-  
+
   // Membro só vê dashboard
   membro: {
     canViewDashboard: true,

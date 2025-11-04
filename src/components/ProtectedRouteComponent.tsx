@@ -7,7 +7,10 @@ interface ProtectedRouteProps {
   requiredPermission?: Permission;
 }
 
-export function ProtectedRoute({ children, requiredPermission }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredPermission,
+}: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -23,7 +26,11 @@ export function ProtectedRoute({ children, requiredPermission }: ProtectedRouteP
   }
 
   // Se uma permissão específica é necessária, verifica
-  if (requiredPermission && user && !hasPermission(user.role, requiredPermission)) {
+  if (
+    requiredPermission &&
+    user &&
+    !hasPermission(user.role, requiredPermission)
+  ) {
     return <Navigate to="/dashboard" replace />;
   }
 

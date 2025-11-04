@@ -25,9 +25,24 @@ interface MenuItem {
 
 const allMenuItems: MenuItem[] = [
   { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-  { name: "Membros das Equipes", path: "/members", icon: UsersIcon, permission: "canViewMembers" },
-  { name: "Usuários (Login)", path: "/admin/users", icon: CogIcon, permission: "canViewUsers" },
-  { name: "Equipes", path: "/admin/teams", icon: UsersIcon, permission: "canViewTeams" },
+  {
+    name: "Membros das Equipes",
+    path: "/members",
+    icon: UsersIcon,
+    permission: "canViewMembers",
+  },
+  {
+    name: "Usuários (Login)",
+    path: "/admin/users",
+    icon: CogIcon,
+    permission: "canViewUsers",
+  },
+  {
+    name: "Equipes",
+    path: "/admin/teams",
+    icon: UsersIcon,
+    permission: "canViewTeams",
+  },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -40,8 +55,8 @@ export function Layout({ children }: LayoutProps) {
   // Filtra os itens do menu baseado nas permissões
   const menuItems = useMemo(() => {
     if (!permissions) return [];
-    
-    return allMenuItems.filter(item => {
+
+    return allMenuItems.filter((item) => {
       // Dashboard sempre visível
       if (item.path === "/dashboard") return true;
       // Se tem permissão definida, verifica

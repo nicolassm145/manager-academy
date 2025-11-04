@@ -18,7 +18,7 @@ const EditTeamPage = () => {
     if (id) {
       const foundTeam = getTeamById(id);
       setTeam(foundTeam);
-      
+
       if (foundTeam) {
         setFormData({
           nome: foundTeam.nome,

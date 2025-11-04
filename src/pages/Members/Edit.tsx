@@ -19,7 +19,7 @@ const EditMemberPage = () => {
     if (id) {
       const foundMember = getMemberById(id);
       setMember(foundMember);
-      
+
       if (foundMember) {
         setFormData({
           email: foundMember.email,
