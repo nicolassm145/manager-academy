@@ -43,7 +43,7 @@ const router = createBrowserRouter([
   {
     path: "/members",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewMembers">
         <MembersPage />
       </ProtectedRoute>
     ),
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
   {
     path: "/members/new",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canCreateMember">
         <NewMemberPage />
       </ProtectedRoute>
     ),
@@ -59,7 +59,7 @@ const router = createBrowserRouter([
   {
     path: "/members/:id",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewMembers">
         <MemberDetailPage />
       </ProtectedRoute>
     ),
@@ -67,7 +67,7 @@ const router = createBrowserRouter([
   {
     path: "/members/:id/edit",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canEditMember">
         <EditMemberPage />
       </ProtectedRoute>
     ),
@@ -76,7 +76,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/users",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewUsers">
         <AdminUsersPage />
       </ProtectedRoute>
     ),
@@ -84,7 +84,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/users/new",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canCreateUser">
         <NewUserPage />
       </ProtectedRoute>
     ),
@@ -92,7 +92,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/users/:id",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewUsers">
         <UserDetailPage />
       </ProtectedRoute>
     ),
@@ -100,7 +100,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/users/:id/edit",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canEditUser">
         <EditUserPage />
       </ProtectedRoute>
     ),
@@ -109,7 +109,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/teams",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewTeams">
         <AdminTeamsPage />
       </ProtectedRoute>
     ),
@@ -117,7 +117,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/teams/new",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canCreateTeam">
         <NewTeamPage />
       </ProtectedRoute>
     ),
@@ -125,7 +125,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/teams/:id",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canViewTeams">
         <TeamDetailPage />
       </ProtectedRoute>
     ),
@@ -133,7 +133,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/teams/:id/edit",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredPermission="canEditTeam">
         <EditTeamPage />
       </ProtectedRoute>
     ),

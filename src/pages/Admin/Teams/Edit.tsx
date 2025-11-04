@@ -6,7 +6,7 @@ import { getTeamById, updateTeam } from "../../../services/teamService";
 const EditTeamPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const team = id ? getTeamById(id) : undefined;
+  const [team, setTeam] = useState<any>(undefined);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -15,14 +15,19 @@ const EditTeamPage = () => {
   });
 
   useEffect(() => {
-    if (team) {
-      setFormData({
-        nome: team.nome,
-        descricao: team.descricao,
-        status: team.status,
-      });
+    if (id) {
+      const foundTeam = getTeamById(id);
+      setTeam(foundTeam);
+      
+      if (foundTeam) {
+        setFormData({
+          nome: foundTeam.nome,
+          descricao: foundTeam.descricao,
+          status: foundTeam.status,
+        });
+      }
     }
-  }, [team]);
+  }, [id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

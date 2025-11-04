@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
-import { getTeams } from "../../../services/teamService";
+import { getTeams, deleteTeam } from "../../../services/teamService";
 import type { Team } from "../../../types/admin";
 import {
   MagnifyingGlassIcon,
@@ -9,14 +9,24 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 const AdminTeamsPage = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const { can } = usePermissions();
 
   useEffect(() => {
     setTeams(getTeams());
   }, []);
+
+  const handleDelete = (id: string, nome: string) => {
+    if (confirm(`Tem certeza que deseja excluir a equipe ${nome}?`)) {
+      deleteTeam(id);
+      setTeams(getTeams());
+      alert("Equipe excluída com sucesso!");
+    }
+  };
 
   const filteredTeams = teams.filter(
     (team) =>
@@ -37,13 +47,15 @@ const AdminTeamsPage = () => {
               etc)
             </p>
           </div>
-          <Link
-            to="/admin/teams/new"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Nova Equipe
-          </Link>
+          {can("canCreateTeam") && (
+            <Link
+              to="/admin/teams/new"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Nova Equipe
+            </Link>
+          )}
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
@@ -97,15 +109,22 @@ const AdminTeamsPage = () => {
                 >
                   Ver Detalhes
                 </Link>
-                <Link
-                  to={`/admin/teams/${team.id}/edit`}
-                  className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-600 hover:text-gray-900"
-                >
-                  <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Link>
-                <button className="px-2 sm:px-3 py-1.5 sm:py-2 text-red-600 hover:text-red-900">
-                  <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+                {can("canEditTeam") && (
+                  <Link
+                    to={`/admin/teams/${team.id}/edit`}
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-600 hover:text-gray-900"
+                  >
+                    <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </Link>
+                )}
+                {can("canDeleteTeam") && (
+                  <button
+                    onClick={() => handleDelete(team.id, team.nome)}
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-red-600 hover:text-red-900"
+                  >
+                    <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                )}
               </div>
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   HomeIcon,
   UsersIcon,
@@ -10,6 +10,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
+import { usePermissions } from "../hooks/usePermissions";
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,20 +20,37 @@ interface MenuItem {
   name: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
+  permission?: string;
 }
 
-const menuItems: MenuItem[] = [
+const allMenuItems: MenuItem[] = [
   { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-  { name: "Membros das Equipes", path: "/members", icon: UsersIcon },
-  { name: "Usuários (Login)", path: "/admin/users", icon: CogIcon },
-  { name: "Equipes", path: "/admin/teams", icon: UsersIcon },
+  { name: "Membros das Equipes", path: "/members", icon: UsersIcon, permission: "canViewMembers" },
+  { name: "Usuários (Login)", path: "/admin/users", icon: CogIcon, permission: "canViewUsers" },
+  { name: "Equipes", path: "/admin/teams", icon: UsersIcon, permission: "canViewTeams" },
 ];
 
 export function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
+  const { permissions } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Filtra os itens do menu baseado nas permissões
+  const menuItems = useMemo(() => {
+    if (!permissions) return [];
+    
+    return allMenuItems.filter(item => {
+      // Dashboard sempre visível
+      if (item.path === "/dashboard") return true;
+      // Se tem permissão definida, verifica
+      if (item.permission) {
+        return (permissions as any)[item.permission];
+      }
+      return true;
+    });
+  }, [permissions]);
 
   const handleLogout = () => {
     logout();

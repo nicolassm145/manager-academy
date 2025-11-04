@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
-import { getUsers } from "../../../services/userService";
+import { getUsers, deleteUser } from "../../../services/userService";
 import { getMembers } from "../../../services/memberService";
 import type { SystemUser } from "../../../types/admin";
 import {
@@ -11,17 +11,27 @@ import {
   TrashIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
+import { usePermissions } from "../../../hooks/usePermissions";
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("");
+  const { can } = usePermissions();
 
   useEffect(() => {
     setUsers(getUsers());
     setMembers(getMembers());
   }, []);
+
+  const handleDelete = (id: string, nome: string) => {
+    if (confirm(`Tem certeza que deseja excluir o usuário ${nome}?`)) {
+      deleteUser(id);
+      setUsers(getUsers());
+      alert("Usuário excluído com sucesso!");
+    }
+  };
 
   // Filtros
   const filteredUsers = users.filter((user) => {
@@ -67,13 +77,15 @@ const AdminUsersPage = () => {
               Gerencie contas de acesso, permissões e credenciais de login
             </p>
           </div>
-          <Link
-            to="/admin/users/new"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Novo Usuário
-          </Link>
+          {can("canCreateUser") && (
+            <Link
+              to="/admin/users/new"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Novo Usuário
+            </Link>
+          )}
         </div>
 
         {/* Filtros */}
@@ -165,15 +177,22 @@ const AdminUsersPage = () => {
                       >
                         Ver Detalhes
                       </Link>
-                      <Link
-                        to={`/admin/users/${user.id}/edit`}
-                        className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </Link>
-                      <button className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100">
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
+                      {can("canEditUser") && (
+                        <Link
+                          to={`/admin/users/${user.id}/edit`}
+                          className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </Link>
+                      )}
+                      {can("canDeleteUser") && (
+                        <button
+                          onClick={() => handleDelete(user.id, user.nome)}
+                          className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -257,15 +276,22 @@ const AdminUsersPage = () => {
                         >
                           Ver
                         </Link>
-                        <Link
-                          to={`/admin/users/${user.id}/edit`}
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          <PencilIcon className="w-5 h-5" />
-                        </Link>
-                        <button className="text-red-600 hover:text-red-900">
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
+                        {can("canEditUser") && (
+                          <Link
+                            to={`/admin/users/${user.id}/edit`}
+                            className="text-gray-600 hover:text-gray-900"
+                          >
+                            <PencilIcon className="w-5 h-5" />
+                          </Link>
+                        )}
+                        {can("canDeleteUser") && (
+                          <button
+                            onClick={() => handleDelete(user.id, user.nome)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -6,7 +6,7 @@ import { getUserById, updateUser } from "../../../services/userService";
 const EditUserPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = id ? getUserById(id) : undefined;
+  const [user, setUser] = useState<any>(undefined);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -17,16 +17,21 @@ const EditUserPage = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        nome: user.nome,
-        email: user.email,
-        role: user.role,
-        equipe: user.equipe || "",
-        status: user.status,
-      });
+    if (id) {
+      const foundUser = getUserById(id);
+      setUser(foundUser);
+      
+      if (foundUser) {
+        setFormData({
+          nome: foundUser.nome,
+          email: foundUser.email,
+          role: foundUser.role,
+          equipe: foundUser.equipe || "",
+          status: foundUser.status,
+        });
+      }
     }
-  }, [user]);
+  }, [id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -6,7 +6,7 @@ import { getMemberById, updateMember } from "../../services/memberService";
 const EditMemberPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const member = id ? getMemberById(id) : undefined;
+  const [member, setMember] = useState<any>(undefined);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -16,15 +16,20 @@ const EditMemberPage = () => {
   });
 
   useEffect(() => {
-    if (member) {
-      setFormData({
-        email: member.email,
-        curso: member.curso,
-        equipe: member.equipe,
-        cargo: member.cargo,
-      });
+    if (id) {
+      const foundMember = getMemberById(id);
+      setMember(foundMember);
+      
+      if (foundMember) {
+        setFormData({
+          email: foundMember.email,
+          curso: foundMember.curso,
+          equipe: foundMember.equipe,
+          cargo: foundMember.cargo,
+        });
+      }
     }
-  }, [member]);
+  }, [id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

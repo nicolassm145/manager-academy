@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../components/LayoutComponent";
-import { getMembers } from "../../services/memberService";
+import { getMembers, deleteMember } from "../../services/memberService";
 import type { Member } from "../../types/member";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { usePermissions } from "../../hooks/usePermissions";
+import { useAuth } from "../../context/AuthContext";
 import {
   PageHeader,
   SearchBar,
@@ -26,14 +28,30 @@ const MembersPage = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEquipe, setFilterEquipe] = useState("");
+  const { can } = usePermissions();
+  const { user } = useAuth();
 
-  // Carrega membros do localStorage/JSON
+  // Carrega membros do localStorage/JSON apenas uma vez
   useEffect(() => {
     setMembers(getMembers());
   }, []);
 
-  // Filtros
+  // Função para deletar membro
+  const handleDelete = (id: string, nome: string) => {
+    if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
+      deleteMember(id);
+      setMembers(getMembers());
+      alert("Membro excluído com sucesso!");
+    }
+  };
+
+  // Filtros (incluindo filtro de equipe para líder)
   const filteredMembers = members.filter((member) => {
+    // Se for líder, só mostra membros da sua equipe
+    if (user?.role === "lider" && user?.equipe && member.equipe !== user.equipe) {
+      return false;
+    }
+    
     const matchSearch =
       member.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.matricula.includes(searchTerm) ||
@@ -51,11 +69,11 @@ const MembersPage = () => {
         <PageHeader
           title="Membros das Equipes"
           description="Cadastro de alunos participantes dos projetos (não precisam ter acesso ao sistema)"
-          actionButton={{
+          actionButton={can("canCreateMember") ? {
             label: "Novo Membro",
             to: "/members/new",
             icon: PlusIcon,
-          }}
+          } : undefined}
         />
 
         <Card>
@@ -124,15 +142,22 @@ const MembersPage = () => {
                     >
                       Ver Detalhes
                     </Link>
-                    <Link
-                      to={`/members/${member.id}/edit`}
-                      className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </Link>
-                    <button className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100">
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
+                    {can("canEditMember") && (
+                      <Link
+                        to={`/members/${member.id}/edit`}
+                        className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </Link>
+                    )}
+                    {can("canDeleteMember") && (
+                      <button
+                        onClick={() => handleDelete(member.id, member.nome)}
+                        className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    )}
                   </MobileCardActions>
                 </MobileCard>
               ))}
@@ -183,15 +208,22 @@ const MembersPage = () => {
                           >
                             Ver
                           </Link>
-                          <Link
-                            to={`/members/${member.id}/edit`}
-                            className="text-gray-600 hover:text-gray-900 p-1"
-                          >
-                            <PencilIcon className="w-5 h-5" />
-                          </Link>
-                          <button className="text-red-600 hover:text-red-900 p-1">
-                            <TrashIcon className="w-5 h-5" />
-                          </button>
+                          {can("canEditMember") && (
+                            <Link
+                              to={`/members/${member.id}/edit`}
+                              className="text-gray-600 hover:text-gray-900 p-1"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </Link>
+                          )}
+                          {can("canDeleteMember") && (
+                            <button
+                              onClick={() => handleDelete(member.id, member.nome)}
+                              className="text-red-600 hover:text-red-900 p-1"
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
