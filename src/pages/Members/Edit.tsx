@@ -219,7 +219,9 @@ const EditMemberPage = () => {
 
           {/* Divisor - Dados de Acesso */}
           <div className="border-t pt-4 sm:pt-6">
-            <h3 className="text-lg font-semibold mb-4">Dados de Acesso ao Sistema</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Dados de Acesso ao Sistema
+            </h3>
           </div>
 
           {/* Perfil de Acesso */}
@@ -238,7 +240,9 @@ const EditMemberPage = () => {
               <option value="membro">Membro - Acesso básico</option>
               <option value="lider">Líder - Gerencia sua equipe</option>
               <option value="admin">Administrador - Acesso total</option>
-              <option value="professor">Professor - Consulta e orientação</option>
+              <option value="professor">
+                Professor - Consulta e orientação
+              </option>
               <option value="diretor">Diretor - Gerencia finanças</option>
             </select>
             <p className="text-xs opacity-60 mt-1">
@@ -248,7 +252,10 @@ const EditMemberPage = () => {
 
           {/* Nova Senha (opcional) */}
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="newPassword"
+              className="block text-sm font-medium mb-2"
+            >
               Nova Senha (opcional)
             </label>
             <input

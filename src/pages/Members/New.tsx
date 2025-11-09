@@ -214,7 +214,9 @@ const NewMemberPage = () => {
 
           {/* Divisor - Dados de Acesso */}
           <div className="border-t pt-4 sm:pt-6">
-            <h3 className="text-lg font-semibold mb-4">Dados de Acesso ao Sistema</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Dados de Acesso ao Sistema
+            </h3>
           </div>
 
           {/* Senha e Perfil */}
@@ -243,10 +245,7 @@ const NewMemberPage = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium mb-2"
-              >
+              <label htmlFor="role" className="block text-sm font-medium mb-2">
                 Perfil de Acesso *
               </label>
               <select
@@ -260,7 +259,9 @@ const NewMemberPage = () => {
                 <option value="membro">Membro - Acesso básico</option>
                 <option value="lider">Líder - Gerencia sua equipe</option>
                 <option value="admin">Administrador - Acesso total</option>
-                <option value="professor">Professor - Consulta e orientação</option>
+                <option value="professor">
+                  Professor - Consulta e orientação
+                </option>
                 <option value="diretor">Diretor - Gerencia finanças</option>
               </select>
               <p className="text-xs opacity-60 mt-1">
