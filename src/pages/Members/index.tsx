@@ -31,6 +31,30 @@ const MembersPage = () => {
   const { can } = usePermissions();
   const { user } = useAuth();
 
+  // Função helper para exibir o nome do role
+  const getRoleName = (role: string) => {
+    const roleNames: Record<string, string> = {
+      admin: "Admin",
+      lider: "Líder",
+      professor: "Professor",
+      diretor: "Diretor",
+      membro: "Membro",
+    };
+    return roleNames[role] || role;
+  };
+
+  // Função helper para cor do badge de role
+  const getRoleColor = (role: string) => {
+    const colors: Record<string, string> = {
+      admin: "bg-purple-100 text-purple-800",
+      lider: "bg-blue-100 text-blue-800",
+      professor: "bg-green-100 text-green-800",
+      diretor: "bg-yellow-100 text-yellow-800",
+      membro: "bg-gray-100 text-gray-800",
+    };
+    return colors[role] || "bg-gray-100 text-gray-800";
+  };
+
   // Carrega membros do localStorage/JSON apenas uma vez
   useEffect(() => {
     setMembers(getMembers());
@@ -122,7 +146,16 @@ const MembersPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium text-sm">{member.nome}</p>
-                        <StatusBadge status={member.status} />
+                        <div className="flex gap-1">
+                          <span
+                            className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getRoleColor(
+                              member.role
+                            )}`}
+                          >
+                            {getRoleName(member.role)}
+                          </span>
+                          <StatusBadge status={member.status} />
+                        </div>
                       </div>
                       <p className="text-xs opacity-60 truncate">
                         {member.email}
@@ -177,6 +210,7 @@ const MembersPage = () => {
                   <TableHeadCell>Matrícula</TableHeadCell>
                   <TableHeadCell>Equipe</TableHeadCell>
                   <TableHeadCell>Cargo</TableHeadCell>
+                  <TableHeadCell>Perfil</TableHeadCell>
                   <TableHeadCell>Status</TableHeadCell>
                   <TableHeadCell className="text-right">Ações</TableHeadCell>
                 </TableHeader>
@@ -203,6 +237,15 @@ const MembersPage = () => {
                       <TableCell>{member.matricula}</TableCell>
                       <TableCell>{member.equipe}</TableCell>
                       <TableCell>{member.cargo}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
+                            member.role
+                          )}`}
+                        >
+                          {getRoleName(member.role)}
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <StatusBadge status={member.status} />
                       </TableCell>

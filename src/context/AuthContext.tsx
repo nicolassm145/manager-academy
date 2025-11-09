@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { getUserByEmail } from "../services/userService";
+import { getMembers } from "../services/memberService";
 
 
 export type UserRole = "admin" | "lider" | "professor" | "diretor" | "membro";
@@ -36,13 +36,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const foundUser = getUserByEmail(email);
+    // Buscar por email nos members
+    const members = getMembers();
+    const foundMember = members.find(m => m.email === email && m.status === "ativo");
 
-    if (!foundUser || foundUser.password !== password) {
+    if (!foundMember || foundMember.password !== password) {
       throw new Error("Email ou senha inválidos");
     }
 
-    const { password: _, ...userWithoutPassword } = foundUser;
+    const userWithoutPassword = {
+      id: foundMember.id,
+      nome: foundMember.nome,
+      email: foundMember.email,
+      role: foundMember.role,
+      equipe: foundMember.equipe,
+    };
+    
     setUser(userWithoutPassword);
     localStorage.setItem("user", JSON.stringify(userWithoutPassword));
   };

@@ -5,17 +5,13 @@ import DashboardPage from "../pages/Dashboard";
 import SettingsPage from "../pages/Settings";
 import NotFoundPage from "../pages/NotFound";
 
-// Crud dos Membros
+// Crud dos Membros (agora inclui gestão de usuários)
 import MembersPage from "../pages/Members";
 import NewMemberPage from "../pages/Members/New";
 import MemberDetailPage from "../pages/Members/Detail";
 import EditMemberPage from "../pages/Members/Edit";
 
-// Crud dos administradores
-import AdminUsersPage from "../pages/Admin/Users/index";
-import NewUserPage from "../pages/Admin/Users/New";
-import UserDetailPage from "../pages/Admin/Users/Detail";
-import EditUserPage from "../pages/Admin/Users/Edit";
+// Crud das Equipes
 import AdminTeamsPage from "../pages/Admin/Teams/index";
 import NewTeamPage from "../pages/Admin/Teams/New";
 import TeamDetailPage from "../pages/Admin/Teams/Detail";
@@ -82,42 +78,6 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requiredPermission="canEditMember">
         <EditMemberPage />
-      </ProtectedRoute>
-    ),
-  },
-
-  {
-    path: "/admin/users",
-    element: (
-      <ProtectedRoute requiredPermission="canViewUsers">
-        <AdminUsersPage />
-      </ProtectedRoute>
-    ),
-  },
-
-  {
-    path: "/admin/users/new",
-    element: (
-      <ProtectedRoute requiredPermission="canCreateUser">
-        <NewUserPage />
-      </ProtectedRoute>
-    ),
-  },
-
-  {
-    path: "/admin/users/:id",
-    element: (
-      <ProtectedRoute requiredPermission="canViewUsers">
-        <UserDetailPage />
-      </ProtectedRoute>
-    ),
-  },
-
-  {
-    path: "/admin/users/:id/edit",
-    element: (
-      <ProtectedRoute requiredPermission="canEditUser">
-        <EditUserPage />
       </ProtectedRoute>
     ),
   },

@@ -14,14 +14,20 @@ const NewMemberPage = () => {
     cargo: "",
     dataInicio: "",
     status: "ativo" as "ativo" | "inativo",
+    password: "",
+    role: "membro" as "admin" | "lider" | "professor" | "diretor" | "membro",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      createMember(formData);
-      alert("Membro cadastrado com sucesso!");
+      const memberData = {
+        ...formData,
+        dataCriacao: new Date().toISOString(),
+      };
+      createMember(memberData);
+      alert("Membro e conta de acesso cadastrados com sucesso!");
       navigate("/members");
     } catch (error) {
       alert(
@@ -204,6 +210,63 @@ const NewMemberPage = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
+          </div>
+
+          {/* Divisor - Dados de Acesso */}
+          <div className="border-t pt-4 sm:pt-6">
+            <h3 className="text-lg font-semibold mb-4">Dados de Acesso ao Sistema</h3>
+          </div>
+
+          {/* Senha e Perfil */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+              >
+                Senha *
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                minLength={6}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Mínimo 6 caracteres"
+              />
+              <p className="text-xs opacity-60 mt-1">
+                Esta será a senha de login do membro
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium mb-2"
+              >
+                Perfil de Acesso *
+              </label>
+              <select
+                id="role"
+                name="role"
+                required
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="membro">Membro - Acesso básico</option>
+                <option value="lider">Líder - Gerencia sua equipe</option>
+                <option value="admin">Administrador - Acesso total</option>
+                <option value="professor">Professor - Consulta e orientação</option>
+                <option value="diretor">Diretor - Gerencia finanças</option>
+              </select>
+              <p className="text-xs opacity-60 mt-1">
+                Define as permissões no sistema
+              </p>
+            </div>
           </div>
 
           {/* Botões */}

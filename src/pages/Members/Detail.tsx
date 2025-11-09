@@ -122,6 +122,64 @@ const MemberDetailPage = () => {
           </div>
         </div>
 
+        {/* Dados de Acesso */}
+        <div className="bg-white rounded-xl shadow-md p-6 border">
+          <h2 className="text-xl font-bold mb-4">Dados de Acesso ao Sistema</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm opacity-60 mb-1">Email de Login</p>
+              <p className="text-lg font-semibold">{member.email}</p>
+            </div>
+
+            <div>
+              <p className="text-sm opacity-60 mb-1">Perfil de Acesso</p>
+              <p className="text-lg font-semibold">
+                <span
+                  className={`inline-block px-3 py-1 text-sm rounded-full ${
+                    member.role === "admin"
+                      ? "bg-purple-100 text-purple-800"
+                      : member.role === "lider"
+                      ? "bg-blue-100 text-blue-800"
+                      : member.role === "professor"
+                      ? "bg-green-100 text-green-800"
+                      : member.role === "diretor"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {member.role === "admin" && "Administrador"}
+                  {member.role === "lider" && "Líder de Equipe"}
+                  {member.role === "professor" && "Professor Orientador"}
+                  {member.role === "diretor" && "Diretor Financeiro"}
+                  {member.role === "membro" && "Membro"}
+                </span>
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm opacity-60 mb-1">Conta Criada em</p>
+              <p className="text-lg font-semibold">
+                {new Date(member.dataCriacao).toLocaleDateString("pt-BR")}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm opacity-60 mb-1">Status da Conta</p>
+              <p className="text-lg font-semibold">
+                <span
+                  className={`inline-block px-3 py-1 text-sm rounded-full ${
+                    member.status === "ativo"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {member.status === "ativo" ? "Ativa" : "Inativa"}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Histórico (mockado) */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
           <h2 className="text-xl font-bold mb-4">Histórico de Mudanças</h2>

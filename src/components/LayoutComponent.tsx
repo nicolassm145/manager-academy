@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import {
   HomeIcon,
   UsersIcon,
-  UserGroupIcon,
   Cog8ToothIcon,
   Bars3Icon,
   XMarkIcon,
@@ -28,16 +27,10 @@ interface MenuItem {
 const allMenuItems: MenuItem[] = [
   { name: "Home", path: "/dashboard", icon: HomeIcon },
   {
-    name: "Membros das Equipes",
+    name: "Membros",
     path: "/members",
     icon: UsersIcon,
     permission: "canViewMembers",
-  },
-  {
-    name: "Usuários (Login)",
-    path: "/admin/users",
-    icon: UserGroupIcon,
-    permission: "canViewUsers",
   },
   {
     name: "Equipes",

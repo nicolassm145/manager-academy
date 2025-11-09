@@ -13,6 +13,8 @@ const EditMemberPage = () => {
     curso: "",
     equipe: "",
     cargo: "",
+    role: "membro" as "admin" | "lider" | "professor" | "diretor" | "membro",
+    newPassword: "", // Opcional - só preenche se quiser trocar
   });
 
   useEffect(() => {
@@ -26,6 +28,8 @@ const EditMemberPage = () => {
           curso: foundMember.curso,
           equipe: foundMember.equipe,
           cargo: foundMember.cargo,
+          role: foundMember.role,
+          newPassword: "",
         });
       }
     }
@@ -35,8 +39,21 @@ const EditMemberPage = () => {
     e.preventDefault();
     if (!id) return;
 
-    updateMember(id, formData);
-    alert("Membro atualizado com sucesso!");
+    const updateData: any = {
+      email: formData.email,
+      curso: formData.curso,
+      equipe: formData.equipe,
+      cargo: formData.cargo,
+      role: formData.role,
+    };
+
+    // Só atualiza senha se preencheu o campo
+    if (formData.newPassword && formData.newPassword.length >= 6) {
+      updateData.password = formData.newPassword;
+    }
+
+    updateMember(id, updateData);
+    alert("Membro e dados de acesso atualizados com sucesso!");
     navigate(`/members/${id}`);
   };
 
@@ -198,6 +215,55 @@ const EditMemberPage = () => {
                 <option value="Membro">Membro</option>
               </select>
             </div>
+          </div>
+
+          {/* Divisor - Dados de Acesso */}
+          <div className="border-t pt-4 sm:pt-6">
+            <h3 className="text-lg font-semibold mb-4">Dados de Acesso ao Sistema</h3>
+          </div>
+
+          {/* Perfil de Acesso */}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium mb-2">
+              Perfil de Acesso *
+            </label>
+            <select
+              id="role"
+              name="role"
+              required
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="membro">Membro - Acesso básico</option>
+              <option value="lider">Líder - Gerencia sua equipe</option>
+              <option value="admin">Administrador - Acesso total</option>
+              <option value="professor">Professor - Consulta e orientação</option>
+              <option value="diretor">Diretor - Gerencia finanças</option>
+            </select>
+            <p className="text-xs opacity-60 mt-1">
+              Define as permissões no sistema
+            </p>
+          </div>
+
+          {/* Nova Senha (opcional) */}
+          <div>
+            <label htmlFor="newPassword" className="block text-sm font-medium mb-2">
+              Nova Senha (opcional)
+            </label>
+            <input
+              id="newPassword"
+              name="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={handleChange}
+              minLength={6}
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Deixe em branco para manter a atual"
+            />
+            <p className="text-xs opacity-60 mt-1">
+              Preencha apenas se quiser alterar a senha de login
+            </p>
           </div>
 
           {/* Botões */}

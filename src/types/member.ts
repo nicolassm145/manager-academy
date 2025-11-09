@@ -8,4 +8,8 @@ export interface Member {
   cargo: string;
   dataInicio: string;
   status: "ativo" | "inativo";
+  // Dados de acesso ao sistema
+  password: string;
+  role: "admin" | "lider" | "professor" | "diretor" | "membro";
+  dataCriacao: string;
 }

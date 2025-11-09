@@ -106,10 +106,10 @@ const LoginPage = () => {
               • <strong>Admin:</strong> admin@manager.com / 123456
             </p>
             <p className="break-all">
-              • <strong>Líder:</strong> lider@manager.com / 123456
+              • <strong>Líder:</strong> joao.silva@example.com / 123456
             </p>
             <p className="break-all">
-              • <strong>Membro:</strong> membro@manager.com / 123456
+              • <strong>Membro:</strong> ana.costa@example.com / 123456
             </p>
           </div>
         </div>

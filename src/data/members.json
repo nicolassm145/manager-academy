@@ -1,5 +1,19 @@
 [
   {
+    "id": "admin-1",
+    "nome": "Admin Sistema",
+    "matricula": "0000000000",
+    "email": "admin@manager.com",
+    "curso": "Administração",
+    "equipe": "Administração",
+    "cargo": "Administrador",
+    "dataInicio": "2024-01-01",
+    "status": "ativo",
+    "password": "123456",
+    "role": "admin",
+    "dataCriacao": "2024-01-01T10:00:00.000Z"
+  },
+  {
     "id": "1",
     "nome": "João Silva",
     "matricula": "2021000001",
@@ -8,7 +22,10 @@
     "equipe": "DevU",
     "cargo": "Líder",
     "dataInicio": "2021-03-15",
-    "status": "ativo"
+    "status": "ativo",
+    "password": "123456",
+    "role": "lider",
+    "dataCriacao": "2021-03-15T10:00:00.000Z"
   },
   {
     "id": "2",
@@ -19,7 +36,10 @@
     "equipe": "Byron",
     "cargo": "Vice-Líder",
     "dataInicio": "2021-04-01",
-    "status": "ativo"
+    "status": "ativo",
+    "password": "123456",
+    "role": "membro",
+    "dataCriacao": "2021-04-01T10:00:00.000Z"
   },
   {
     "id": "3",
@@ -30,7 +50,10 @@
     "equipe": "Exmachima",
     "cargo": "Membro",
     "dataInicio": "2022-02-10",
-    "status": "ativo"
+    "status": "ativo",
+    "password": "123456",
+    "role": "membro",
+    "dataCriacao": "2022-02-10T10:00:00.000Z"
   },
   {
     "id": "4",
@@ -41,7 +64,10 @@
     "equipe": "Asimov",
     "cargo": "Membro",
     "dataInicio": "2020-08-20",
-    "status": "ativo"
+    "status": "ativo",
+    "password": "123456",
+    "role": "membro",
+    "dataCriacao": "2020-08-20T10:00:00.000Z"
   },
   {
     "id": "5",
@@ -52,6 +78,9 @@
     "equipe": "BlackBee",
     "cargo": "Membro",
     "dataInicio": "2023-03-10",
-    "status": "ativo"
+    "status": "ativo",
+    "password": "123456",
+    "role": "membro",
+    "dataCriacao": "2023-03-10T10:00:00.000Z"
   }
 ]
