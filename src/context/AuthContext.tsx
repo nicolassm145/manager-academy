@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { getMembers } from "../services/memberService";
+import { API_BASE_URL } from "../config/api";
+import type { LoginResponse } from "../types/api";
+import { apiUserToMember } from "../types/mappers";
+import { mapTipoAcessoToRole } from "../types/mappers";
 
 export type UserRole = "admin" | "lider" | "professor" | "diretor" | "membro";
 
@@ -27,39 +30,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else {
+            localStorage.removeItem("token");
+          }
+        } catch (error) {
+          console.error("Erro ao verificar autenticação:", error);
+          localStorage.removeItem("token");
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Buscar por email nos members
-    const members = getMembers();
-    const foundMember = members.find(
-      (m) => m.email === email && m.status === "ativo"
-    );
+    try {
+      // Faz requisição para o endpoint de login da API
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!foundMember || foundMember.password !== password) {
-      throw new Error("Email ou senha inválidos");
+      if (!response.ok) {
+        const error = await response.json();
+        // A API retorna "detail" nas mensagens de erro
+        throw new Error(error.detail || "Email ou senha inválidos");
+      }
+
+      // A API retorna { access_token, token_type, user }
+      const responseData: LoginResponse = await response.json();
+
+      // 🔍 CONSOLE LOG: Mostra o que a API está retornando
+      console.log("📥 Resposta da API /auth/login:", responseData);
+      console.log("📥 Dados do usuário:", responseData.user);
+
+      const { access_token, user: apiUser } = responseData;
+
+      // Salva o token JWT no localStorage
+      localStorage.setItem("token", access_token);
+
+      // Converte ApiUser para User do frontend
+      const userData: User = {
+        id: apiUser.id.toString(),
+        nome: apiUser.nomeCompleto,
+        email: apiUser.email,
+        role: mapTipoAcessoToRole(apiUser.tipoAcesso),
+        equipe: apiUser.equipeId?.toString(),
+      };
+
+      console.log("✅ Usuário autenticado:", userData);
+
+      setUser(userData);
+    } catch (error) {
+      throw error;
     }
-
-    const userWithoutPassword = {
-      id: foundMember.id,
-      nome: foundMember.nome,
-      email: foundMember.email,
-      role: foundMember.role,
-      equipe: foundMember.equipe,
-    };
-
-    setUser(userWithoutPassword);
-    localStorage.setItem("user", JSON.stringify(userWithoutPassword));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   return (

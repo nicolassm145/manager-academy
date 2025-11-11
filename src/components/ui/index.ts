@@ -1,4 +1,3 @@
-// Export all UI components from a single file
 export { PageHeader } from "./PageHeaderComponent";
 export { SearchBar } from "./SearchBarComponent";
 export { FilterSelect } from "./FilterSelectComponent";

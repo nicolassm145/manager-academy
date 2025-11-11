@@ -6,16 +6,16 @@ import SettingsPage from "../pages/Settings";
 import NotFoundPage from "../pages/NotFound";
 
 // Crud dos Membros (agora inclui gestão de usuários)
-import MembersPage from "../pages/Members";
+import MembersPage from "../pages/Members/List";
 import NewMemberPage from "../pages/Members/New";
 import MemberDetailPage from "../pages/Members/Detail";
 import EditMemberPage from "../pages/Members/Edit";
 
 // Crud das Equipes
-import AdminTeamsPage from "../pages/Admin/Teams/index";
-import NewTeamPage from "../pages/Admin/Teams/New";
-import TeamDetailPage from "../pages/Admin/Teams/Detail";
-import EditTeamPage from "../pages/Admin/Teams/Edit";
+import AdminTeamsPage from "../pages/Teams/List";
+import NewTeamPage from "../pages/Teams/New";
+import TeamDetailPage from "../pages/Teams/Detail";
+import EditTeamPage from "../pages/Teams/Edit";
 
 const router = createBrowserRouter([
   {

@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { getTeamById, deleteTeam } from "../../../services/teamService";
-import { getUsers } from "../../../services/userService";
 import { getMembers } from "../../../services/memberService";
+import type { Team } from "../../../types/admin";
+import type { Member } from "../../../types/member";
 import {
   PencilIcon,
   TrashIcon,
@@ -22,7 +24,43 @@ import {
 const TeamDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const team = id ? getTeamById(id) : undefined;
+  const [team, setTeam] = useState<Team | undefined>(undefined);
+  const [teamMembers, setTeamMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        try {
+          const teamData = await getTeamById(id);
+          setTeam(teamData);
+
+          if (teamData) {
+            const allMembers = await getMembers();
+            const members = allMembers.filter(
+              (m) => m.equipe === teamData.nome
+            );
+            setTeamMembers(members);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar equipe:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <p className="opacity-60">Carregando...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!team) {
     return (
@@ -37,22 +75,20 @@ const TeamDetailPage = () => {
     );
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (id && confirm("Tem certeza que deseja excluir esta equipe?")) {
-      deleteTeam(id);
-      alert("Equipe excluída com sucesso!");
-      navigate("/admin/teams");
+      try {
+        await deleteTeam(id);
+        alert("Equipe excluída com sucesso!");
+        navigate("/admin/teams");
+      } catch (error) {
+        console.error("Erro ao excluir equipe:", error);
+        alert("Erro ao excluir equipe");
+      }
     }
   };
 
-  // Estatísticas da equipe
-  const allMembers = getMembers();
-  const allUsers = getUsers();
-  const teamMembers = team
-    ? allMembers.filter((m) => m.equipe === team.nome)
-    : [];
-  const teamUsers = team ? allUsers.filter((u) => u.equipe === team.nome) : [];
-  const teamLeader = teamUsers.find((u) => u.role === "lider");
+  const teamLeader = teamMembers.find((m) => m.role === "lider");
 
   return (
     <Layout>
@@ -101,7 +137,7 @@ const TeamDetailPage = () => {
             />
             <StatCard
               label="Usuários no Sistema"
-              value={teamUsers.length}
+              value={teamMembers.length}
               icon={UsersIcon}
               color="green"
             />

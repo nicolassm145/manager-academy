@@ -17,14 +17,29 @@ const AdminTeamsPage = () => {
   const { can } = usePermissions();
 
   useEffect(() => {
-    setTeams(getTeams());
+    const fetchTeams = async () => {
+      try {
+        const data = await getTeams();
+        setTeams(data);
+      } catch (error) {
+        console.error("Erro ao carregar equipes:", error);
+        alert("Erro ao carregar equipes");
+      }
+    };
+    fetchTeams();
   }, []);
 
-  const handleDelete = (id: string, nome: string) => {
+  const handleDelete = async (id: string, nome: string) => {
     if (confirm(`Tem certeza que deseja excluir a equipe ${nome}?`)) {
-      deleteTeam(id);
-      setTeams(getTeams());
-      alert("Equipe excluída com sucesso!");
+      try {
+        await deleteTeam(id);
+        const data = await getTeams();
+        setTeams(data);
+        alert("Equipe excluída com sucesso!");
+      } catch (error) {
+        console.error("Erro ao excluir equipe:", error);
+        alert("Erro ao excluir equipe");
+      }
     }
   };
 

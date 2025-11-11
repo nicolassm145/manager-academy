@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout } from "../../components/LayoutComponent";
-import { getMembers, deleteMember } from "../../services/memberService";
-import type { Member } from "../../types/member";
+import { Layout } from "../../../components/LayoutComponent";
+import { getMembers, deleteMember } from "../../../services/memberService";
+import type { Member } from "../../../types/member";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { usePermissions } from "../../hooks/usePermissions";
-import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useAuth } from "../../../context/AuthContext";
 import {
   PageHeader,
   SearchBar,
@@ -22,7 +22,7 @@ import {
   MobileCard,
   MobileCardItem,
   MobileCardActions,
-} from "../../components/ui";
+} from "../../../components/ui";
 
 const MembersPage = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -55,17 +55,32 @@ const MembersPage = () => {
     return colors[role] || "bg-gray-100 text-gray-800";
   };
 
-  // Carrega membros do localStorage/JSON apenas uma vez
+  // Carrega membros da API
   useEffect(() => {
-    setMembers(getMembers());
+    const fetchMembers = async () => {
+      try {
+        const data = await getMembers();
+        setMembers(data);
+      } catch (error) {
+        console.error("Erro ao carregar membros:", error);
+        alert("Erro ao carregar membros");
+      }
+    };
+    fetchMembers();
   }, []);
 
   // Função para deletar membro
-  const handleDelete = (id: string, nome: string) => {
+  const handleDelete = async (id: string, nome: string) => {
     if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
-      deleteMember(id);
-      setMembers(getMembers());
-      alert("Membro excluído com sucesso!");
+      try {
+        await deleteMember(id);
+        const data = await getMembers();
+        setMembers(data);
+        alert("Membro excluído com sucesso!");
+      } catch (error) {
+        console.error("Erro ao excluir membro:", error);
+        alert("Erro ao excluir membro");
+      }
     }
   };
 

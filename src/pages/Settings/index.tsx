@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Layout } from "../../components/LayoutComponent";
 import { useAuth } from "../../context/AuthContext";
-import { updateUser, getUserById } from "../../services/userService";
+import { updateMember } from "../../services/memberService";
 import {
   EnvelopeIcon,
   LockClosedIcon,
@@ -12,7 +12,6 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: user?.email || "",
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -28,7 +27,7 @@ const SettingsPage = () => {
     setErrorMessage("");
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user?.id) {
@@ -37,10 +36,7 @@ const SettingsPage = () => {
     }
 
     try {
-      updateUser(user.id, { email: formData.email });
-
-      const updatedUser = { ...user, email: formData.email };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      await updateMember(user.id, { email: formData.email });
 
       setSuccessMessage("Email atualizado com sucesso!");
       setErrorMessage("");
@@ -54,16 +50,11 @@ const SettingsPage = () => {
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user?.id) {
       setErrorMessage("Usuário não encontrado");
-      return;
-    }
-
-    if (!formData.currentPassword) {
-      setErrorMessage("Digite a senha atual");
       return;
     }
 
@@ -83,20 +74,13 @@ const SettingsPage = () => {
     }
 
     try {
-      const currentUser = getUserById(user.id);
-      if (!currentUser || currentUser.password !== formData.currentPassword) {
-        setErrorMessage("Senha atual incorreta");
-        return;
-      }
-
-      updateUser(user.id, { password: formData.newPassword });
+      await updateMember(user.id, { password: formData.newPassword });
 
       setSuccessMessage("Senha atualizada com sucesso!");
       setErrorMessage("");
 
       setFormData({
         ...formData,
-        currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
@@ -199,25 +183,6 @@ const SettingsPage = () => {
           </div>
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="currentPassword"
-                className="block text-sm font-medium mb-2"
-              >
-                Senha Atual *
-              </label>
-              <input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                required
-                value={formData.currentPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Digite sua senha atual"
-              />
-            </div>
-
             <div>
               <label
                 htmlFor="newPassword"

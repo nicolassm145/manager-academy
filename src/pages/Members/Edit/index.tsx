@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "../../components/LayoutComponent";
-import { getMemberById, updateMember } from "../../services/memberService";
+import { Layout } from "../../../components/LayoutComponent";
+import { getMemberById, updateMember } from "../../../services/memberService";
+import { getTeams } from "../../../services/teamService";
+import type { Team } from "../../../types/admin";
 
 const EditMemberPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [member, setMember] = useState<any>(undefined);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -18,24 +21,45 @@ const EditMemberPage = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      const foundMember = getMemberById(id);
-      setMember(foundMember);
+    loadTeams();
+  }, []);
 
-      if (foundMember) {
-        setFormData({
-          email: foundMember.email,
-          curso: foundMember.curso,
-          equipe: foundMember.equipe,
-          cargo: foundMember.cargo,
-          role: foundMember.role,
-          newPassword: "",
-        });
-      }
+  const loadTeams = async () => {
+    try {
+      const data = await getTeams();
+      setTeams(data.filter((team) => team.status === "ativa"));
+    } catch (error) {
+      console.error("Erro ao carregar equipes:", error);
     }
+  };
+
+  useEffect(() => {
+    const fetchMember = async () => {
+      if (id) {
+        try {
+          const foundMember = await getMemberById(id);
+          setMember(foundMember);
+
+          if (foundMember) {
+            setFormData({
+              email: foundMember.email,
+              curso: foundMember.curso,
+              equipe: foundMember.equipe,
+              cargo: foundMember.cargo,
+              role: foundMember.role,
+              newPassword: "",
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao carregar membro:", error);
+          alert("Erro ao carregar dados do membro");
+        }
+      }
+    };
+    fetchMember();
   }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
 
@@ -52,9 +76,14 @@ const EditMemberPage = () => {
       updateData.password = formData.newPassword;
     }
 
-    updateMember(id, updateData);
-    alert("Membro e dados de acesso atualizados com sucesso!");
-    navigate(`/members/${id}`);
+    try {
+      await updateMember(id, updateData);
+      alert("Membro e dados de acesso atualizados com sucesso!");
+      navigate(`/members/${id}`);
+    } catch (error) {
+      console.error("Erro ao atualizar membro:", error);
+      alert("Erro ao atualizar membro");
+    }
   };
 
   const handleChange = (
@@ -175,21 +204,21 @@ const EditMemberPage = () => {
                 htmlFor="equipe"
                 className="block text-sm font-medium mb-2"
               >
-                Equipe *
+                Equipe
               </label>
               <select
                 id="equipe"
                 name="equipe"
-                required
                 value={formData.equipe}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="DevU">DevU</option>
-                <option value="Byron">Byron</option>
-                <option value="Exmachima">Exmachima</option>
-                <option value="Asimov">Asimov</option>
-                <option value="BlackBee">BlackBee</option>
+                <option value="">Sem equipe</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.nome}
+                  </option>
+                ))}
               </select>
               {formData.equipe !== member.equipe && (
                 <p className="text-xs text-yellow-600 mt-1">

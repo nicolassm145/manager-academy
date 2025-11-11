@@ -15,30 +15,43 @@ const EditTeamPage = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      const foundTeam = getTeamById(id);
-      setTeam(foundTeam);
+    const fetchTeam = async () => {
+      if (id) {
+        try {
+          const foundTeam = await getTeamById(id);
+          setTeam(foundTeam);
 
-      if (foundTeam) {
-        setFormData({
-          nome: foundTeam.nome,
-          descricao: foundTeam.descricao,
-          status: foundTeam.status,
-        });
+          if (foundTeam) {
+            setFormData({
+              nome: foundTeam.nome,
+              descricao: foundTeam.descricao,
+              status: foundTeam.status,
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao carregar equipe:", error);
+          alert("Erro ao carregar dados da equipe");
+        }
       }
-    }
+    };
+    fetchTeam();
   }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (id) {
       const teamData = {
         ...formData,
         status: formData.status as "ativa" | "inativa",
       };
-      updateTeam(id, teamData);
-      alert("Equipe atualizada com sucesso!");
-      navigate(`/admin/teams/${id}`);
+      try {
+        await updateTeam(id, teamData);
+        alert("Equipe atualizada com sucesso!");
+        navigate(`/admin/teams/${id}`);
+      } catch (error) {
+        console.error("Erro ao atualizar equipe:", error);
+        alert("Erro ao atualizar equipe");
+      }
     }
   };
 

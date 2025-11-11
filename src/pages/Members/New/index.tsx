@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Layout } from "../../components/LayoutComponent";
-import { createMember } from "../../services/memberService";
+import { Layout } from "../../../components/LayoutComponent";
+import { createMember } from "../../../services/memberService";
+import { getTeams } from "../../../services/teamService";
+import type { Team } from "../../../types/admin";
 
 const NewMemberPage = () => {
   const navigate = useNavigate();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [formData, setFormData] = useState({
     nome: "",
     matricula: "",
@@ -18,7 +21,20 @@ const NewMemberPage = () => {
     role: "membro" as "admin" | "lider" | "professor" | "diretor" | "membro",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  const loadTeams = async () => {
+    try {
+      const data = await getTeams();
+      setTeams(data.filter((team) => team.status === "ativa"));
+    } catch (error) {
+      console.error("Erro ao carregar equipes:", error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -26,7 +42,7 @@ const NewMemberPage = () => {
         ...formData,
         dataCriacao: new Date().toISOString(),
       };
-      createMember(memberData);
+      await createMember(memberData);
       alert("Membro e conta de acesso cadastrados com sucesso!");
       navigate("/members");
     } catch (error) {
@@ -154,22 +170,21 @@ const NewMemberPage = () => {
                 htmlFor="equipe"
                 className="block text-sm font-medium mb-2"
               >
-                Equipe *
+                Equipe
               </label>
               <select
                 id="equipe"
                 name="equipe"
-                required
                 value={formData.equipe}
                 onChange={handleChange}
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">Selecione uma equipe</option>
-                <option value="DevU">DevU</option>
-                <option value="Byron">Byron</option>
-                <option value="Exmachima">Exmachima</option>
-                <option value="Asimov">Asimov</option>
-                <option value="BlackBee">BlackBee</option>
+                <option value="">Sem equipe</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.nome}
+                  </option>
+                ))}
               </select>
             </div>
 

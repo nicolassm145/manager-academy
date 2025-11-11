@@ -10,11 +10,16 @@ const NewTeamPage = () => {
     descricao: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createTeam({ ...formData, status: "ativa" });
-    alert("Equipe criada com sucesso!");
-    navigate("/admin/teams");
+    try {
+      await createTeam({ ...formData, status: "ativa" });
+      alert("Equipe criada com sucesso!");
+      navigate("/admin/teams");
+    } catch (error) {
+      console.error("Erro ao criar equipe:", error);
+      alert("Erro ao criar equipe");
+    }
   };
 
   const handleChange = (

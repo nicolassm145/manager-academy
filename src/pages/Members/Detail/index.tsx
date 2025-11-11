@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Layout } from "../../components/LayoutComponent";
-import { getMemberById, deleteMember } from "../../services/memberService";
+import { Layout } from "../../../components/LayoutComponent";
+import { getMemberById, deleteMember } from "../../../services/memberService";
+import type { Member } from "../../../types/member";
 import {
   PencilIcon,
   TrashIcon,
@@ -10,7 +12,34 @@ import {
 const MemberDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const member = id ? getMemberById(id) : undefined;
+  const [member, setMember] = useState<Member | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMember = async () => {
+      if (id) {
+        try {
+          const data = await getMemberById(id);
+          setMember(data);
+        } catch (error) {
+          console.error("Erro ao carregar membro:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchMember();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <p className="opacity-60">Carregando...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!member) {
     return (
@@ -25,11 +54,16 @@ const MemberDetailPage = () => {
     );
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (id && confirm("Tem certeza que deseja excluir este membro?")) {
-      deleteMember(id);
-      alert("Membro excluído com sucesso!");
-      navigate("/members");
+      try {
+        await deleteMember(id);
+        alert("Membro excluído com sucesso!");
+        navigate("/members");
+      } catch (error) {
+        console.error("Erro ao excluir membro:", error);
+        alert("Erro ao excluir membro");
+      }
     }
   };
 
