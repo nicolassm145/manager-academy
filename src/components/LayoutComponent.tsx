@@ -9,6 +9,8 @@ import {
   XMarkIcon,
   QueueListIcon,
   ArrowRightStartOnRectangleIcon,
+  BanknotesIcon,
+  ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";
@@ -38,6 +40,18 @@ const allMenuItems: MenuItem[] = [
     icon: QueueListIcon,
     permission: "canViewTeams",
   },
+  // {
+  //   name: "Financeiro",
+  //   path: "/finance",
+  //   icon: BanknotesIcon,
+  //   permission: "canViewFinance",
+  // },
+  // {
+  //   name: "Inventário",
+  //   path: "/inventory",
+  //   icon: ArchiveBoxIcon,
+  //   permission: "canViewInventory",
+  // },
   { name: "Configurações", path: "/settings", icon: Cog8ToothIcon },
 ];
 

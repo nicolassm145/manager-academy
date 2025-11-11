@@ -17,9 +17,17 @@ export const PERMISSIONS = {
     canCreateTeam: true,
     canEditTeam: true,
     canDeleteTeam: true,
+    canViewFinance: true,
+    canCreateFinance: true,
+    canEditFinance: true,
+    canDeleteFinance: true,
+    canViewInventory: true,
+    canCreateInventory: true,
+    canEditInventory: true,
+    canDeleteInventory: true,
   },
 
-  // Líder pode gerenciar membros e ver equipes
+  // Líder pode gerenciar membros, finanças e inventário da sua equipe
   lider: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -34,6 +42,14 @@ export const PERMISSIONS = {
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,
+    canViewFinance: true,
+    canCreateFinance: true,
+    canEditFinance: true,
+    canDeleteFinance: true,
+    canViewInventory: true,
+    canCreateInventory: true,
+    canEditInventory: true,
+    canDeleteInventory: true,
   },
 
   // Professor pode ver e editar membros
@@ -51,9 +67,17 @@ export const PERMISSIONS = {
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,
+    canViewFinance: false,
+    canCreateFinance: false,
+    canEditFinance: false,
+    canDeleteFinance: false,
+    canViewInventory: false,
+    canCreateInventory: false,
+    canEditInventory: false,
+    canDeleteInventory: false,
   },
 
-  // Diretor pode ver relatórios e membros
+  // Diretor pode ver finanças
   diretor: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -68,9 +92,17 @@ export const PERMISSIONS = {
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,
+    canViewFinance: true,
+    canCreateFinance: false,
+    canEditFinance: false,
+    canDeleteFinance: false,
+    canViewInventory: false,
+    canCreateInventory: false,
+    canEditInventory: false,
+    canDeleteInventory: false,
   },
 
-  // Membro só vê dashboard
+  // Membro pode ver inventário da sua equipe
   membro: {
     canViewDashboard: true,
     canViewMembers: false,
@@ -85,11 +117,18 @@ export const PERMISSIONS = {
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,
+    canViewFinance: false,
+    canCreateFinance: false,
+    canEditFinance: false,
+    canDeleteFinance: false,
+    canViewInventory: true,
+    canCreateInventory: false,
+    canEditInventory: false,
+    canDeleteInventory: false,
   },
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS.admin;
-
 
 export function hasPermission(role: UserRole, permission: Permission): boolean {
   return PERMISSIONS[role][permission];
