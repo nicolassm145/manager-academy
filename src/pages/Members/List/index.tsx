@@ -31,7 +31,6 @@ const MembersPage = () => {
   const { can } = usePermissions();
   const { user } = useAuth();
 
-  // Função helper para exibir o nome do role
   const getRoleName = (role: string) => {
     const roleNames: Record<string, string> = {
       admin: "Admin",
@@ -43,7 +42,6 @@ const MembersPage = () => {
     return roleNames[role] || role;
   };
 
-  // Função helper para cor do badge de role
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
       admin: "bg-purple-100 text-purple-800",
@@ -55,7 +53,6 @@ const MembersPage = () => {
     return colors[role] || "bg-gray-100 text-gray-800";
   };
 
-  // Carrega membros da API
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -69,7 +66,6 @@ const MembersPage = () => {
     fetchMembers();
   }, []);
 
-  // Função para deletar membro
   const handleDelete = async (id: string, nome: string) => {
     if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
       try {
@@ -84,9 +80,11 @@ const MembersPage = () => {
     }
   };
 
-  // Filtros (incluindo filtro de equipe para líder)
   const filteredMembers = members.filter((member) => {
-    // Se for líder, só mostra membros da sua equipe
+    if (member.status === "inativo") {
+      return false;
+    }
+
     if (
       user?.role === "lider" &&
       user?.equipe &&
@@ -103,7 +101,6 @@ const MembersPage = () => {
     return matchSearch && matchEquipe;
   });
 
-  // Lista de equipes únicas
   const equipes = Array.from(new Set(members.map((m) => m.equipe)));
 
   return (
@@ -148,7 +145,6 @@ const MembersPage = () => {
           </Card>
         ) : (
           <>
-            {/* Mobile Cards (visível só em mobile) */}
             <div className="block lg:hidden space-y-3">
               {filteredMembers.map((member) => (
                 <MobileCard key={member.id}>
@@ -217,7 +213,6 @@ const MembersPage = () => {
               ))}
             </div>
 
-            {/* Tabela Desktop (oculta em mobile) */}
             <div className="hidden lg:block">
               <Table>
                 <TableHeader>
@@ -226,8 +221,7 @@ const MembersPage = () => {
                   <TableHeadCell>Equipe</TableHeadCell>
                   <TableHeadCell>Cargo</TableHeadCell>
                   <TableHeadCell>Perfil</TableHeadCell>
-                  <TableHeadCell>Status</TableHeadCell>
-                  <TableHeadCell className="text-right">Ações</TableHeadCell>
+                  <TableHeadCell className="text-center">Ações</TableHeadCell>
                 </TableHeader>
                 <TableBody>
                   {filteredMembers.map((member) => (
@@ -261,11 +255,8 @@ const MembersPage = () => {
                           {getRoleName(member.role)}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <StatusBadge status={member.status} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-2">
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <Link
                             to={`/members/${member.id}`}
                             className="btn btn-primary btn-xs"

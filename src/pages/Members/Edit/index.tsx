@@ -4,10 +4,13 @@ import { Layout } from "../../../components/LayoutComponent";
 import { getMemberById, updateMember } from "../../../services/memberService";
 import { getTeams } from "../../../services/teamService";
 import type { Team } from "../../../types/admin";
+import { COURSES } from "../../../constants/courses";
+import { useAuth } from "../../../context/AuthContext";
 
 const EditMemberPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [member, setMember] = useState<any>(undefined);
   const [teams, setTeams] = useState<Team[]>([]);
 
@@ -17,7 +20,7 @@ const EditMemberPage = () => {
     equipe: "",
     cargo: "",
     role: "membro" as "admin" | "lider" | "professor" | "diretor" | "membro",
-    newPassword: "", // Opcional - só preenche se quiser trocar
+    newPassword: "",
   });
 
   useEffect(() => {
@@ -68,12 +71,16 @@ const EditMemberPage = () => {
       curso: formData.curso,
       equipe: formData.equipe,
       cargo: formData.cargo,
-      role: formData.role,
     };
 
-    // Só atualiza senha se preencheu o campo
-    if (formData.newPassword && formData.newPassword.length >= 6) {
-      updateData.password = formData.newPassword;
+    // Apenas admin pode alterar senha e perfil
+    if (user?.role === "admin") {
+      if (formData.role) {
+        updateData.role = formData.role;
+      }
+      if (formData.newPassword && formData.newPassword.length >= 6) {
+        updateData.password = formData.newPassword;
+      }
     }
 
     try {
@@ -108,7 +115,6 @@ const EditMemberPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Editar Membro</h1>
           <p className="text-sm sm:text-base opacity-60 mt-1">
@@ -116,20 +122,10 @@ const EditMemberPage = () => {
           </p>
         </div>
 
-        {/* Aviso */}
-        <div className="bg-yellow-50 border rounded-lg p-3 sm:p-4">
-          <p className="text-xs sm:text-sm text-yellow-800">
-            <strong>Atenção:</strong> Nome e Matrícula não podem ser editados
-            conforme requisito RF03.
-          </p>
-        </div>
-
-        {/* Formulário */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border space-y-4 sm:space-y-6"
         >
-          {/* Campos não editáveis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pb-4 sm:pb-6 border-b">
             <div>
               <label className="block text-sm font-medium opacity-60 mb-2">
@@ -156,7 +152,6 @@ const EditMemberPage = () => {
             </div>
           </div>
 
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email *
@@ -172,7 +167,6 @@ const EditMemberPage = () => {
             />
           </div>
 
-          {/* Curso */}
           <div>
             <label htmlFor="curso" className="block text-sm font-medium mb-2">
               Curso *
@@ -185,19 +179,15 @@ const EditMemberPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="Engenharia Mecânica">Engenharia Mecânica</option>
-              <option value="Engenharia Elétrica">Engenharia Elétrica</option>
-              <option value="Engenharia Aeroespacial">
-                Engenharia Aeroespacial
-              </option>
-              <option value="Engenharia de Produção">
-                Engenharia de Produção
-              </option>
-              <option value="Engenharia Civil">Engenharia Civil</option>
+              <option value="">Selecione um curso</option>
+              {COURSES.map((curso) => (
+                <option key={curso} value={curso}>
+                  {curso}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Equipe e Cargo */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label
@@ -246,63 +236,94 @@ const EditMemberPage = () => {
             </div>
           </div>
 
-          {/* Divisor - Dados de Acesso */}
           <div className="border-t pt-4 sm:pt-6">
             <h3 className="text-lg font-semibold mb-4">
               Dados de Acesso ao Sistema
             </h3>
           </div>
 
-          {/* Perfil de Acesso */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium mb-2">
-              Perfil de Acesso *
-            </label>
-            <select
-              id="role"
-              name="role"
-              required
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="membro">Membro - Acesso básico</option>
-              <option value="lider">Líder - Gerencia sua equipe</option>
-              <option value="admin">Administrador - Acesso total</option>
-              <option value="professor">
-                Professor - Consulta e orientação
-              </option>
-              <option value="diretor">Diretor - Gerencia finanças</option>
-            </select>
-            <p className="text-xs opacity-60 mt-1">
-              Define as permissões no sistema
-            </p>
-          </div>
+          {/* Perfil de Acesso - apenas admin pode editar */}
+          {user?.role === "admin" ? (
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium mb-2">
+                Perfil de Acesso *
+              </label>
+              <select
+                id="role"
+                name="role"
+                required
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="membro">Membro - Acesso básico</option>
+                <option value="lider">Líder - Gerencia sua equipe</option>
+                <option value="admin">Administrador - Acesso total</option>
+                <option value="professor">
+                  Professor - Consulta e orientação
+                </option>
+                <option value="diretor">Diretor - Gerencia finanças</option>
+              </select>
+              <p className="text-xs opacity-60 mt-1">
+                Define as permissões no sistema
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Perfil de Acesso
+              </label>
+              <div className="px-4 py-3 border rounded-lg bg-gray-50">
+                <strong>
+                  {formData.role === "admin" && "Administrador - Acesso total"}
+                  {formData.role === "lider" && "Líder - Gerencia sua equipe"}
+                  {formData.role === "membro" && "Membro - Acesso básico"}
+                  {formData.role === "professor" &&
+                    "Professor - Consulta e orientação"}
+                  {formData.role === "diretor" && "Diretor - Gerencia finanças"}
+                </strong>
+              </div>
+              <p className="text-xs opacity-60 mt-1">
+                Apenas administradores podem alterar o perfil de acesso
+              </p>
+            </div>
+          )}
 
-          {/* Nova Senha (opcional) */}
-          <div>
-            <label
-              htmlFor="newPassword"
-              className="block text-sm font-medium mb-2"
-            >
-              Nova Senha (opcional)
-            </label>
-            <input
-              id="newPassword"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleChange}
-              minLength={6}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Deixe em branco para manter a atual"
-            />
-            <p className="text-xs opacity-60 mt-1">
-              Preencha apenas se quiser alterar a senha de login
-            </p>
-          </div>
+          {/* Senha - apenas admin pode editar */}
+          {user?.role === "admin" ? (
+            <div>
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium mb-2"
+              >
+                Nova Senha (opcional)
+              </label>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={handleChange}
+                minLength={6}
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Deixe em branco para manter a atual"
+              />
+              <p className="text-xs opacity-60 mt-1">
+                Preencha apenas se quiser alterar a senha de login
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium mb-2">Senha</label>
+              <div className="px-4 py-3 border rounded-lg bg-gray-50">
+                ••••••••
+              </div>
+              <p className="text-xs opacity-60 mt-1">
+                Apenas administradores podem alterar a senha
+              </p>
+            </div>
+          )}
 
-          {/* Botões */}
           <div className="flex gap-4 pt-4">
             <button type="submit" className="btn btn-primary flex-1">
               Salvar Alterações

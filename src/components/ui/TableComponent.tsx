@@ -9,7 +9,7 @@ export function Table({ children, className = "" }: TableProps) {
   return (
     <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-0">
       <div className="inline-block min-w-full align-middle">
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+        <div className="overflow-hidden shadow border-1 border-black sm:rounded-lg">
           <table className={`min-w-full divide-y divide-gray-300 ${className}`}>
             {children}
           </table>
@@ -43,7 +43,9 @@ export function TableHeadCell({
   return (
     <th
       scope="col"
-      className={`px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 ${className}`}
+      className={`px-3 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-semibold text-gray-900 ${
+        className || "text-left"
+      }`}
     >
       {children}
     </th>

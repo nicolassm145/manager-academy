@@ -47,7 +47,7 @@ const MemberDetailPage = () => {
         <div className="text-center py-12">
           <p className="opacity-60">Membro não encontrado</p>
           <Link to="/members" className="btn btn-link mt-4">
-            Voltar para listagem
+            Voltar
           </Link>
         </div>
       </Layout>
@@ -70,7 +70,6 @@ const MemberDetailPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header com ações */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <button
             onClick={() => navigate("/members")}
@@ -97,9 +96,7 @@ const MemberDetailPage = () => {
           </div>
         </div>
 
-        {/* Card do Membro */}
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border">
-          {/* Header do Card */}
           <div className="flex items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-base-200 flex items-center justify-center mr-4 sm:mr-6 flex-shrink-0">
               <span className="text-2xl sm:text-3xl font-bold">
@@ -125,7 +122,6 @@ const MemberDetailPage = () => {
             </div>
           </div>
 
-          {/* Informações */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm opacity-60 mb-1">Matrícula</p>
@@ -156,7 +152,6 @@ const MemberDetailPage = () => {
           </div>
         </div>
 
-        {/* Dados de Acesso */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
           <h2 className="text-xl font-bold mb-4">Dados de Acesso ao Sistema</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -210,27 +205,6 @@ const MemberDetailPage = () => {
                   {member.status === "ativo" ? "Ativa" : "Inativa"}
                 </span>
               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Histórico (mockado) */}
-        <div className="bg-white rounded-xl shadow-md p-6 border">
-          <h2 className="text-xl font-bold mb-4">Histórico de Mudanças</h2>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 pb-4 border-b">
-              <div className="w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
-              <div>
-                <p className="text-sm font-medium">
-                  Cadastro inicial - {member.equipe}
-                </p>
-                <p className="text-xs opacity-60 mt-1">
-                  {new Date(member.dataInicio).toLocaleDateString("pt-BR")}
-                </p>
-              </div>
-            </div>
-            <div className="text-center text-sm opacity-60 py-4">
-              Nenhuma mudança de equipe registrada
             </div>
           </div>
         </div>

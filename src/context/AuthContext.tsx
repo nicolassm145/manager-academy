@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { API_BASE_URL } from "../config/api";
 import type { LoginResponse } from "../types/api";
-import { apiUserToMember } from "../types/mappers";
 import { mapTipoAcessoToRole } from "../types/mappers";
 
 export type UserRole = "admin" | "lider" | "professor" | "diretor" | "membro";
@@ -30,25 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+      const userDataStr = localStorage.getItem("user");
 
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else {
-            localStorage.removeItem("token");
-          }
+      if (token && userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          setUser(userData);
         } catch (error) {
-          console.error("Erro ao verificar autenticação:", error);
+          console.error("Erro ao recuperar dados do usuário:", error);
           localStorage.removeItem("token");
+          localStorage.removeItem("user");
         }
       }
       setIsLoading(false);
@@ -95,6 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         equipe: apiUser.equipeId?.toString(),
       };
 
+      // Salva os dados do usuário no localStorage também
+      localStorage.setItem("user", JSON.stringify(userData));
+
       console.log("✅ Usuário autenticado:", userData);
 
       setUser(userData);
@@ -106,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

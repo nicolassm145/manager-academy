@@ -20,7 +20,7 @@ export function CardComponent({
 }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-xl shadow-md border ${paddingClasses[padding]} ${className}`}
+      className={`bg-base-100 rounded-xl shadow-md border ${paddingClasses[padding]} ${className}`}
     >
       {children}
     </div>

@@ -4,9 +4,12 @@ import { Layout } from "../../../components/LayoutComponent";
 import { createMember } from "../../../services/memberService";
 import { getTeams } from "../../../services/teamService";
 import type { Team } from "../../../types/admin";
+import { COURSES } from "../../../constants/courses";
+import { useAuth } from "../../../context/AuthContext";
 
 const NewMemberPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [formData, setFormData] = useState({
     nome: "",
@@ -17,7 +20,7 @@ const NewMemberPage = () => {
     cargo: "",
     dataInicio: "",
     status: "ativo" as "ativo" | "inativo",
-    password: "",
+    password: "123456", // Senha padrão
     role: "membro" as "admin" | "lider" | "professor" | "diretor" | "membro",
   });
 
@@ -151,15 +154,11 @@ const NewMemberPage = () => {
               className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Selecione um curso</option>
-              <option value="Engenharia Mecânica">Engenharia Mecânica</option>
-              <option value="Engenharia Elétrica">Engenharia Elétrica</option>
-              <option value="Engenharia Aeroespacial">
-                Engenharia Aeroespacial
-              </option>
-              <option value="Engenharia de Produção">
-                Engenharia de Produção
-              </option>
-              <option value="Engenharia Civil">Engenharia Civil</option>
+              {COURSES.map((curso) => (
+                <option key={curso} value={curso}>
+                  {curso}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -236,53 +235,92 @@ const NewMemberPage = () => {
 
           {/* Senha e Perfil */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium mb-2"
-              >
-                Senha *
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                minLength={6}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Mínimo 6 caracteres"
-              />
-              <p className="text-xs opacity-60 mt-1">
-                Esta será a senha de login do membro
-              </p>
-            </div>
+            {/* Senha - apenas admin pode editar */}
+            {user?.role === "admin" && (
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-2"
+                >
+                  Senha *
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  minLength={6}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <p className="text-xs opacity-60 mt-1">
+                  Esta será a senha de login do membro
+                </p>
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium mb-2">
-                Perfil de Acesso *
-              </label>
-              <select
-                id="role"
-                name="role"
-                required
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="membro">Membro - Acesso básico</option>
-                <option value="lider">Líder - Gerencia sua equipe</option>
-                <option value="admin">Administrador - Acesso total</option>
-                <option value="professor">
-                  Professor - Consulta e orientação
-                </option>
-                <option value="diretor">Diretor - Gerencia finanças</option>
-              </select>
-              <p className="text-xs opacity-60 mt-1">
-                Define as permissões no sistema
-              </p>
-            </div>
+            {/* Informação de senha padrão para líder */}
+            {user?.role === "lider" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Senha de Acesso
+                </label>
+                <div className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg bg-gray-50">
+                  Senha padrão: <strong>123456</strong>
+                </div>
+                <p className="text-xs opacity-60 mt-1">
+                  O membro poderá alterar a senha após o primeiro login
+                </p>
+              </div>
+            )}
+
+            {/* Perfil - apenas admin pode selecionar */}
+            {user?.role === "admin" && (
+              <div>
+                <label
+                  htmlFor="role"
+                  className="block text-sm font-medium mb-2"
+                >
+                  Perfil de Acesso *
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  required
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="membro">Membro - Acesso básico</option>
+                  <option value="lider">Líder - Gerencia sua equipe</option>
+                  <option value="admin">Administrador - Acesso total</option>
+                  <option value="professor">
+                    Professor - Consulta e orientação
+                  </option>
+                  <option value="diretor">Diretor - Gerencia finanças</option>
+                </select>
+                <p className="text-xs opacity-60 mt-1">
+                  Define as permissões no sistema
+                </p>
+              </div>
+            )}
+
+            {/* Informação de perfil fixo para líder */}
+            {user?.role === "lider" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Perfil de Acesso
+                </label>
+                <div className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg bg-gray-50">
+                  <strong>Membro</strong> - Acesso básico
+                </div>
+                <p className="text-xs opacity-60 mt-1">
+                  Líderes só podem criar membros com perfil básico
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Botões */}
