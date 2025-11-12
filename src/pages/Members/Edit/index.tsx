@@ -103,6 +103,25 @@ const EditMemberPage = () => {
     });
   };
 
+  // Função para obter o label correto do campo matrícula baseado no role
+  const getMatriculaLabel = () => {
+    if (!member) return "Matrícula";
+    
+    switch (member.role) {
+      case "professor":
+        return "Registro Profissional (SIAPE)";
+      case "lider":
+      case "membro":
+        return "Matrícula";
+      case "admin":
+        return "Registro";
+      case "diretor":
+        return "Registro Profissional";
+      default:
+        return "Matrícula";
+    }
+  };
+
   if (!member) {
     return (
       <Layout>
@@ -142,7 +161,7 @@ const EditMemberPage = () => {
 
             <div>
               <label className="block text-sm font-medium opacity-60 mb-2">
-                Matrícula (não editável)
+                {getMatriculaLabel()} (não editável)
               </label>
               <input
                 type="text"
@@ -244,6 +263,7 @@ const EditMemberPage = () => {
                 <option value="Líder">Líder</option>
                 <option value="Vice-Líder">Vice-Líder</option>
                 <option value="Membro">Membro</option>
+                <option value="Professor Orientador">Professor Orientador</option>
               </select>
             </div>
           </div>

@@ -73,6 +73,35 @@ const NewMemberPage = () => {
     });
   };
 
+  // Função para obter o label correto do campo matrícula baseado no role
+  const getMatriculaLabel = () => {
+    switch (formData.role) {
+      case "professor":
+        return "Registro Profissional (SIAPE)";
+      case "lider":
+      case "membro":
+        return "Matrícula";
+      case "admin":
+        return "Registro";
+      case "diretor":
+        return "Registro Profissional";
+      default:
+        return "Matrícula";
+    }
+  };
+
+  const getMatriculaPlaceholder = () => {
+    switch (formData.role) {
+      case "professor":
+        return "Ex: 1234567";
+      case "lider":
+      case "membro":
+        return "Ex: 2021000001";
+      default:
+        return "Digite o registro";
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
@@ -113,7 +142,7 @@ const NewMemberPage = () => {
                 htmlFor="matricula"
                 className="block text-sm font-medium mb-2"
               >
-                Matrícula *
+                {getMatriculaLabel()} *
               </label>
               <input
                 id="matricula"
@@ -122,14 +151,18 @@ const NewMemberPage = () => {
                 required
                 value={formData.matricula}
                 onChange={handleChange}
-                maxLength={10}
-                pattern="\d{10}"
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Ex: 2021000001"
+                placeholder={getMatriculaPlaceholder()}
               />
-              <p className="text-xs opacity-60 mt-1">
-                10 dígitos: AAAA (ano) + 6 dígitos sequenciais
-              </p>
+              {formData.role === "membro" || formData.role === "lider" ? (
+                <p className="text-xs opacity-60 mt-1">
+                  10 dígitos: AAAA (ano) + 6 dígitos sequenciais
+                </p>
+              ) : formData.role === "professor" ? (
+                <p className="text-xs opacity-60 mt-1">
+                  SIAPE: 7 dígitos do registro profissional
+                </p>
+              ) : null}
             </div>
 
             <div>
@@ -221,6 +254,7 @@ const NewMemberPage = () => {
                 <option value="Líder">Líder</option>
                 <option value="Vice-Líder">Vice-Líder</option>
                 <option value="Membro">Membro</option>
+                <option value="Professor Orientador">Professor Orientador</option>
               </select>
             </div>
           </div>

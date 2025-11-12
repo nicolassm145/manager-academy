@@ -49,6 +49,25 @@ const MemberDetailPage = () => {
     return team?.nome || equipeId;
   };
 
+  // Função para obter o label correto do campo matrícula baseado no role
+  const getMatriculaLabel = () => {
+    if (!member) return "Matrícula";
+    
+    switch (member.role) {
+      case "professor":
+        return "Registro Profissional (SIAPE)";
+      case "lider":
+      case "membro":
+        return "Matrícula";
+      case "admin":
+        return "Registro";
+      case "diretor":
+        return "Registro Profissional";
+      default:
+        return "Matrícula";
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -148,7 +167,7 @@ const MemberDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm opacity-60 mb-1">Matrícula</p>
+              <p className="text-sm opacity-60 mb-1">{getMatriculaLabel()}</p>
               <p className="text-lg font-semibold">{member.matricula}</p>
             </div>
 

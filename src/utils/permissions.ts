@@ -52,13 +52,13 @@ export const PERMISSIONS = {
     canDeleteInventory: true,
   },
 
-  // Professor pode ver e editar membros
+  // Professor tem as mesmas permissões que Líder
   professor: {
     canViewDashboard: true,
     canViewMembers: true,
-    canCreateMember: false,
+    canCreateMember: true,
     canEditMember: true,
-    canDeleteMember: false,
+    canDeleteMember: true,
     canViewUsers: false,
     canCreateUser: false,
     canEditUser: false,
@@ -67,14 +67,14 @@ export const PERMISSIONS = {
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,
-    canViewFinance: false,
-    canCreateFinance: false,
-    canEditFinance: false,
-    canDeleteFinance: false,
-    canViewInventory: false,
-    canCreateInventory: false,
-    canEditInventory: false,
-    canDeleteInventory: false,
+    canViewFinance: true,
+    canCreateFinance: true,
+    canEditFinance: true,
+    canDeleteFinance: true,
+    canViewInventory: true,
+    canCreateInventory: true,
+    canEditInventory: true,
+    canDeleteInventory: true,
   },
 
   // Diretor pode ver finanças
