@@ -42,7 +42,6 @@ const NewMemberPage = () => {
       setTeams(data); // Backend retorna todas as equipes disponíveis
     } catch (error) {
       console.error("Erro ao carregar equipes:", error);
-      alert("Erro ao carregar equipes. Tente novamente.");
     }
   };
 
@@ -55,12 +54,9 @@ const NewMemberPage = () => {
         dataCriacao: new Date().toISOString(),
       };
       await createMember(memberData);
-      alert("Membro e conta de acesso cadastrados com sucesso!");
       navigate("/members");
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Erro ao cadastrar membro"
-      );
+      console.error("Erro ao cadastrar membro:", error);
     }
   };
 

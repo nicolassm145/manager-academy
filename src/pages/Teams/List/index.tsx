@@ -25,7 +25,6 @@ const AdminTeamsPage = () => {
         setTeams(data);
       } catch (error) {
         console.error("Erro ao carregar equipes:", error);
-        alert("Erro ao carregar equipes");
       }
     };
     fetchTeams();
@@ -37,10 +36,8 @@ const AdminTeamsPage = () => {
         await deleteTeam(id.toString());
         const data = await getTeams(user?.role, user?.equipe);
         setTeams(data);
-        alert("Equipe excluída com sucesso!");
       } catch (error) {
         console.error("Erro ao excluir equipe:", error);
-        alert("Erro ao excluir equipe");
       }
     }
   };

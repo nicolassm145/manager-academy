@@ -20,15 +20,9 @@ const NewTeamPage = () => {
         descricao: formData.descricao,
         criadoEm: formData.criadoEm,
       });
-      alert("Equipe criada com sucesso!");
       navigate("/admin/teams");
     } catch (error) {
       console.error("Erro ao criar equipe:", error);
-      alert(
-        `Erro ao criar equipe: ${
-          error instanceof Error ? error.message : "Erro desconhecido"
-        }`
-      );
     }
   };
 
