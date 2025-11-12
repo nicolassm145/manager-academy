@@ -1,37 +1,30 @@
 [
   {
     "id": "1",
-    "nome": "DevU",
-    "descricao": "Equipe de DevU",
+    "nome": "Equipe Alpha",
+    "descricao": "Equipe focada em desenvolvimento web e aplicações mobile",
     "status": "ativa",
-    "dataCriacao": "2020-03-01"
+    "dataCriacao": "2024-01-15"
   },
   {
     "id": "2",
-    "nome": "Byron",
-    "descricao": "Equipe Byron",
+    "nome": "Equipe Beta",
+    "descricao": "Equipe especializada em inteligência artificial e machine learning",
     "status": "ativa",
-    "dataCriacao": "2019-08-15"
+    "dataCriacao": "2024-02-20"
   },
   {
     "id": "3",
-    "nome": "Exmachima",
-    "descricao": "Equipe Exmachima",
+    "nome": "Equipe Gamma",
+    "descricao": "Equipe de infraestrutura e DevOps",
     "status": "ativa",
-    "dataCriacao": "2021-01-10"
+    "dataCriacao": "2024-03-10"
   },
   {
     "id": "4",
-    "nome": "Asimov",
-    "descricao": "Equipe Asimov",
-    "status": "ativa",
-    "dataCriacao": "2022-05-20"
-  },
-  {
-    "id": "5",
-    "nome": "BlackBee",
-    "descricao": "Equipe BlackBee",
-    "status": "ativa",
-    "dataCriacao": "2023-02-15"
+    "nome": "Equipe Delta",
+    "descricao": "Equipe de design e experiência do usuário",
+    "status": "inativa",
+    "dataCriacao": "2023-11-05"
   }
 ]

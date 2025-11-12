@@ -1,82 +1,100 @@
 import type { SystemUser } from "../types/admin";
-import usersData from "../data/users.json";
+import { API_BASE_URL, getAuthHeaders, handleApiError } from "../config/api";
 
-const STORAGE_KEY = "manager_academy_users";
+// Funções para gerenciar usuários do sistema (administração)
+export const getUsers = async (skip = 0, limit = 50): Promise<SystemUser[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/users/listarTudo?skip=${skip}&limit=${limit}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+  await handleApiError(response);
+  return response.json();
+};
 
-const initUsers = (): SystemUser[] => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(usersData));
-    return usersData as SystemUser[];
+export const getUserById = async (
+  id: string
+): Promise<SystemUser | undefined> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/listar/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    await handleApiError(response);
+    return response.json();
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    return undefined;
   }
-  return JSON.parse(stored) as SystemUser[];
 };
 
-export const getUsers = (): SystemUser[] => {
-  return initUsers();
+export const getUserByEmail = async (
+  email: string
+): Promise<SystemUser | undefined> => {
+  try {
+    // Buscar todos e filtrar por email (já que não há endpoint específico)
+    const users = await getUsers();
+    return users.find((u) => u.email === email);
+  } catch (error) {
+    console.error("Erro ao buscar usuário por email:", error);
+    return undefined;
+  }
 };
 
-export const getUserById = (id: string): SystemUser | undefined => {
-  const users = getUsers();
-  return users.find((u) => u.id === id);
-};
-
-export const getUserByEmail = (email: string): SystemUser | undefined => {
-  const users = getUsers();
-  return users.find((u) => u.email === email);
-};
-
-export const createUser = (
+export const createUser = async (
   user: Omit<SystemUser, "id" | "dataCriacao">
-): SystemUser => {
-  const users = getUsers();
-  const newUser: SystemUser = {
-    ...user,
-    id: Date.now().toString(),
-    dataCriacao: new Date().toISOString().split("T")[0],
-  };
-  users.push(newUser);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-  return newUser;
+): Promise<SystemUser> => {
+  const response = await fetch(`${API_BASE_URL}/users/criar`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(user),
+  });
+  await handleApiError(response);
+  return response.json();
 };
 
-export const updateUser = (
+export const updateUser = async (
   id: string,
   data: Partial<SystemUser>
-): SystemUser => {
-  const users = getUsers();
-  const index = users.findIndex((u) => u.id === id);
-  if (index === -1) throw new Error("Usuário não encontrado");
-
-  users[index] = { ...users[index], ...data };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-  return users[index];
+): Promise<SystemUser> => {
+  const response = await fetch(`${API_BASE_URL}/users/atualizar/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  await handleApiError(response);
+  return response.json();
 };
 
-export const deleteUser = (id: string): void => {
-  const users = getUsers();
-  const filtered = users.filter((u) => u.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+export const deleteUser = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/users/deletar/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  await handleApiError(response);
 };
 
-export const filterUsers = (filters: {
+export const filterUsers = async (filters: {
   searchTerm?: string;
   role?: string;
-}): SystemUser[] => {
-  let users = getUsers();
+}): Promise<SystemUser[]> => {
+  // A API não tem filtros específicos, então fazemos busca local
+  const users = await getUsers();
+
+  let filtered = users;
 
   if (filters.searchTerm) {
     const term = filters.searchTerm.toLowerCase();
-    users = users.filter(
+    filtered = filtered.filter(
       (u) =>
-        u.nome.toLowerCase().includes(term) ||
+        u.nomeCompleto?.toLowerCase().includes(term) ||
         u.email.toLowerCase().includes(term)
     );
   }
 
   if (filters.role) {
-    users = users.filter((u) => u.role === filters.role);
+    filtered = filtered.filter((u) => u.tipoAcesso === filters.role);
   }
 
-  return users;
+  return filtered;
 };

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout } from "../../components/LayoutComponent";
-import { getMembers, deleteMember } from "../../services/memberService";
-import type { Member } from "../../types/member";
+import { Layout } from "../../../components/LayoutComponent";
+import { getMembers, deleteMember } from "../../../services/memberService";
+import { getTeams } from "../../../services/teamService";
+import type { Member } from "../../../types/member";
+import type { Team } from "../../../types/admin";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { usePermissions } from "../../hooks/usePermissions";
-import { useAuth } from "../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useAuth } from "../../../context/AuthContext";
 import {
   PageHeader,
   SearchBar,
@@ -22,56 +24,63 @@ import {
   MobileCard,
   MobileCardItem,
   MobileCardActions,
-} from "../../components/ui";
+} from "../../../components/ui";
 
 const MembersPage = () => {
   const [members, setMembers] = useState<Member[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEquipe, setFilterEquipe] = useState("");
   const { can } = usePermissions();
   const { user } = useAuth();
 
-  // Função helper para exibir o nome do role
-  const getRoleName = (role: string) => {
-    const roleNames: Record<string, string> = {
-      admin: "Admin",
-      lider: "Líder",
-      professor: "Professor",
-      diretor: "Diretor",
-      membro: "Membro",
-    };
-    return roleNames[role] || role;
+  // Função para obter o nome da equipe pelo ID
+  const getTeamName = (equipeId: string | undefined) => {
+    if (!equipeId) return "Sem equipe";
+    const team = teams.find((t) => t.id.toString() === equipeId);
+    return team ? team.nome : equipeId;
   };
 
-  // Função helper para cor do badge de role
-  const getRoleColor = (role: string) => {
-    const colors: Record<string, string> = {
-      admin: "bg-purple-100 text-purple-800",
-      lider: "bg-blue-100 text-blue-800",
-      professor: "bg-green-100 text-green-800",
-      diretor: "bg-yellow-100 text-yellow-800",
-      membro: "bg-gray-100 text-gray-800",
-    };
-    return colors[role] || "bg-gray-100 text-gray-800";
-  };
-
-  // Carrega membros do localStorage/JSON apenas uma vez
   useEffect(() => {
-    setMembers(getMembers());
-  }, []);
+    const fetchData = async () => {
+      try {
+        const teamsData = await getTeams(user?.role, user?.equipe);
+        setTeams(teamsData);
 
-  // Função para deletar membro
-  const handleDelete = (id: string, nome: string) => {
+        // Se for líder ou membro, passa o equipeId para buscar apenas da sua equipe
+        const userEquipeId = user?.equipe ? parseInt(user.equipe) : undefined;
+        const membersData = await getMembers(userEquipeId);
+
+        setMembers(membersData);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        alert("Erro ao carregar dados");
+      }
+    };
+    fetchData();
+  }, [user]);
+
+  const handleDelete = async (id: string, nome: string) => {
     if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
-      deleteMember(id);
-      setMembers(getMembers());
-      alert("Membro excluído com sucesso!");
+      try {
+        await deleteMember(id);
+        // Recarrega com o equipeId correto
+        const userEquipeId = user?.equipe ? parseInt(user.equipe) : undefined;
+        const data = await getMembers(userEquipeId);
+        setMembers(data);
+        alert("Membro excluído com sucesso!");
+      } catch (error) {
+        console.error("Erro ao excluir membro:", error);
+        alert("Erro ao excluir membro");
+      }
     }
   };
 
-  // Filtros (incluindo filtro de equipe para líder)
   const filteredMembers = members.filter((member) => {
-    // Se for líder, só mostra membros da sua equipe
+    if (member.status === "inativo") {
+      return false;
+    }
+
     if (
       user?.role === "lider" &&
       user?.equipe &&
@@ -88,15 +97,23 @@ const MembersPage = () => {
     return matchSearch && matchEquipe;
   });
 
-  // Lista de equipes únicas
-  const equipes = Array.from(new Set(members.map((m) => m.equipe)));
+  // Lista de equipes únicas para o filtro, mostrando nome ao invés do ID
+  const equipesOptions = Array.from(
+    new Set(members.map((m) => m.equipe).filter(Boolean))
+  ).map((equipeId) => {
+    const team = teams.find((t) => t.id.toString() === equipeId);
+    return {
+      value: equipeId,
+      label: team ? team.nome : equipeId,
+    };
+  });
 
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
         <PageHeader
           title="Membros das Equipes"
-          description="Cadastro de alunos participantes dos projetos (não precisam ter acesso ao sistema)"
+          description="Cadastro de alunos participantes dos projetos"
           actionButton={
             can("canCreateMember")
               ? {
@@ -118,7 +135,7 @@ const MembersPage = () => {
             <FilterSelect
               value={filterEquipe}
               onChange={setFilterEquipe}
-              options={equipes.map((e) => ({ value: e, label: e }))}
+              options={equipesOptions}
               placeholder="Todas as Equipes"
             />
           </div>
@@ -133,7 +150,6 @@ const MembersPage = () => {
           </Card>
         ) : (
           <>
-            {/* Mobile Cards (visível só em mobile) */}
             <div className="block lg:hidden space-y-3">
               {filteredMembers.map((member) => (
                 <MobileCard key={member.id}>
@@ -146,16 +162,7 @@ const MembersPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium text-sm">{member.nome}</p>
-                        <div className="flex gap-1">
-                          <span
-                            className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getRoleColor(
-                              member.role
-                            )}`}
-                          >
-                            {getRoleName(member.role)}
-                          </span>
-                          <StatusBadge status={member.status} />
-                        </div>
+                        <StatusBadge status={member.status} />
                       </div>
                       <p className="text-xs opacity-60 truncate">
                         {member.email}
@@ -170,7 +177,7 @@ const MembersPage = () => {
                     <MobileCardItem label="Cargo" value={member.cargo} />
                     <MobileCardItem
                       label="Equipe"
-                      value={member.equipe}
+                      value={getTeamName(member.equipe)}
                       fullWidth
                     />
                   </div>
@@ -202,7 +209,6 @@ const MembersPage = () => {
               ))}
             </div>
 
-            {/* Tabela Desktop (oculta em mobile) */}
             <div className="hidden lg:block">
               <Table>
                 <TableHeader>
@@ -210,9 +216,7 @@ const MembersPage = () => {
                   <TableHeadCell>Matrícula</TableHeadCell>
                   <TableHeadCell>Equipe</TableHeadCell>
                   <TableHeadCell>Cargo</TableHeadCell>
-                  <TableHeadCell>Perfil</TableHeadCell>
-                  <TableHeadCell>Status</TableHeadCell>
-                  <TableHeadCell className="text-right">Ações</TableHeadCell>
+                  <TableHeadCell className="text-center">Ações</TableHeadCell>
                 </TableHeader>
                 <TableBody>
                   {filteredMembers.map((member) => (
@@ -235,22 +239,10 @@ const MembersPage = () => {
                         </div>
                       </TableCell>
                       <TableCell>{member.matricula}</TableCell>
-                      <TableCell>{member.equipe}</TableCell>
+                      <TableCell>{getTeamName(member.equipe)}</TableCell>
                       <TableCell>{member.cargo}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
-                            member.role
-                          )}`}
-                        >
-                          {getRoleName(member.role)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={member.status} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-2">
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <Link
                             to={`/members/${member.id}`}
                             className="btn btn-primary btn-xs"

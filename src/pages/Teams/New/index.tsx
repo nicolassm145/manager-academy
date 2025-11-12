@@ -8,13 +8,22 @@ const NewTeamPage = () => {
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
+    criadoEm: new Date().toISOString().split("T")[0], // Data atual no formato YYYY-MM-DD
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createTeam({ ...formData, status: "ativa" });
-    alert("Equipe criada com sucesso!");
-    navigate("/admin/teams");
+    try {
+      // Envia nome, descricao e criadoEm
+      await createTeam({
+        nome: formData.nome,
+        descricao: formData.descricao,
+        criadoEm: formData.criadoEm,
+      });
+      navigate("/admin/teams");
+    } catch (error) {
+      console.error("Erro ao criar equipe:", error);
+    }
   };
 
   const handleChange = (
@@ -71,6 +80,27 @@ const NewTeamPage = () => {
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Descreva o propósito e atividades da equipe..."
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="criadoEm"
+              className="block text-sm font-medium mb-2"
+            >
+              Data de Criação *
+            </label>
+            <input
+              id="criadoEm"
+              name="criadoEm"
+              type="date"
+              required
+              value={formData.criadoEm}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs opacity-60 mt-1">
+              Data em que a equipe foi fundada
+            </p>
           </div>
 
           <div className="flex gap-4 pt-4">

@@ -11,7 +11,6 @@ const LoginPage = () => {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Se já estiver logado, redireciona
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -34,19 +33,16 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 p-4">
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Manager Academy
+            League Manager
           </h1>
           <p className="text-sm sm:text-base opacity-60">
             Faça login para continuar
           </p>
         </div>
 
-        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email
@@ -62,7 +58,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Senha */}
           <div>
             <label
               htmlFor="password"
@@ -81,14 +76,12 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Erro */}
           {error && (
             <div className="p-3 bg-red-50 border rounded-lg">
               <p className="text-xs sm:text-sm text-red-600">{error}</p>
             </div>
           )}
 
-          {/* Botão */}
           <button
             type="submit"
             disabled={isLoading}
@@ -98,7 +91,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Credenciais para teste */}
         <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-50 rounded-lg">
           <p className="text-xs font-semibold mb-2">Credenciais para teste:</p>
           <div className="text-xs opacity-80 space-y-1">
@@ -106,10 +98,10 @@ const LoginPage = () => {
               • <strong>Admin:</strong> admin@manager.com / 123456
             </p>
             <p className="break-all">
-              • <strong>Líder:</strong> joao.silva@example.com / 123456
+              • <strong>Líder:</strong> leader@manager.com / 123456
             </p>
             <p className="break-all">
-              • <strong>Membro:</strong> ana.costa@example.com / 123456
+              • <strong>Membro:</strong> member@manager.com / 123456
             </p>
           </div>
         </div>

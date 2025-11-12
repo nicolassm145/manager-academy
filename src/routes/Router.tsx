@@ -6,16 +6,28 @@ import SettingsPage from "../pages/Settings";
 import NotFoundPage from "../pages/NotFound";
 
 // Crud dos Membros (agora inclui gestão de usuários)
-import MembersPage from "../pages/Members";
+import MembersPage from "../pages/Members/List";
 import NewMemberPage from "../pages/Members/New";
 import MemberDetailPage from "../pages/Members/Detail";
 import EditMemberPage from "../pages/Members/Edit";
 
 // Crud das Equipes
-import AdminTeamsPage from "../pages/Admin/Teams/index";
-import NewTeamPage from "../pages/Admin/Teams/New";
-import TeamDetailPage from "../pages/Admin/Teams/Detail";
-import EditTeamPage from "../pages/Admin/Teams/Edit";
+import AdminTeamsPage from "../pages/Teams/List";
+import NewTeamPage from "../pages/Teams/New";
+import TeamDetailPage from "../pages/Teams/Detail";
+import EditTeamPage from "../pages/Teams/Edit";
+
+// Crud do Financeiro
+import FinanceListPage from "../pages/Finance/List";
+import FinanceNewPage from "../pages/Finance/New";
+import FinanceDetailPage from "../pages/Finance/Detail";
+import FinanceEditPage from "../pages/Finance/Edit";
+
+// Crud do Inventário
+import InventoryListPage from "../pages/Inventory/List";
+import InventoryNewPage from "../pages/Inventory/New";
+import InventoryDetailPage from "../pages/Inventory/Detail";
+import InventoryEditPage from "../pages/Inventory/Edit";
 
 const router = createBrowserRouter([
   {
@@ -114,6 +126,80 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requiredPermission="canEditTeam">
         <EditTeamPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Financeiro Routes
+  {
+    path: "/finance",
+    element: (
+      <ProtectedRoute requiredPermission="canViewFinance">
+        <FinanceListPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/finance/new",
+    element: (
+      <ProtectedRoute requiredPermission="canCreateFinance">
+        <FinanceNewPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/finance/:id",
+    element: (
+      <ProtectedRoute requiredPermission="canViewFinance">
+        <FinanceDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/finance/:id/edit",
+    element: (
+      <ProtectedRoute requiredPermission="canEditFinance">
+        <FinanceEditPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Inventário Routes
+  {
+    path: "/inventory",
+    element: (
+      <ProtectedRoute requiredPermission="canViewInventory">
+        <InventoryListPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/inventory/new",
+    element: (
+      <ProtectedRoute requiredPermission="canCreateInventory">
+        <InventoryNewPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/inventory/:id",
+    element: (
+      <ProtectedRoute requiredPermission="canViewInventory">
+        <InventoryDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/inventory/:id/edit",
+    element: (
+      <ProtectedRoute requiredPermission="canEditInventory">
+        <InventoryEditPage />
       </ProtectedRoute>
     ),
   },
