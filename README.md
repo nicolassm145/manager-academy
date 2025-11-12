@@ -33,7 +33,7 @@ src/
 ├── services/           # Serviços de API
 │
 ├── types/              # Definições de tipos TypeScript
-│  
+│
 └── utils/              # Funções utilitárias
     └── permissions.ts
 ```
@@ -41,6 +41,7 @@ src/
 ## Funcionalidades
 
 ### Autenticação
+
 - Login com JWT (JSON Web Tokens)
 - Proteção de rotas com ProtectedRoute
 - Context API para gerenciamento de estado de autenticação
@@ -49,6 +50,7 @@ src/
 ### Módulos Principais
 
 #### Equipes (Teams)
+
 - Listagem de equipes
 - Criação de novas equipes
 - Edição de equipes existentes
@@ -56,6 +58,7 @@ src/
 - Exclusão de equipes (com confirmação)
 
 #### Membros (Members)
+
 - Gerenciamento completo de membros
 - CRUD completo (Create, Read, Update, Delete)
 - Associação com equipes
@@ -64,6 +67,7 @@ src/
 ## Instalação
 
 ### Pré-requisitos
+
 - Node.js (versão 18 ou superior)
 - npm ou yarn
 - Backend API rodando em http://127.0.0.1:8000
@@ -71,23 +75,27 @@ src/
 ### Passos
 
 1. Clone o repositório:
+
 ```bash
 git clone <repository-url>
 cd manager-academy
 ```
 
 2. Instale as dependências:
+
 ```bash
 npm install
 ```
 
 3. (Opcional) Configure a URL da API:
-Crie um arquivo `.env` na raiz do projeto:
+   Crie um arquivo `.env` na raiz do projeto:
+
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
 4. Inicie o servidor de desenvolvimento:
+
 ```bash
 npm run dev
 ```
@@ -108,30 +116,36 @@ npm run dev
 O projeto inclui testes automatizados usando Selenium WebDriver.
 
 #### Pré-requisitos para Testes
+
 - Python 3.11+
 - pytest
 - selenium
 - Microsoft Edge instalado
 
 #### Instalação das Dependências de Teste
+
 ```bash
 cd test
 pip install pytest selenium
 ```
 
 #### Executando os Testes
+
 ```bash
 cd test
 pytest Release01.py -v -s
 ```
 
 **Parâmetros:**
+
 - `-v` - Verbose (mostra detalhes)
 - `-s` - Mostra prints no console
 - `--tb=line` - Mostra apenas uma linha de erro (opcional)
 
 #### Estrutura do Teste (Release01.py)
+
 O teste cobre o seguinte fluxo:
+
 1. Login como administrador
 2. Criação de duas equipes (BlackBee e teste)
 3. Criação de um membro líder (Lider01)
