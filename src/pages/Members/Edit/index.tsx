@@ -106,7 +106,7 @@ const EditMemberPage = () => {
   // Função para obter o label correto do campo matrícula baseado no role
   const getMatriculaLabel = () => {
     if (!member) return "Matrícula";
-    
+
     switch (member.role) {
       case "professor":
         return "Registro Profissional (SIAPE)";
@@ -263,7 +263,9 @@ const EditMemberPage = () => {
                 <option value="Líder">Líder</option>
                 <option value="Vice-Líder">Vice-Líder</option>
                 <option value="Membro">Membro</option>
-                <option value="Professor Orientador">Professor Orientador</option>
+                <option value="Professor Orientador">
+                  Professor Orientador
+                </option>
               </select>
             </div>
           </div>

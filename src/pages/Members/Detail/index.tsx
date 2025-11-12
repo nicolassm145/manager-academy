@@ -52,7 +52,7 @@ const MemberDetailPage = () => {
   // Função para obter o label correto do campo matrícula baseado no role
   const getMatriculaLabel = () => {
     if (!member) return "Matrícula";
-    
+
     switch (member.role) {
       case "professor":
         return "Registro Profissional (SIAPE)";

@@ -254,7 +254,9 @@ const NewMemberPage = () => {
                 <option value="Líder">Líder</option>
                 <option value="Vice-Líder">Vice-Líder</option>
                 <option value="Membro">Membro</option>
-                <option value="Professor Orientador">Professor Orientador</option>
+                <option value="Professor Orientador">
+                  Professor Orientador
+                </option>
               </select>
             </div>
           </div>
