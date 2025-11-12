@@ -9,8 +9,6 @@ import {
   XMarkIcon,
   QueueListIcon,
   ArrowRightStartOnRectangleIcon,
-  BanknotesIcon,
-  ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";

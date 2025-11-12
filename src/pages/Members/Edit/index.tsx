@@ -30,9 +30,10 @@ const EditMemberPage = () => {
   const loadTeams = async () => {
     try {
       const data = await getTeams();
-      setTeams(data.filter((team) => team.status === "ativa"));
+      setTeams(data); // Backend retorna todas as equipes disponíveis
     } catch (error) {
       console.error("Erro ao carregar equipes:", error);
+      alert("Erro ao carregar equipes. Tente novamente.");
     }
   };
 
@@ -196,24 +197,35 @@ const EditMemberPage = () => {
               >
                 Equipe
               </label>
-              <select
-                id="equipe"
-                name="equipe"
-                value={formData.equipe}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Sem equipe</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.nome}
-                  </option>
-                ))}
-              </select>
-              {formData.equipe !== member.equipe && (
-                <p className="text-xs text-yellow-600 mt-1">
-                  ⚠️ Mudança de equipe será registrada no histórico
-                </p>
+              {user?.role === "lider" ? (
+                // Líder: Campo desabilitado, não pode mudar equipe
+                <div className="w-full px-4 py-3 bg-gray-100 border rounded-lg opacity-60">
+                  {teams.find((t) => t.id.toString() === formData.equipe)
+                    ?.nome || "Sem equipe"}
+                </div>
+              ) : (
+                // Admin: Pode alterar equipe
+                <>
+                  <select
+                    id="equipe"
+                    name="equipe"
+                    value={formData.equipe}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Sem equipe</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.nome}
+                      </option>
+                    ))}
+                  </select>
+                  {formData.equipe !== member.equipe && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      ⚠️ Mudança de equipe será registrada no histórico
+                    </p>
+                  )}
+                </>
               )}
             </div>
 

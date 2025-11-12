@@ -141,7 +141,7 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium opacity-60 mb-1">
                   Equipe
                 </label>
-                <p className="text-base">{user.equipe}</p>
+                <p className="text-base">{user.equipeNome || user.equipe}</p>
               </div>
             )}
           </div>

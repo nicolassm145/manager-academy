@@ -26,7 +26,7 @@ const NewInventoryItemPage = () => {
   const loadTeams = async () => {
     try {
       const data = await getTeams();
-      setTeams(data.filter((team) => team.status === "ativa"));
+      setTeams(data); // Backend retorna todas as equipes disponíveis
     } catch (error) {
       console.error("Erro ao carregar equipes:", error);
     }
@@ -204,7 +204,8 @@ const NewInventoryItemPage = () => {
               </select>
             ) : (
               <div className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg bg-gray-50">
-                {teams.find((t) => t.id === user?.equipe)?.nome || "Sua Equipe"}
+                {teams.find((t) => t.id === Number(user?.equipe))?.nome ||
+                  "Sua Equipe"}
               </div>
             )}
           </div>

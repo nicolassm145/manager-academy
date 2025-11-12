@@ -31,7 +31,7 @@ const EditInventoryItemPage = () => {
   const loadTeams = async () => {
     try {
       const data = await getTeams();
-      setTeams(data.filter((team) => team.status === "ativa"));
+      setTeams(data); // Backend retorna todas as equipes disponíveis
     } catch (error) {
       console.error("Erro ao carregar equipes:", error);
     }
@@ -240,7 +240,8 @@ const EditInventoryItemPage = () => {
               </select>
             ) : (
               <div className="px-4 py-3 border rounded-lg bg-gray-50">
-                {teams.find((t) => t.id === formData.equipeId)?.nome || "N/A"}
+                {teams.find((t) => t.id === Number(formData.equipeId))?.nome ||
+                  "N/A"}
               </div>
             )}
           </div>

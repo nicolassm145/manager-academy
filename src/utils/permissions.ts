@@ -102,10 +102,10 @@ export const PERMISSIONS = {
     canDeleteInventory: false,
   },
 
-  // Membro pode ver inventário da sua equipe
+  // Membro pode ver membros e equipes (mas sem editar/criar/deletar)
   membro: {
     canViewDashboard: true,
-    canViewMembers: false,
+    canViewMembers: true,
     canCreateMember: false,
     canEditMember: false,
     canDeleteMember: false,
@@ -113,7 +113,7 @@ export const PERMISSIONS = {
     canCreateUser: false,
     canEditUser: false,
     canDeleteUser: false,
-    canViewTeams: false,
+    canViewTeams: true,
     canCreateTeam: false,
     canEditTeam: false,
     canDeleteTeam: false,

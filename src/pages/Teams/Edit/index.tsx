@@ -11,7 +11,6 @@ const EditTeamPage = () => {
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
-    status: "" as "ativa" | "inativa" | "",
   });
 
   useEffect(() => {
@@ -25,7 +24,6 @@ const EditTeamPage = () => {
             setFormData({
               nome: foundTeam.nome,
               descricao: foundTeam.descricao,
-              status: foundTeam.status,
             });
           }
         } catch (error) {
@@ -40,17 +38,21 @@ const EditTeamPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (id) {
-      const teamData = {
-        ...formData,
-        status: formData.status as "ativa" | "inativa",
-      };
       try {
-        await updateTeam(id, teamData);
+        // Envia apenas nome e descricao
+        await updateTeam(id, {
+          nome: formData.nome,
+          descricao: formData.descricao,
+        });
         alert("Equipe atualizada com sucesso!");
         navigate(`/admin/teams/${id}`);
       } catch (error) {
         console.error("Erro ao atualizar equipe:", error);
-        alert("Erro ao atualizar equipe");
+        alert(
+          `Erro ao atualizar equipe: ${
+            error instanceof Error ? error.message : "Erro desconhecido"
+          }`
+        );
       }
     }
   };
@@ -119,26 +121,6 @@ const EditTeamPage = () => {
               rows={4}
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
-
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium mb-2">
-              Status *
-            </label>
-            <select
-              id="status"
-              name="status"
-              required
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="ativa">Ativa</option>
-              <option value="inativa">Inativa</option>
-            </select>
-            <p className="text-xs opacity-60 mt-1">
-              Equipes inativas não aparecem em seleções de cadastro
-            </p>
           </div>
 
           <div className="flex gap-4 pt-4">

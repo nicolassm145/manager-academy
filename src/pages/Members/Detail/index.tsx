@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { getMemberById, deleteMember } from "../../../services/memberService";
+import { getTeams } from "../../../services/teamService";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useAuth } from "../../../context/AuthContext";
 import type { Member } from "../../../types/member";
+import type { Team } from "../../../types/admin";
 import {
   PencilIcon,
   TrashIcon,
@@ -12,24 +16,38 @@ import {
 const MemberDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { can } = usePermissions();
+  const { user } = useAuth();
   const [member, setMember] = useState<Member | undefined>(undefined);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMember = async () => {
-      if (id) {
-        try {
-          const data = await getMemberById(id);
-          setMember(data);
-        } catch (error) {
-          console.error("Erro ao carregar membro:", error);
-        } finally {
-          setLoading(false);
-        }
+    loadData();
+  }, [id, user]);
+
+  const loadData = async () => {
+    if (id) {
+      try {
+        const [memberData, teamsData] = await Promise.all([
+          getMemberById(id),
+          getTeams(user?.role, user?.equipe),
+        ]);
+        setMember(memberData);
+        setTeams(teamsData);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchMember();
-  }, [id]);
+    }
+  };
+
+  const getTeamName = (equipeId?: string) => {
+    if (!equipeId) return "Sem equipe";
+    const team = teams.find((t) => t.id === Number(equipeId));
+    return team?.nome || equipeId;
+  };
 
   if (loading) {
     return (
@@ -78,22 +96,28 @@ const MemberDetailPage = () => {
             <ArrowLeftIcon className="w-5 h-5" />
             Voltar
           </button>
-          <div className="flex gap-2 sm:gap-3">
-            <Link
-              to={`/members/${id}/edit`}
-              className="btn btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2"
-            >
-              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              Editar
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="btn btn-error flex-1 sm:flex-none flex items-center justify-center gap-2"
-            >
-              <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              Excluir
-            </button>
-          </div>
+          {(can("canEditMember") || can("canDeleteMember")) && (
+            <div className="flex gap-2 sm:gap-3">
+              {can("canEditMember") && (
+                <Link
+                  to={`/members/${id}/edit`}
+                  className="btn btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2"
+                >
+                  <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Editar
+                </Link>
+              )}
+              {can("canDeleteMember") && (
+                <button
+                  onClick={handleDelete}
+                  className="btn btn-error flex-1 sm:flex-none flex items-center justify-center gap-2"
+                >
+                  <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Excluir
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border">
@@ -135,7 +159,7 @@ const MemberDetailPage = () => {
 
             <div>
               <p className="text-sm opacity-60 mb-1">Equipe</p>
-              <p className="text-lg font-semibold">{member.equipe}</p>
+              <p className="text-lg font-semibold">{getTeamName(member.equipe)}</p>
             </div>
 
             <div>
@@ -152,62 +176,67 @@ const MemberDetailPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border">
-          <h2 className="text-xl font-bold mb-4">Dados de Acesso ao Sistema</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm opacity-60 mb-1">Email de Login</p>
-              <p className="text-lg font-semibold">{member.email}</p>
-            </div>
+        {/* Dados de Acesso - Apenas para Admin e Líder */}
+        {(can("canEditMember") || can("canDeleteMember")) && (
+          <div className="bg-white rounded-xl shadow-md p-6 border">
+            <h2 className="text-xl font-bold mb-4">
+              Dados de Acesso ao Sistema
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-sm opacity-60 mb-1">Email de Login</p>
+                <p className="text-lg font-semibold">{member.email}</p>
+              </div>
 
-            <div>
-              <p className="text-sm opacity-60 mb-1">Perfil de Acesso</p>
-              <p className="text-lg font-semibold">
-                <span
-                  className={`inline-block px-3 py-1 text-sm rounded-full ${
-                    member.role === "admin"
-                      ? "bg-purple-100 text-purple-800"
-                      : member.role === "lider"
-                      ? "bg-blue-100 text-blue-800"
-                      : member.role === "professor"
-                      ? "bg-green-100 text-green-800"
-                      : member.role === "diretor"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {member.role === "admin" && "Administrador"}
-                  {member.role === "lider" && "Líder de Equipe"}
-                  {member.role === "professor" && "Professor Orientador"}
-                  {member.role === "diretor" && "Diretor Financeiro"}
-                  {member.role === "membro" && "Membro"}
-                </span>
-              </p>
-            </div>
+              <div>
+                <p className="text-sm opacity-60 mb-1">Perfil de Acesso</p>
+                <p className="text-lg font-semibold">
+                  <span
+                    className={`inline-block px-3 py-1 text-sm rounded-full ${
+                      member.role === "admin"
+                        ? "bg-purple-100 text-purple-800"
+                        : member.role === "lider"
+                        ? "bg-blue-100 text-blue-800"
+                        : member.role === "professor"
+                        ? "bg-green-100 text-green-800"
+                        : member.role === "diretor"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {member.role === "admin" && "Administrador"}
+                    {member.role === "lider" && "Líder de Equipe"}
+                    {member.role === "professor" && "Professor Orientador"}
+                    {member.role === "diretor" && "Diretor Financeiro"}
+                    {member.role === "membro" && "Membro"}
+                  </span>
+                </p>
+              </div>
 
-            <div>
-              <p className="text-sm opacity-60 mb-1">Conta Criada em</p>
-              <p className="text-lg font-semibold">
-                {new Date(member.dataCriacao).toLocaleDateString("pt-BR")}
-              </p>
-            </div>
+              <div>
+                <p className="text-sm opacity-60 mb-1">Conta Criada em</p>
+                <p className="text-lg font-semibold">
+                  {new Date(member.dataCriacao).toLocaleDateString("pt-BR")}
+                </p>
+              </div>
 
-            <div>
-              <p className="text-sm opacity-60 mb-1">Status da Conta</p>
-              <p className="text-lg font-semibold">
-                <span
-                  className={`inline-block px-3 py-1 text-sm rounded-full ${
-                    member.status === "ativo"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {member.status === "ativo" ? "Ativa" : "Inativa"}
-                </span>
-              </p>
+              <div>
+                <p className="text-sm opacity-60 mb-1">Status da Conta</p>
+                <p className="text-lg font-semibold">
+                  <span
+                    className={`inline-block px-3 py-1 text-sm rounded-full ${
+                      member.status === "ativo"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {member.status === "ativo" ? "Ativa" : "Inativa"}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Layout>
   );

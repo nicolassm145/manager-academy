@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { getTeams, deleteTeam } from "../../../services/teamService";
+import { useAuth } from "../../../context/AuthContext";
 import type { Team } from "../../../types/admin";
 import {
   MagnifyingGlassIcon,
@@ -15,11 +16,12 @@ const AdminTeamsPage = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { can } = usePermissions();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const data = await getTeams();
+        const data = await getTeams(user?.role, user?.equipe);
         setTeams(data);
       } catch (error) {
         console.error("Erro ao carregar equipes:", error);
@@ -27,13 +29,13 @@ const AdminTeamsPage = () => {
       }
     };
     fetchTeams();
-  }, []);
+  }, [user]);
 
-  const handleDelete = async (id: string, nome: string) => {
+  const handleDelete = async (id: number, nome: string) => {
     if (confirm(`Tem certeza que deseja excluir a equipe ${nome}?`)) {
       try {
-        await deleteTeam(id);
-        const data = await getTeams();
+        await deleteTeam(id.toString());
+        const data = await getTeams(user?.role, user?.equipe);
         setTeams(data);
         alert("Equipe excluída com sucesso!");
       } catch (error) {
@@ -49,6 +51,14 @@ const AdminTeamsPage = () => {
       team.descricao.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Verifica se o usuário pode ver os detalhes da equipe
+  const canViewTeamDetails = (teamId: number) => {
+    // Admin pode ver qualquer equipe
+    if (user?.role === "admin") return true;
+    // Líder/Membro só pode ver sua própria equipe
+    return user?.equipe === teamId.toString();
+  };
+
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
@@ -58,8 +68,7 @@ const AdminTeamsPage = () => {
               Equipes de Competição
             </h1>
             <p className="text-sm sm:text-base opacity-60 mt-1">
-              Gerencie as equipes do projeto (Baja, Fórmula SAE, Aerodesign,
-              etc)
+              Gerencie as equipes do projeto 
             </p>
           </div>
           {can("canCreateTeam") && (
@@ -101,24 +110,25 @@ const AdminTeamsPage = () => {
                     {team.descricao}
                   </p>
                 </div>
-                <span
-                  className={`px-2 sm:px-3 py-1 text-xs font-semibold rounded-full flex-shrink-0 ${
-                    team.status === "ativa"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {team.status}
-                </span>
               </div>
 
               <div className="flex items-center gap-2 pt-3 sm:pt-4 border-t mt-4">
-                <Link
-                  to={`/admin/teams/${team.id}`}
-                  className="btn btn-primary btn-sm flex-1"
-                >
-                  Ver Detalhes
-                </Link>
+                {canViewTeamDetails(team.id) ? (
+                  <Link
+                    to={`/admin/teams/${team.id}`}
+                    className="btn btn-primary btn-sm flex-1"
+                  >
+                    Ver Detalhes
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    className="btn btn-primary btn-sm flex-1 opacity-50 cursor-not-allowed"
+                    title="Você só pode ver detalhes da sua própria equipe"
+                  >
+                    Ver Detalhes
+                  </button>
+                )}
                 {can("canEditTeam") && (
                   <Link
                     to={`/admin/teams/${team.id}/edit`}

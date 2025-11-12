@@ -10,21 +10,41 @@ import {
 // Funções para consumir a API de usuários (members)
 
 /**
- * GET /api/v1/users/listarTudo
- * Lista todos os usuários (requer permissão de Admin)
- * Parâmetros: skip (paginação), limit (quantidade por página)
+ * GET /api/v1/users/listarTudo (Admin) ou /api/v1/equipes/{equipe_id}/membros (Líder/Membro)
+ * Lista todos os usuários ou apenas da equipe do usuário logado
+ * Se for Admin: busca todos
+ * Se for Líder/Membro: busca apenas da sua equipe
  */
-export const getMembers = async (): Promise<Member[]> => {
-  const response = await fetch(
-    `${API_BASE_URL}/users/listarTudo?skip=0&limit=1000`,
-    {
-      headers: getAuthHeaders(),
+export const getMembers = async (userEquipeId?: number): Promise<Member[]> => {
+  try {
+    let response;
+
+    // Se tem equipeId, busca membros da equipe específica
+    if (userEquipeId) {
+      response = await fetch(
+        `${API_BASE_URL}/equipes/${userEquipeId}/membros`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+    } else {
+      // Admin busca todos
+      response = await fetch(
+        `${API_BASE_URL}/users/listarTudo?skip=0&limit=1000`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
     }
-  );
-  await handleApiError(response);
-  const apiUsers: ApiUser[] = await response.json();
-  // Converte cada ApiUser para Member
-  return apiUsers.map(apiUserToMember);
+
+    await handleApiError(response);
+    const apiUsers: ApiUser[] = await response.json();
+    // Converte cada ApiUser para Member
+    return apiUsers.map(apiUserToMember);
+  } catch (error) {
+    console.error("Erro ao buscar membros:", error);
+    throw error;
+  }
 };
 
 /**

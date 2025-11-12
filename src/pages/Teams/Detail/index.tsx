@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
-import { getTeamById, deleteTeam } from "../../../services/teamService";
-import { getMembers } from "../../../services/memberService";
+import {
+  getTeamById,
+  deleteTeam,
+  getTeamMembers,
+} from "../../../services/teamService";
+import { useAuth } from "../../../context/AuthContext";
 import type { Team } from "../../../types/admin";
 import type { Member } from "../../../types/member";
 import {
@@ -15,7 +19,6 @@ import {
 import {
   BackButton,
   Card,
-  StatusBadge,
   StatCard,
   EmptyState,
   DetailSection,
@@ -24,9 +27,13 @@ import {
 const TeamDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [team, setTeam] = useState<Team | undefined>(undefined);
   const [teamMembers, setTeamMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Verifica se o usuário é da equipe atual
+  const isUserTeam = user?.equipe === id;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,11 +42,13 @@ const TeamDetailPage = () => {
           const teamData = await getTeamById(id);
           setTeam(teamData);
 
-          if (teamData) {
-            const allMembers = await getMembers();
-            const members = allMembers.filter(
-              (m) => m.equipe === teamData.nome
-            );
+          // Busca membros se:
+          // 1. For admin (vê todos)
+          // 2. OU se for a própria equipe do usuário (líder/membro vê sua equipe)
+          const canSeeMbers = user?.role === "admin" || isUserTeam;
+          
+          if (teamData && canSeeMbers) {
+            const members = await getTeamMembers(id);
             setTeamMembers(members);
           }
         } catch (error) {
@@ -50,7 +59,7 @@ const TeamDetailPage = () => {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, user?.role, user?.equipe, isUserTeam]);
 
   if (loading) {
     return (
@@ -95,22 +104,25 @@ const TeamDetailPage = () => {
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <BackButton to="/admin/teams" />
-          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-            <Link
-              to={`/admin/teams/${id}/edit`}
-              className="btn btn-primary flex-1 sm:flex-initial flex items-center justify-center gap-2"
-            >
-              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Editar</span>
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="btn btn-error flex-1 sm:flex-initial flex items-center justify-center gap-2"
-            >
-              <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Excluir</span>
-            </button>
-          </div>
+          {/* Só mostra botões de editar/excluir para Admin */}
+          {user?.role === "admin" && (
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+              <Link
+                to={`/admin/teams/${id}/edit`}
+                className="btn btn-primary flex-1 sm:flex-initial flex items-center justify-center gap-2"
+              >
+                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Editar</span>
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="btn btn-error flex-1 sm:flex-initial flex items-center justify-center gap-2"
+              >
+                <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Excluir</span>
+              </button>
+            </div>
+          )}
         </div>
 
         <Card padding="large">
@@ -124,29 +136,38 @@ const TeamDetailPage = () => {
                   {team.descricao}
                 </p>
               </div>
-              <StatusBadge status={team.status} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <StatCard
-              label="Total de Membros"
-              value={teamMembers.length}
-              icon={UserGroupIcon}
-              color="blue"
-            />
-            <StatCard
-              label="Usuários no Sistema"
-              value={teamMembers.length}
-              icon={UsersIcon}
-              color="green"
-            />
+            {/* Mostra estatísticas de membros se for admin OU a própria equipe */}
+            {(user?.role === "admin" || isUserTeam) && (
+              <>
+                <StatCard
+                  label="Total de Membros"
+                  value={teamMembers.length}
+                  icon={UserGroupIcon}
+                  color="blue"
+                />
+                <StatCard
+                  label="Usuários no Sistema"
+                  value={teamMembers.length}
+                  icon={UsersIcon}
+                  color="green"
+                />
+              </>
+            )}
             <StatCard
               label="Data de Criação"
-              value={new Date(team.dataCriacao).toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "short",
-              })}
+              value={
+                team.criadoEm
+                  ? new Date(team.criadoEm).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "Não informada"
+              }
               icon={CalendarIcon}
               color="purple"
             />
@@ -176,40 +197,46 @@ const TeamDetailPage = () => {
           )}
         </Card>
 
-        <Card>
-          <DetailSection title="Membros da Equipe">
-            {teamMembers.length > 0 ? (
-              <div className="space-y-3">
-                {teamMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b last:border-0"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm sm:text-base truncate">
-                        {member.nome}
-                      </p>
-                      <p className="text-xs sm:text-sm opacity-60 truncate">
-                        {member.cargo} • {member.curso}
-                      </p>
-                    </div>
-                    <Link
-                      to={`/members/${member.id}`}
-                      className="btn btn-link btn-sm"
+        {/* Card de membros: Apenas para admin OU para a própria equipe */}
+        {(user?.role === "admin" || isUserTeam) && (
+          <Card>
+            <DetailSection title="Membros da Equipe">
+              {teamMembers.length > 0 ? (
+                <div className="space-y-3">
+                  {teamMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b last:border-0"
                     >
-                      Ver perfil →
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                title="Nenhum membro cadastrado"
-                description="Esta equipe ainda não possui membros cadastrados."
-              />
-            )}
-          </DetailSection>
-        </Card>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm sm:text-base truncate">
+                          {member.nome}
+                        </p>
+                        <p className="text-xs sm:text-sm opacity-60 truncate">
+                          {member.cargo} • {member.curso}
+                        </p>
+                      </div>
+                      {/* Botão Ver perfil: Admin vê todos, Líder só da sua equipe */}
+                      {(user?.role === "admin" || isUserTeam) && (
+                        <Link
+                          to={`/members/${member.id}`}
+                          className="btn btn-link btn-sm"
+                        >
+                          Ver perfil →
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="Nenhum membro cadastrado"
+                  description="Esta equipe ainda não possui membros cadastrados."
+                />
+              )}
+            </DetailSection>
+          </Card>
+        )}
       </div>
     </Layout>
   );

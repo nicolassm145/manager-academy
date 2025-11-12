@@ -26,14 +26,23 @@ const NewMemberPage = () => {
 
   useEffect(() => {
     loadTeams();
-  }, []);
+
+    // Se for líder, já define a equipe automaticamente como a dele
+    if (user?.role === "lider" && user?.equipe) {
+      setFormData((prev) => ({
+        ...prev,
+        equipe: user.equipe || "",
+      }));
+    }
+  }, [user]);
 
   const loadTeams = async () => {
     try {
       const data = await getTeams();
-      setTeams(data.filter((team) => team.status === "ativa"));
+      setTeams(data); // Backend retorna todas as equipes disponíveis
     } catch (error) {
       console.error("Erro ao carregar equipes:", error);
+      alert("Erro ao carregar equipes. Tente novamente.");
     }
   };
 
@@ -169,22 +178,31 @@ const NewMemberPage = () => {
                 htmlFor="equipe"
                 className="block text-sm font-medium mb-2"
               >
-                Equipe
+                Equipe {user?.role === "lider" && "*"}
               </label>
-              <select
-                id="equipe"
-                name="equipe"
-                value={formData.equipe}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Sem equipe</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.nome}
-                  </option>
-                ))}
-              </select>
+              {user?.role === "lider" ? (
+                // Líder: Campo desabilitado, mostrando apenas sua equipe
+                <div className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg bg-gray-50">
+                  {teams.find((t) => t.id.toString() === user?.equipe)?.nome ||
+                    "Sua Equipe"}
+                </div>
+              ) : (
+                // Admin: Pode selecionar qualquer equipe
+                <select
+                  id="equipe"
+                  name="equipe"
+                  value={formData.equipe}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Sem equipe</option>
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.nome}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div>

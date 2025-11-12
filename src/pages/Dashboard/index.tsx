@@ -10,8 +10,6 @@ import { getInventoryItems } from "../../services/inventoryService";
 import {
   UsersIcon,
   QueueListIcon,
-  BanknotesIcon,
-  ArchiveBoxIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Card } from "../../components/ui";
@@ -34,8 +32,15 @@ const DashboardPage = () => {
   const loadStats = async () => {
     try {
       // Carregar dados baseado no perfil
-      const membersData = can("canViewMembers") ? await getMembers() : [];
-      const teamsData = can("canViewTeams") ? await getTeams() : [];
+      // Se for líder/membro, passa o equipeId para buscar apenas da sua equipe
+      const userEquipeId = user?.equipe ? parseInt(user.equipe) : undefined;
+      const membersData = can("canViewMembers")
+        ? await getMembers(userEquipeId)
+        : [];
+      const teamsData = can("canViewTeams") 
+        ? await getTeams(user?.role, user?.equipe) 
+        : [];
+
       const transactionsData = can("canViewFinance")
         ? await getTransactions()
         : [];
@@ -43,15 +48,13 @@ const DashboardPage = () => {
         ? await getInventoryItems()
         : [];
 
-      // Filtrar por equipe se não for admin
+      // Para admin, não precisa filtrar (já vem tudo)
+      // Para líder/membro, já vem filtrado do backend
       let filteredMembers = membersData;
       let filteredTransactions = transactionsData;
       let filteredInventory = inventoryData;
 
       if (user?.role !== "admin" && user?.equipe) {
-        filteredMembers = membersData.filter(
-          (m) => m.equipe === user.equipe?.toString()
-        );
         filteredTransactions = transactionsData.filter(
           (t) => t.equipeId === user.equipe
         );
@@ -80,13 +83,6 @@ const DashboardPage = () => {
       console.error("Erro ao carregar estatísticas:", error);
       setLoading(false);
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
   };
 
   const getGreeting = () => {
@@ -126,15 +122,14 @@ const DashboardPage = () => {
         {/* Saudação */}
         <div className="bg-gradient-to-r from-primary to-secondary rounded-xl shadow-lg p-6 text-white">
           <h1 className="text-2xl sm:text-3xl font-bold">
-            {getGreeting()}, {user?.nome?.split(" ")[0]}! 👋
+            {getGreeting()}, {user?.nome?.split(" ")[0]}!
           </h1>
           <p className="text-sm sm:text-base opacity-90 mt-2">
             {getRoleLabel(user?.role || "")} •{" "}
             {user?.role === "admin"
               ? "Acesso Total"
-              : user?.role === "lider"
-              ? `Equipe ${user?.equipe || "N/A"}`
-              : `Equipe ${user?.equipe || "N/A"}`}
+              : user?.equipeNome ||
+                (user?.equipe ? `Equipe ${user.equipe}` : "Sem equipe")}
           </p>
         </div>
 
@@ -300,51 +295,6 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
-
-        {/* Links Rápidos */}
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Acesso Rápido</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {can("canViewMembers") && (
-                <Link
-                  to="/members"
-                  className="text-center p-4 rounded-lg hover:bg-base-200 transition-colors"
-                >
-                  <UsersIcon className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm font-medium">Membros</p>
-                </Link>
-              )}
-              {can("canViewTeams") && (
-                <Link
-                  to="/admin/teams"
-                  className="text-center p-4 rounded-lg hover:bg-base-200 transition-colors"
-                >
-                  <QueueListIcon className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                  <p className="text-sm font-medium">Equipes</p>
-                </Link>
-              )}
-              {/* {can("canViewFinance") && (
-                <Link
-                  to="/finance"
-                  className="text-center p-4 rounded-lg hover:bg-base-200 transition-colors"
-                >
-                  <BanknotesIcon className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                  <p className="text-sm font-medium">Financeiro</p>
-                </Link>
-              )} */}
-              {/* {can("canViewInventory") && (
-                <Link
-                  to="/inventory"
-                  className="text-center p-4 rounded-lg hover:bg-base-200 transition-colors"
-                >
-                  <ArchiveBoxIcon className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-                  <p className="text-sm font-medium">Inventário</p>
-                </Link>
-              )} */}
-            </div>
-          </div>
-        </Card>
       </div>
     </Layout>
   );
