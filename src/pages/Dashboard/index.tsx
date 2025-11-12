@@ -37,8 +37,8 @@ const DashboardPage = () => {
       const membersData = can("canViewMembers")
         ? await getMembers(userEquipeId)
         : [];
-      const teamsData = can("canViewTeams") 
-        ? await getTeams(user?.role, user?.equipe) 
+      const teamsData = can("canViewTeams")
+        ? await getTeams(user?.role, user?.equipe)
         : [];
 
       const transactionsData = can("canViewFinance")

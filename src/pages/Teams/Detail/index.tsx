@@ -46,7 +46,7 @@ const TeamDetailPage = () => {
           // 1. For admin (vê todos)
           // 2. OU se for a própria equipe do usuário (líder/membro vê sua equipe)
           const canSeeMbers = user?.role === "admin" || isUserTeam;
-          
+
           if (teamData && canSeeMbers) {
             const members = await getTeamMembers(id);
             setTeamMembers(members);

@@ -5,26 +5,31 @@ import { apiUserToMember } from "../types/mappers";
 import { API_BASE_URL, getAuthHeaders, handleApiError } from "../config/api";
 
 // Funções para gerenciar equipes/times
-export const getTeams = async (_userRole?: string, userEquipeId?: string): Promise<Team[]> => {
+export const getTeams = async (
+  _userRole?: string,
+  userEquipeId?: string
+): Promise<Team[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/equipes/listAll`, {
       headers: getAuthHeaders(),
     });
-    
+
     // Se funcionar, retorna todas as equipes
     if (response.ok) {
       return response.json();
     }
-    
+
     // Se der 403, significa que o usuário não tem permissão para /listAll
     // Vamos tentar buscar equipes de forma alternativa
     if (response.status === 403) {
-      console.log("⚠️ Sem permissão para listar todas as equipes, tentando alternativa...");
-      
+      console.log(
+        "⚠️ Sem permissão para listar todas as equipes, tentando alternativa..."
+      );
+
       // Para membros e líderes sem permissão: tenta buscar IDs conhecidos
       // Isso é um workaround até o backend fornecer um endpoint público
       const teams: Team[] = [];
-      
+
       // Se tiver a própria equipe, busca ela primeiro
       if (userEquipeId) {
         try {
@@ -36,25 +41,28 @@ export const getTeams = async (_userRole?: string, userEquipeId?: string): Promi
           console.error("Erro ao buscar própria equipe:", error);
         }
       }
-      
+
       // Tenta buscar outras equipes por IDs conhecidos (1 a 10)
       // Isso é um hack temporário - o ideal seria o backend ter um endpoint público
       const teamIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      
+
       const fetchPromises = teamIds.map(async (id) => {
         // Pula se já buscou a própria equipe
         if (userEquipeId && id.toString() === userEquipeId) return null;
-        
+
         try {
-          const teamResponse = await fetch(`${API_BASE_URL}/equipes/listar/${id}`, {
-            headers: getAuthHeaders(),
-          });
-          
+          const teamResponse = await fetch(
+            `${API_BASE_URL}/equipes/listar/${id}`,
+            {
+              headers: getAuthHeaders(),
+            }
+          );
+
           // Se for 200 OK, retorna a equipe
           if (teamResponse.ok) {
             return await teamResponse.json();
           }
-          
+
           // Se for 403 ou 404, ignora silenciosamente
           return null;
         } catch (error) {
@@ -62,27 +70,29 @@ export const getTeams = async (_userRole?: string, userEquipeId?: string): Promi
           return null;
         }
       });
-      
+
       // Aguarda todas as requisições
       const results = await Promise.all(fetchPromises);
-      
+
       // Adiciona apenas as equipes válidas que não são duplicadas
-      results.forEach(team => {
-        if (team && !teams.find(t => t.id === team.id)) {
+      results.forEach((team) => {
+        if (team && !teams.find((t) => t.id === team.id)) {
           teams.push(team);
         }
       });
-      
-      console.log(`✅ Encontradas ${teams.length} equipes via método alternativo`);
+
+      console.log(
+        `✅ Encontradas ${teams.length} equipes via método alternativo`
+      );
       return teams;
     }
-    
+
     // Para outros erros
     await handleApiError(response);
     return [];
   } catch (error) {
     console.error("Erro ao buscar equipes:", error);
-    
+
     // Fallback: se tiver equipeId, retorna só sua equipe
     if (userEquipeId) {
       try {
@@ -92,7 +102,7 @@ export const getTeams = async (_userRole?: string, userEquipeId?: string): Promi
         return [];
       }
     }
-    
+
     return [];
   }
 };

@@ -68,7 +68,7 @@ const AdminTeamsPage = () => {
               Equipes de Competição
             </h1>
             <p className="text-sm sm:text-base opacity-60 mt-1">
-              Gerencie as equipes do projeto 
+              Gerencie as equipes do projeto
             </p>
           </div>
           {can("canCreateTeam") && (

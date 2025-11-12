@@ -159,7 +159,9 @@ const MemberDetailPage = () => {
 
             <div>
               <p className="text-sm opacity-60 mb-1">Equipe</p>
-              <p className="text-lg font-semibold">{getTeamName(member.equipe)}</p>
+              <p className="text-lg font-semibold">
+                {getTeamName(member.equipe)}
+              </p>
             </div>
 
             <div>
