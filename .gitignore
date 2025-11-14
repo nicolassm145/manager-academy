@@ -22,7 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-test/__pycache__/test_teste01.cpython-311-pytest-9.0.1.pyc
-test/__pycache__/Release01.cpython-311-pytest-9.0.1.pyc
-test/__pycache__/Release01.cpython-311-pytest-9.0.1.pyc
-test/__pycache__/Release01.cpython-311-pytest-9.0.1.pyc
+
+# Test directory - ignore everything except Release*.py files
+test/*
+!test/Release*.py

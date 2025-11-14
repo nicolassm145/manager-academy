@@ -44,12 +44,12 @@ const allMenuItems: MenuItem[] = [
   //   icon: BanknotesIcon,
   //   permission: "canViewFinance",
   // },
-  // {
-  //   name: "Inventário",
-  //   path: "/inventory",
-  //   icon: ArchiveBoxIcon,
-  //   permission: "canViewInventory",
-  // },
+  {
+    name: "Inventário",
+    path: "/inventory",
+    icon: QueueListIcon, // Substitua por ArchiveBoxIcon se existir/importado
+    permission: "canViewInventory",
+  },
   { name: "Configurações", path: "/settings", icon: Cog8ToothIcon },
 ];
 
