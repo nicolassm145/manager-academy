@@ -6,7 +6,12 @@ import { getUserById } from "../../../services/userService";
 import type { Transaction } from "../../../types/finance";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { usePermissions } from "../../../hooks/usePermissions";
-import { BackButton, DetailSection, DetailItem, DetailGrid } from "../../../components/ui";
+import {
+  BackButton,
+  DetailSection,
+  DetailItem,
+  DetailGrid,
+} from "../../../components/ui";
 
 const FinanceDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -113,29 +118,42 @@ const FinanceDetailPage = () => {
           <br />
           <DetailSection title="Informações da Transação">
             <DetailGrid>
-              <DetailItem label="Tipo" value={
-                <span className={`inline-block px-4 py-1 text-base font-bold rounded-full ${
-                  transaction.tipo === "entrada"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}>
-                  {transaction.tipo === "entrada" ? "ENTRADA" : "SAÍDA"}
-                </span>
-              } />
-              <DetailItem label="Valor" value={
-                <span className={`text-2xl font-bold ${
-                  transaction.tipo === "entrada"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}>
-                  {transaction.tipo === "entrada" ? "+" : "-"}
-                  {formatCurrency(transaction.valor)}
-                </span>
-              } />
+              <DetailItem
+                label="Tipo"
+                value={
+                  <span
+                    className={`inline-block px-4 py-1 text-base font-bold rounded-full ${
+                      transaction.tipo === "entrada"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {transaction.tipo === "entrada" ? "ENTRADA" : "SAÍDA"}
+                  </span>
+                }
+              />
+              <DetailItem
+                label="Valor"
+                value={
+                  <span
+                    className={`text-2xl font-bold ${
+                      transaction.tipo === "entrada"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {transaction.tipo === "entrada" ? "+" : "-"}
+                    {formatCurrency(transaction.valor)}
+                  </span>
+                }
+              />
               <DetailItem label="Descrição" value={transaction.descricao} />
               <DetailItem label="Categoria" value={transaction.categoria} />
               <DetailItem label="Data" value={formatDate(transaction.data)} />
-              <DetailItem label="Equipe" value={transaction.equipe || "Geral"} />
+              <DetailItem
+                label="Equipe"
+                value={transaction.equipe || "Geral"}
+              />
               <DetailItem label="Criado Por" value={creatorName} />
             </DetailGrid>
           </DetailSection>
