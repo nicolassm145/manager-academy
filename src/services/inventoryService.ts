@@ -1,4 +1,3 @@
-
 import type { InventoryItem } from "../types/inventory";
 import { API_BASE_URL, getAuthHeaders, handleApiError } from "../config/api";
 
