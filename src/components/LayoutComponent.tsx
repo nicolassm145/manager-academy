@@ -9,6 +9,7 @@ import {
   XMarkIcon,
   QueueListIcon,
   ArrowRightStartOnRectangleIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";
@@ -38,12 +39,12 @@ const allMenuItems: MenuItem[] = [
     icon: QueueListIcon,
     permission: "canViewTeams",
   },
-  // {
-  //   name: "Financeiro",
-  //   path: "/finance",
-  //   icon: BanknotesIcon,
-  //   permission: "canViewFinance",
-  // },
+  {
+    name: "Financeiro",
+    path: "/finance",
+    icon: BanknotesIcon,
+    permission: "canViewFinance",
+  },
   {
     name: "Inventário",
     path: "/inventory",

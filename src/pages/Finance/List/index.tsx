@@ -89,19 +89,18 @@ const FinanceListPage = () => {
 
   // Filtros
   const filteredTransactions = transactions.filter((t) => {
-    // Se não for admin, filtra por equipe do usuário
-    if (user?.role !== "admin" && user?.equipe && t.equipeId !== user.equipe) {
-      return false;
-    }
-
+    // Não filtra por equipe localmente para membros/líderes, deixa o backend controlar
     const matchSearch =
       t.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.categoria.toLowerCase().includes(searchTerm.toLowerCase());
     const matchTipo = !filterTipo || t.tipo === filterTipo;
-    const matchEquipe =
-      !filterEquipe ||
-      t.equipeId === filterEquipe ||
-      (filterEquipe === "geral" && !t.equipeId);
+    let matchEquipe = true;
+    if (user?.role === "admin") {
+      matchEquipe =
+        !filterEquipe ||
+        String(t.equipeId) === String(filterEquipe) ||
+        (filterEquipe === "geral" && (!t.equipeId || t.equipeId === ""));
+    }
     return matchSearch && matchTipo && matchEquipe;
   });
 

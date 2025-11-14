@@ -100,7 +100,7 @@ const FinanceEditPage = () => {
         data: formData.data,
         tipo: formData.tipo as "entrada" | "saida",
         categoria: formData.categoria,
-        equipeId: formData.equipe === "" ? "" : formData.equipe,
+        equipeId: formData.equipe || "",
       };
 
       await updateTransaction(id, transactionData);

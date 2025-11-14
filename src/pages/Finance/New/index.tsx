@@ -69,7 +69,7 @@ const FinanceNewPage = () => {
         data: formData.data,
         tipo: formData.tipo as "entrada" | "saida",
         categoria: formData.categoria,
-        equipeId: formData.equipe === "" ? "" : formData.equipe,
+        equipeId: formData.equipe || "",
         criadoPor: user?.id || "",
       };
 
