@@ -39,14 +39,25 @@ const InventoryListPage = () => {
 
   useEffect(() => {
     loadItems();
-    if (user?.role === "admin") {
-      loadTeams();
-    }
+    loadTeams();
+    
   }, [user]);
+
+  useEffect(() => {
+    loadItems();
+    
+  }, [searchTerm, filterCategoria, filterEquipe]);
 
   const loadItems = async () => {
     try {
-      const data = await getInventoryItems();
+      const filters: any = {};
+      if (searchTerm) filters.nome = searchTerm;
+      if (filterCategoria) filters.categoria = filterCategoria;
+      // Filtro de equipe só para admin
+      if (user?.role === "admin" && filterEquipe && filterEquipe !== "geral") {
+        filters.equipeId = Number(filterEquipe);
+      }
+      const data = await getInventoryItems(filters);
       setItems(data);
     } catch (error) {
       console.error("Erro ao carregar itens:", error);
@@ -76,31 +87,16 @@ const InventoryListPage = () => {
     }
   };
 
-  // Filtros
-  const filteredItems = items.filter((item) => {
-    // Se não for admin, filtra por equipe do usuário
-    if (
-      user?.role !== "admin" &&
-      user?.equipe &&
-      item.equipeId !== user.equipe
-    ) {
-      return false;
-    }
-
-    const matchSearch =
-      item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.categoria.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategoria =
-      !filterCategoria || item.categoria === filterCategoria;
-    const matchEquipe =
-      !filterEquipe ||
-      item.equipeId === filterEquipe ||
-      (filterEquipe === "geral" && !item.equipeId);
-    return matchSearch && matchCategoria && matchEquipe;
-  });
+  // Agora os itens já vêm filtrados do backend
+  const filteredItems = items;
 
   const categorias = Array.from(new Set(items.map((i) => i.categoria)));
+
+  // Função para pegar o nome da equipe pelo id
+  const getEquipeNome = (equipeId: number | string) => {
+    const equipe = teams.find((t) => t.id === Number(equipeId));
+    return equipe ? equipe.nome : "N/A";
+  };
 
   return (
     <Layout>
@@ -182,7 +178,7 @@ const InventoryListPage = () => {
                     />
                     <MobileCardItem
                       label="Equipe"
-                      value={item.equipe || "N/A"}
+                      value={getEquipeNome(item.equipeId)}
                       fullWidth
                     />
                   </div>
@@ -246,7 +242,7 @@ const InventoryListPage = () => {
                         <span className="font-semibold">{item.quantidade}</span>
                       </TableCell>
                       <TableCell>{item.localizacao}</TableCell>
-                      <TableCell>{item.equipe || "N/A"}</TableCell>
+                      <TableCell>{getEquipeNome(item.equipeId)}</TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           <Link

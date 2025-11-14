@@ -66,9 +66,13 @@ const EditInventoryItemPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
-
     try {
-      await updateInventoryItem(id, formData);
+      // Não envie o campo sku no update
+      const { sku, ...body } = formData;
+      await updateInventoryItem(id, {
+        ...body,
+        equipeId: String(formData.equipeId),
+      });
       alert("Item atualizado com sucesso!");
       navigate(`/inventory/${id}`);
     } catch (error) {
@@ -83,7 +87,12 @@ const EditInventoryItemPage = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "quantidade" ? parseInt(value) || 0 : value,
+      [name]:
+        name === "quantidade"
+          ? parseInt(value) || 0
+          : name === "equipeId"
+          ? Number(value)
+          : value,
     });
   };
 
@@ -145,8 +154,8 @@ const EditInventoryItemPage = () => {
                 type="text"
                 required
                 value={formData.sku}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                disabled
+                className="w-full px-4 py-3 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
               />
             </div>
           </div>
@@ -253,7 +262,7 @@ const EditInventoryItemPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/inventory/${id}`)}
+              onClick={() => navigate(`/inventory`)}
               className="btn btn-ghost"
             >
               Cancelar

@@ -10,7 +10,14 @@ const NewInventoryItemPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    nome: string;
+    sku: string;
+    categoria: string;
+    quantidade: number;
+    localizacao: string;
+    equipeId: number | string;
+  }>({
     nome: "",
     sku: "",
     categoria: "",
@@ -34,9 +41,11 @@ const NewInventoryItemPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      await createInventoryItem(formData);
+      await createInventoryItem({
+        ...formData,
+        equipeId: Number(formData.equipeId),
+      } as any);
       alert("Item cadastrado com sucesso!");
       navigate("/inventory");
     } catch (error) {
@@ -50,7 +59,12 @@ const NewInventoryItemPage = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "quantidade" ? parseInt(value) || 0 : value,
+      [name]:
+        name === "quantidade"
+          ? parseInt(value) || 0
+          : name === "equipeId"
+          ? Number(value)
+          : value,
     });
   };
 
