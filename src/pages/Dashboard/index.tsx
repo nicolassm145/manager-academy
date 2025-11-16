@@ -372,7 +372,6 @@ const DashboardPage = () => {
 
         <br />
 
-
         <h2 className="text-xl font-bold mb-4">Resumo Financeiro</h2>
         {/* Gráficos Financeiros */}
         {can("canViewFinance") && user?.role !== "admin" && (
