@@ -142,10 +142,12 @@ export function Layout({ children }: LayoutProps) {
                 <p className="text-xs opacity-60 truncate">{user?.email}</p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
                   {user?.role === "admin" && "Administrador"}
-                  {user?.role === "lider" && "Líder de Equipe"}
-                  {user?.role === "professor" && "Professor"}
-                  {user?.role === "diretor" && "Diretor Financeiro"}
+                  {user?.role === "professor" && "Professor Orientador"}
                   {user?.role === "membro" && "Membro"}
+                  {user?.role === "lider" &&
+                    (user?.cargo === "Professor Orientador"
+                      ? "Professor Orientador"
+                      : "Líder de Equipe")}
                 </p>
               </div>
               <button

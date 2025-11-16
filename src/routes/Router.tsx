@@ -28,6 +28,7 @@ import InventoryListPage from "../pages/Inventory/List";
 import InventoryNewPage from "../pages/Inventory/New";
 import InventoryDetailPage from "../pages/Inventory/Detail";
 import InventoryEditPage from "../pages/Inventory/Edit";
+import FinanceResumePage from "../pages/Finance/Resume";
 
 const router = createBrowserRouter([
   {
@@ -166,7 +167,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
+  {
+    path: "/finance/resume",
+    element: (
+      <ProtectedRoute requiredPermission="canViewFinance">
+        <FinanceResumePage />
+      </ProtectedRoute>
+    ),
+  },
   // Inventário Routes
   {
     path: "/inventory",

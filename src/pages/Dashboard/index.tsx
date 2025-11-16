@@ -22,6 +22,7 @@ import {
   UsersIcon,
   UserGroupIcon,
   PlusIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { Card } from "../../components/ui";
 
@@ -174,10 +175,12 @@ const DashboardPage = () => {
   const getRoleLabel = (role: string) => {
     const roles: Record<string, string> = {
       admin: "Administrador",
-      lider: "Líder",
+      lider:
+        user?.cargo === "Professor Orientador" || user?.cargo === "Professor"
+          ? "Professor Orientador"
+          : "Líder de Equipe",
       membro: "Membro",
-      professor: "Professor",
-      diretor: "Diretor",
+      professor: "Professor Orientador",
     };
     return roles[role] || role;
   };
@@ -248,54 +251,131 @@ const DashboardPage = () => {
               </div>
             </Card>
           )}
-          {can("canViewFinance") && (
-            <StatCard
-              label="Entradas"
-              value={
-                financeSummary
-                  ? financeSummary.entradas.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })
-                  : "-"
-              }
-              color="green"
-            />
-          )}
-          {can("canViewFinance") && (
-            <StatCard
-              label="Saídas"
-              value={
-                financeSummary
-                  ? financeSummary.saidas.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })
-                  : "-"
-              }
-              color="red"
-            />
-          )}
-          {can("canViewFinance") && (
-            <StatCard
-              label="Saldo"
-              value={
-                financeSummary
-                  ? financeSummary.saldo.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })
-                  : "-"
-              }
-              color={
-                financeSummary && financeSummary.saldo >= 0 ? "green" : "red"
-              }
-            />
+          {can("canViewFinance") && user?.role !== "admin" && (
+            <Card className="lg:col-span-2">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm opacity-60 mb-1">Saldo</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
+                      R$
+                      {financeSummary
+                        ? " " +
+                          financeSummary.saldo.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : " -"}
+                    </p>
+                    <p className="text-xs opacity-50 mt-1">
+                      {financeSummary && financeSummary.saldo >= 0
+                        ? "Saldo positivo"
+                        : "Saldo negativo"}
+                    </p>
+                  </div>
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      financeSummary && financeSummary.saldo >= 0
+                        ? "bg-green-100"
+                        : "bg-red-100"
+                    }`}
+                  >
+                    <BanknotesIcon
+                      className={`w-6 h-6 ${
+                        financeSummary && financeSummary.saldo >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
           )}
         </div>
 
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {can("canCreateMember") && (
+              <Link
+                to="/members/new"
+                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <PlusIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Novo Membro</p>
+                    <p className="text-sm opacity-60">
+                      Cadastrar um novo membro
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {can("canCreateFinance") && (
+              <Link
+                to="/finance/new"
+                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <PlusIcon className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Registrar Transação</p>
+                    <p className="text-sm opacity-60">Entrada ou saída</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {can("canCreateInventory") && (
+              <Link
+                to="/inventory/new"
+                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                    <PlusIcon className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Adicionar Item</p>
+                    <p className="text-sm opacity-60">Novo item ao estoque</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {can("canCreateTeam") && (
+              <Link
+                to="/admin/teams/new"
+                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <PlusIcon className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Nova Equipe</p>
+                    <p className="text-sm opacity-60">Criar uma equipe</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <br />
+
+
+        <h2 className="text-xl font-bold mb-4">Resumo Financeiro</h2>
         {/* Gráficos Financeiros */}
-        {can("canViewFinance") && (
+        {can("canViewFinance") && user?.role !== "admin" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card>
               <div className="p-4 sm:p-6">
@@ -385,9 +465,7 @@ const DashboardPage = () => {
                         cx="50%"
                         cy="50%"
                         outerRadius={80}
-                        label={({ name, percent }) =>
-                          `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
-                        }
+                        label={false}
                       >
                         {getPieData("saida").map((_, idx) => (
                           <Cell
@@ -441,82 +519,6 @@ const DashboardPage = () => {
             </Card>
           </div>
         )}
-
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {can("canCreateMember") && (
-              <Link
-                to="/members/new"
-                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <PlusIcon className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Novo Membro</p>
-                    <p className="text-sm opacity-60">
-                      Cadastrar um novo membro
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {/* {can("canCreateFinance") && (
-              <Link
-                to="/finance/new"
-                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <PlusIcon className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Registrar Transação</p>
-                    <p className="text-sm opacity-60">Entrada ou saída</p>
-                  </div>
-                </div>
-              </Link>
-            )} */}
-
-            {/* {can("canCreateInventory") && (
-              <Link
-                to="/inventory/new"
-                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                    <PlusIcon className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Adicionar Item</p>
-                    <p className="text-sm opacity-60">Novo item ao estoque</p>
-                  </div>
-                </div>
-              </Link>
-            )} */}
-
-            {can("canCreateTeam") && (
-              <Link
-                to="/admin/teams/new"
-                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                    <PlusIcon className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Nova Equipe</p>
-                    <p className="text-sm opacity-60">Criar uma equipe</p>
-                  </div>
-                </div>
-              </Link>
-            )}
-          </div>
-        </div>
       </div>
     </Layout>
   );

@@ -13,6 +13,7 @@ export interface User {
   role: UserRole;
   equipe?: string;
   equipeNome?: string; // Nome da equipe para exibição
+  cargo?: string; // Para distinguir professor
 }
 
 interface AuthContextType {
@@ -111,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: apiUser.email,
         role: mapTipoAcessoToRole(apiUser.tipoAcesso),
         equipe: apiUser.equipeId?.toString(),
+        cargo: apiUser.cargoEquipe || undefined,
       };
 
       // Busca o nome da equipe se tiver equipeId
