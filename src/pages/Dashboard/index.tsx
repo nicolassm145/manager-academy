@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { Link } from "react-router-dom";
 import { Layout } from "../../components/LayoutComponent";
 import { useAuth } from "../../context/AuthContext";
@@ -48,7 +55,9 @@ const DashboardPage = () => {
       setTransactions(
         data.map((t) => ({
           ...t,
-          tipo: (typeof t.tipo === "string" ? t.tipo.toLowerCase() : t.tipo) as "entrada" | "saida",
+          tipo: (typeof t.tipo === "string" ? t.tipo.toLowerCase() : t.tipo) as
+            | "entrada"
+            | "saida",
         }))
       );
     } catch (e) {
@@ -65,10 +74,30 @@ const DashboardPage = () => {
       grouped[t.categoria].count += 1;
     });
     // Recharts espera o campo 'name' para o label
-    return Object.entries(grouped).map(([categoria, obj]) => ({ name: categoria, valor: obj.valor, count: obj.count }));
+    return Object.entries(grouped).map(([categoria, obj]) => ({
+      name: categoria,
+      valor: obj.valor,
+      count: obj.count,
+    }));
   };
 
-  const COLORS = ["#22c55e", "#ef4444", "#f59e42", "#6366f1", "#eab308", "#06b6d4", "#a21caf", "#f472b6", "#64748b", "#facc15", "#0ea5e9", "#d97706", "#84cc16", "#db2777", "#7c3aed"];
+  const COLORS = [
+    "#22c55e",
+    "#ef4444",
+    "#f59e42",
+    "#6366f1",
+    "#eab308",
+    "#06b6d4",
+    "#a21caf",
+    "#f472b6",
+    "#64748b",
+    "#facc15",
+    "#0ea5e9",
+    "#d97706",
+    "#84cc16",
+    "#db2777",
+    "#7c3aed",
+  ];
 
   const loadFinanceSummary = async () => {
     try {
@@ -270,9 +299,13 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card>
               <div className="p-4 sm:p-6">
-                <h2 className="text-lg font-bold mb-4">Entradas por Categoria</h2>
+                <h2 className="text-lg font-bold mb-4">
+                  Entradas por Categoria
+                </h2>
                 {getPieData("entrada").length === 0 ? (
-                  <div className="text-center opacity-60">Sem dados de entrada</div>
+                  <div className="text-center opacity-60">
+                    Sem dados de entrada
+                  </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={260}>
                     <PieChart>
@@ -286,19 +319,43 @@ const DashboardPage = () => {
                         // Remove o label externo para deixar o gráfico mais limpo
                       >
                         {getPieData("entrada").map((_, idx) => (
-                          <Cell key={`cell-entrada-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                          <Cell
+                            key={`cell-entrada-${idx}`}
+                            fill={COLORS[idx % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip
                         content={({ active, payload }) => {
-                          if (!active || !payload || !payload.length) return null;
+                          if (!active || !payload || !payload.length)
+                            return null;
                           const entry = payload[0].payload;
-                          const total = getPieData("entrada").reduce((sum, d) => sum + d.valor, 0);
-                          const percent = total ? (entry.valor / total) * 100 : 0;
+                          const total = getPieData("entrada").reduce(
+                            (sum, d) => sum + d.valor,
+                            0
+                          );
+                          const percent = total
+                            ? (entry.valor / total) * 100
+                            : 0;
                           return (
-                            <div style={{ background: "#fff", border: "1px solid #ccc", padding: 8, borderRadius: 6 }}>
-                              <div><b>{entry.name}</b></div>
-                              <div>Valor: {entry.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
+                            <div
+                              style={{
+                                background: "#fff",
+                                border: "1px solid #ccc",
+                                padding: 8,
+                                borderRadius: 6,
+                              }}
+                            >
+                              <div>
+                                <b>{entry.name}</b>
+                              </div>
+                              <div>
+                                Valor:{" "}
+                                {entry.valor.toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </div>
                               <div>Qtd: {entry.count}</div>
                               <div>{percent.toFixed(1)}% do total</div>
                             </div>
@@ -315,7 +372,9 @@ const DashboardPage = () => {
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-bold mb-4">Saídas por Categoria</h2>
                 {getPieData("saida").length === 0 ? (
-                  <div className="text-center opacity-60">Sem dados de saída</div>
+                  <div className="text-center opacity-60">
+                    Sem dados de saída
+                  </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={260}>
                     <PieChart>
@@ -326,22 +385,48 @@ const DashboardPage = () => {
                         cx="50%"
                         cy="50%"
                         outerRadius={80}
-                        label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
+                        label={({ name, percent }) =>
+                          `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
+                        }
                       >
                         {getPieData("saida").map((_, idx) => (
-                          <Cell key={`cell-saida-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                          <Cell
+                            key={`cell-saida-${idx}`}
+                            fill={COLORS[idx % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip
                         content={({ active, payload }) => {
-                          if (!active || !payload || !payload.length) return null;
+                          if (!active || !payload || !payload.length)
+                            return null;
                           const entry = payload[0].payload;
-                          const total = getPieData("saida").reduce((sum, d) => sum + d.valor, 0);
-                          const percent = total ? (entry.valor / total) * 100 : 0;
+                          const total = getPieData("saida").reduce(
+                            (sum, d) => sum + d.valor,
+                            0
+                          );
+                          const percent = total
+                            ? (entry.valor / total) * 100
+                            : 0;
                           return (
-                            <div style={{ background: "#fff", border: "1px solid #ccc", padding: 8, borderRadius: 6 }}>
-                              <div><b>{entry.name}</b></div>
-                              <div>Valor: {entry.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
+                            <div
+                              style={{
+                                background: "#fff",
+                                border: "1px solid #ccc",
+                                padding: 8,
+                                borderRadius: 6,
+                              }}
+                            >
+                              <div>
+                                <b>{entry.name}</b>
+                              </div>
+                              <div>
+                                Valor:{" "}
+                                {entry.valor.toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </div>
                               <div>Qtd: {entry.count}</div>
                               <div>{percent.toFixed(1)}% do total</div>
                             </div>
