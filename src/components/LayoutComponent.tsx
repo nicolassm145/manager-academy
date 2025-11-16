@@ -10,6 +10,7 @@ import {
   QueueListIcon,
   ArrowRightStartOnRectangleIcon,
   BanknotesIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";
@@ -36,7 +37,7 @@ const allMenuItems: MenuItem[] = [
   {
     name: "Equipes",
     path: "/admin/teams",
-    icon: QueueListIcon,
+    icon: UserGroupIcon,
     permission: "canViewTeams",
   },
   {

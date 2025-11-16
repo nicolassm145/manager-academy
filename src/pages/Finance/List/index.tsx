@@ -8,7 +8,12 @@ import {
 import { getTeams } from "../../../services/teamService";
 import type { Transaction } from "../../../types/finance";
 import type { Team } from "../../../types/admin";
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  ChartBarIcon,
+} from "@heroicons/react/24/outline";
 import { usePermissions } from "../../../hooks/usePermissions";
 import { useAuth } from "../../../context/AuthContext";
 import {
@@ -26,7 +31,9 @@ import {
   MobileCard,
   MobileCardItem,
   MobileCardActions,
+  StatCard,
 } from "../../../components/ui";
+import { getFinanceSummary } from "../../../services/financeDashboardService";
 
 const FinanceListPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -35,6 +42,26 @@ const FinanceListPage = () => {
   const [filterTipo, setFilterTipo] = useState("");
   const [filterEquipe, setFilterEquipe] = useState("");
   const { can } = usePermissions();
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [dashboardSummary, setDashboardSummary] = useState<{
+    entradas: number;
+    saidas: number;
+    saldo: number;
+  } | null>(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
+  const handleShowDashboard = async () => {
+    setShowDashboard((prev) => !prev);
+    if (!dashboardSummary && !loadingDashboard) {
+      setLoadingDashboard(true);
+      try {
+        const data = await getFinanceSummary();
+        setDashboardSummary(data);
+      } catch (e) {
+        alert("Erro ao carregar resumo financeiro");
+      }
+      setLoadingDashboard(false);
+    }
+  };
   const { user } = useAuth();
 
   useEffect(() => {
@@ -89,11 +116,12 @@ const FinanceListPage = () => {
 
   // Filtros
   const filteredTransactions = transactions.filter((t) => {
-    // Não filtra por equipe localmente para membros/líderes, deixa o backend controlar
+    // Normaliza tipo para lowercase para evitar problemas de case
+    const tipoLower = t.tipo?.toLowerCase() === "saida" ? "saida" : "entrada";
     const matchSearch =
       t.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.categoria.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchTipo = !filterTipo || t.tipo === filterTipo;
+    const matchTipo = !filterTipo || tipoLower === filterTipo;
     let matchEquipe = true;
     if (user?.role === "admin") {
       matchEquipe =
@@ -106,16 +134,70 @@ const FinanceListPage = () => {
 
   // Calcula totais
   const totalEntradas = filteredTransactions
-    .filter((t) => t.tipo === "entrada")
+    .filter((t) => t.tipo?.toLowerCase() === "entrada")
     .reduce((sum, t) => sum + t.valor, 0);
   const totalSaidas = filteredTransactions
-    .filter((t) => t.tipo === "saida")
+    .filter((t) => t.tipo?.toLowerCase() === "saida")
     .reduce((sum, t) => sum + t.valor, 0);
   const saldo = totalEntradas - totalSaidas;
 
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
+        <div className="flex justify-end">
+          <button
+            className="btn btn-outline flex items-center gap-2"
+            onClick={handleShowDashboard}
+            type="button"
+          >
+            <ChartBarIcon className="w-5 h-5" />
+            {showDashboard ? "Ocultar Dashboard" : "Ver Dashboard"}
+          </button>
+        </div>
+        {showDashboard && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <StatCard
+              label="Entradas"
+              value={
+                dashboardSummary
+                  ? dashboardSummary.entradas.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+                  : "-"
+              }
+              color="green"
+            />
+            <StatCard
+              label="Saídas"
+              value={
+                dashboardSummary
+                  ? dashboardSummary.saidas.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+                  : "-"
+              }
+              color="red"
+            />
+            <StatCard
+              label="Saldo"
+              value={
+                dashboardSummary
+                  ? dashboardSummary.saldo.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+                  : "-"
+              }
+              color={
+                dashboardSummary && dashboardSummary.saldo >= 0
+                  ? "green"
+                  : "red"
+              }
+            />
+          </div>
+        )}
         <PageHeader
           title="Financeiro"
           description="Controle de entradas e saídas financeiras"
@@ -187,12 +269,14 @@ const FinanceListPage = () => {
                     </div>
                     <span
                       className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        transaction.tipo === "entrada"
+                        transaction.tipo?.toLowerCase() === "entrada"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {transaction.tipo === "entrada" ? "Entrada" : "Saída"}
+                      {transaction.tipo?.toLowerCase() === "entrada"
+                        ? "Entrada"
+                        : "Saída"}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -263,24 +347,28 @@ const FinanceListPage = () => {
                       <TableCell>
                         <span
                           className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            transaction.tipo === "entrada"
+                            transaction.tipo?.toLowerCase() === "entrada"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {transaction.tipo === "entrada" ? "Entrada" : "Saída"}
+                          {transaction.tipo?.toLowerCase() === "entrada"
+                            ? "Entrada"
+                            : "Saída"}
                         </span>
                       </TableCell>
                       <TableCell>{transaction.categoria}</TableCell>
                       <TableCell>
                         <span
                           className={`font-semibold ${
-                            transaction.tipo === "entrada"
+                            transaction.tipo?.toLowerCase() === "entrada"
                               ? "text-green-600"
                               : "text-red-600"
                           }`}
                         >
-                          {transaction.tipo === "entrada" ? "+" : "-"}
+                          {transaction.tipo?.toLowerCase() === "entrada"
+                            ? "+"
+                            : "-"}
                           {formatCurrency(transaction.valor)}
                         </span>
                       </TableCell>

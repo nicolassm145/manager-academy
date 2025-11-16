@@ -36,7 +36,7 @@ const InventoryListPage = () => {
   const [filterEquipe, setFilterEquipe] = useState("");
   const { can } = usePermissions();
   const { user } = useAuth();
-
+  
   useEffect(() => {
     loadItems();
     loadTeams();

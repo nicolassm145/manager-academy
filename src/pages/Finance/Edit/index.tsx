@@ -62,7 +62,8 @@ const FinanceEditPage = () => {
           descricao: transaction.descricao,
           valor: transaction.valor.toString(),
           data: transaction.data,
-          tipo: transaction.tipo,
+          tipo:
+            transaction.tipo?.toLowerCase() === "saida" ? "saida" : "entrada",
           categoria: transaction.categoria,
           equipe: transaction.equipeId || "",
         });
