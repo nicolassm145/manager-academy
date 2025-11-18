@@ -102,13 +102,13 @@ const AdminTeamsPage = () => {
                   <span
                     className="text-xs sm:text-sm opacity-60"
                     style={{
-                      display: '-webkit-box',
+                      display: "-webkit-box",
                       WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'normal',
-                      width: '100%',
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "normal",
+                      width: "100%",
                     }}
                   >
                     {team.descricao}
