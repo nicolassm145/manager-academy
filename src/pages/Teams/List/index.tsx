@@ -99,9 +99,20 @@ const AdminTeamsPage = () => {
                   <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">
                     {team.nome}
                   </h3>
-                  <p className="text-xs sm:text-sm opacity-60">
+                  <span
+                    className="text-xs sm:text-sm opacity-60"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                      width: '100%',
+                    }}
+                  >
                     {team.descricao}
-                  </p>
+                  </span>
                 </div>
               </div>
 
