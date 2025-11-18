@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import {
@@ -23,6 +24,10 @@ const EditInventoryItemPage = () => {
     localizacao: "",
     equipeId: "",
   });
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadTeams();
@@ -56,7 +61,10 @@ const EditInventoryItemPage = () => {
           }
         } catch (error) {
           console.error("Erro ao carregar item:", error);
-          alert("Erro ao carregar dados do item");
+          setFeedback({
+            type: "error",
+            message: "Erro ao carregar dados do item",
+          });
         }
       }
     };
@@ -65,15 +73,20 @@ const EditInventoryItemPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFeedback(null);
     if (!id) return;
-
     try {
-      await updateInventoryItem(id, formData);
-      alert("Item atualizado com sucesso!");
-      navigate(`/inventory/${id}`);
+      // Não envie o campo sku no update
+      const { sku, ...body } = formData;
+      await updateInventoryItem(id, {
+        ...body,
+        equipeId: String(formData.equipeId),
+      });
+      setFeedback({ type: "success", message: "Item atualizado com sucesso!" });
+      setTimeout(() => navigate(`/inventory/${id}`), 1200);
     } catch (error) {
       console.error("Erro ao atualizar item:", error);
-      alert("Erro ao atualizar item");
+      setFeedback({ type: "error", message: "Erro ao atualizar item" });
     }
   };
 
@@ -83,7 +96,12 @@ const EditInventoryItemPage = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "quantidade" ? parseInt(value) || 0 : value,
+      [name]:
+        name === "quantidade"
+          ? parseInt(value) || 0
+          : name === "equipeId"
+          ? Number(value)
+          : value,
     });
   };
 
@@ -107,6 +125,10 @@ const EditInventoryItemPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Editar Item</h1>
           <p className="text-sm sm:text-base opacity-60 mt-1">
@@ -145,8 +167,8 @@ const EditInventoryItemPage = () => {
                 type="text"
                 required
                 value={formData.sku}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                disabled
+                className="w-full px-4 py-3 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
               />
             </div>
           </div>
@@ -253,7 +275,7 @@ const EditInventoryItemPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/inventory/${id}`)}
+              onClick={() => navigate(`/inventory`)}
               className="btn btn-ghost"
             >
               Cancelar

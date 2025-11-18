@@ -349,7 +349,6 @@ const NewMemberPage = () => {
                   <option value="professor">
                     Professor - Consulta e orientação
                   </option>
-                  <option value="diretor">Diretor - Gerencia finanças</option>
                 </select>
                 <p className="text-xs opacity-60 mt-1">
                   Define as permissões no sistema

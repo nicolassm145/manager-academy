@@ -21,11 +21,11 @@ export const mapTipoAcessoToRole = (tipoAcesso: TipoAcesso): UserRole => {
 
 // Mapeia UserRole do frontend para TipoAcesso da API
 export const mapRoleToTipoAcesso = (role: UserRole): TipoAcesso => {
+  // Gambiarra: professor salva como Líder
+  if (role === "professor") return "Líder";
   const mapping: Record<UserRole, TipoAcesso> = {
     admin: "Administrador",
     lider: "Líder",
-    professor: "Membro",
-    diretor: "Membro",
     membro: "Membro",
   };
   return mapping[role] || "Membro";

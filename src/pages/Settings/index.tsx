@@ -130,9 +130,12 @@ const SettingsPage = () => {
               </label>
               <p className="text-base">
                 {user?.role === "admin" && "Administrador"}
-                {user?.role === "lider" && "Líder de Equipe"}
+                {user?.role === "lider" &&
+                  (user?.cargo === "Professor Orientador" ||
+                  user?.cargo === "Professor"
+                    ? "Professor Orientador"
+                    : "Líder de Equipe")}
                 {user?.role === "professor" && "Professor Orientador"}
-                {user?.role === "diretor" && "Diretor Financeiro"}
                 {user?.role === "membro" && "Membro"}
               </p>
             </div>

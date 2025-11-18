@@ -2,7 +2,6 @@ import type { UserRole } from "../context/AuthContext";
 
 // Define as permissões para cada cargo
 export const PERMISSIONS = {
-  // Admin tem acesso total
   admin: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -18,16 +17,14 @@ export const PERMISSIONS = {
     canEditTeam: true,
     canDeleteTeam: true,
     canViewFinance: true,
-    canCreateFinance: true,
-    canEditFinance: true,
-    canDeleteFinance: true,
+    canCreateFinance: false,
+    canEditFinance: false,
+    canDeleteFinance: false,
     canViewInventory: true,
-    canCreateInventory: true,
-    canEditInventory: true,
-    canDeleteInventory: true,
+    canCreateInventory: false,
+    canEditInventory: false,
+    canDeleteInventory: false,
   },
-
-  // Líder pode gerenciar membros, finanças e inventário da sua equipe
   lider: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -51,8 +48,6 @@ export const PERMISSIONS = {
     canEditInventory: true,
     canDeleteInventory: true,
   },
-
-  // Professor tem as mesmas permissões que Líder
   professor: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -76,8 +71,6 @@ export const PERMISSIONS = {
     canEditInventory: true,
     canDeleteInventory: true,
   },
-
-  // Diretor pode ver finanças
   diretor: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -93,16 +86,14 @@ export const PERMISSIONS = {
     canEditTeam: false,
     canDeleteTeam: false,
     canViewFinance: true,
-    canCreateFinance: false,
-    canEditFinance: false,
-    canDeleteFinance: false,
+    canCreateFinance: true,
+    canEditFinance: true,
+    canDeleteFinance: true,
     canViewInventory: false,
     canCreateInventory: false,
     canEditInventory: false,
     canDeleteInventory: false,
   },
-
-  // Membro pode ver membros e equipes (mas sem editar/criar/deletar)
   membro: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -122,8 +113,8 @@ export const PERMISSIONS = {
     canEditFinance: false,
     canDeleteFinance: false,
     canViewInventory: true,
-    canCreateInventory: false,
-    canEditInventory: false,
+    canCreateInventory: true,
+    canEditInventory: true,
     canDeleteInventory: false,
   },
 } as const;

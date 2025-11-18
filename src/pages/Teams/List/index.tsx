@@ -10,6 +10,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import { PageHeader } from "../../../components/ui/PageHeaderComponent";
 import { usePermissions } from "../../../hooks/usePermissions";
 
 const AdminTeamsPage = () => {
@@ -59,25 +60,20 @@ const AdminTeamsPage = () => {
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Equipes de Competição
-            </h1>
-            <p className="text-sm sm:text-base opacity-60 mt-1">
-              Gerencie as equipes do projeto
-            </p>
-          </div>
+        <PageHeader
+          title="Equipes de Competição"
+          description="Gerencie as equipes do projeto"
+        >
           {can("canCreateTeam") && (
             <Link
               to="/admin/teams/new"
-              className="btn btn-primary flex items-center gap-2"
+              className="flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"
             >
               <PlusIcon className="w-5 h-5" />
               Nova Equipe
             </Link>
           )}
-        </div>
+        </PageHeader>
 
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border">
           <div className="relative">
@@ -103,9 +99,20 @@ const AdminTeamsPage = () => {
                   <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">
                     {team.nome}
                   </h3>
-                  <p className="text-xs sm:text-sm opacity-60">
+                  <span
+                    className="text-xs sm:text-sm opacity-60"
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "normal",
+                      width: "100%",
+                    }}
+                  >
                     {team.descricao}
-                  </p>
+                  </span>
                 </div>
               </div>
 
