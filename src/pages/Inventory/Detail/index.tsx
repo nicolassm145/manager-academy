@@ -112,17 +112,14 @@ const InventoryDetailPage = () => {
         <div className="bg-white rounded-xl shadow-md border p-6 sm:p-8">
           {/* Informações Principais */}
           <div className="flex flex-col">
-              <h1 className="text-3xl font-bold leading-tight">{item.nome}</h1>
-              <span className="text-base opacity-60 mt-1">
-                SKU:{" "}
-                <code className="bg-gray-100 px-2 py-1 rounded">
-                  {item.sku}
-                </code>
-              </span>
-            </div>
-            <br />
+            <h1 className="text-3xl font-bold leading-tight">{item.nome}</h1>
+            <span className="text-base opacity-60 mt-1">
+              SKU:{" "}
+              <code className="bg-gray-100 px-2 py-1 rounded">{item.sku}</code>
+            </span>
+          </div>
+          <br />
           <DetailSection title="Informações do Item">
-            
             <DetailGrid>
               <DetailItem label="Nome" value={item.nome} />
               <DetailItem label="SKU" value={item.sku} />
@@ -142,7 +139,6 @@ const InventoryDetailPage = () => {
               />
             </DetailGrid>
           </DetailSection>
-
         </div>
       </div>
     </Layout>

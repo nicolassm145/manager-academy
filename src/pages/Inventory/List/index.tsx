@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialogComponent";
 import { Link } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import {
@@ -30,6 +32,14 @@ import {
 
 const InventoryListPage = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    id: string;
+    nome: string;
+  } | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategoria, setFilterCategoria] = useState("");
@@ -72,16 +82,21 @@ const InventoryListPage = () => {
     }
   };
 
-  const handleDelete = async (id: string, nome: string) => {
-    if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
-      try {
-        await deleteInventoryItem(id);
-        await loadItems();
-        alert("Item excluído com sucesso!");
-      } catch (error) {
-        console.error("Erro ao excluir item:", error);
-        alert("Erro ao excluir item");
-      }
+  const handleDelete = (id: string, nome: string) => {
+    setConfirmDelete({ id, nome });
+  };
+
+  const confirmDeleteItem = async () => {
+    if (!confirmDelete) return;
+    try {
+      await deleteInventoryItem(confirmDelete.id);
+      await loadItems();
+      setFeedback({ type: "success", message: "Item excluído com sucesso!" });
+    } catch (error) {
+      console.error("Erro ao excluir item:", error);
+      setFeedback({ type: "error", message: "Erro ao excluir item" });
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -99,6 +114,24 @@ const InventoryListPage = () => {
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
+        {/* Dialogo de confirmação de exclusão */}
+        <ConfirmDialog
+          open={!!confirmDelete}
+          title="Excluir item?"
+          description={
+            confirmDelete
+              ? `Tem certeza que deseja excluir "${confirmDelete.nome}"? Essa ação não poderá ser desfeita.`
+              : ""
+          }
+          confirmText="Excluir"
+          cancelText="Cancelar"
+          onConfirm={confirmDeleteItem}
+          onCancel={() => setConfirmDelete(null)}
+        />
         <PageHeader
           title="Inventário"
           description="Controle de itens e equipamentos"

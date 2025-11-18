@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import {
@@ -23,6 +24,10 @@ const EditInventoryItemPage = () => {
     localizacao: "",
     equipeId: "",
   });
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadTeams();
@@ -56,7 +61,10 @@ const EditInventoryItemPage = () => {
           }
         } catch (error) {
           console.error("Erro ao carregar item:", error);
-          alert("Erro ao carregar dados do item");
+          setFeedback({
+            type: "error",
+            message: "Erro ao carregar dados do item",
+          });
         }
       }
     };
@@ -65,6 +73,7 @@ const EditInventoryItemPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFeedback(null);
     if (!id) return;
     try {
       // Não envie o campo sku no update
@@ -73,11 +82,11 @@ const EditInventoryItemPage = () => {
         ...body,
         equipeId: String(formData.equipeId),
       });
-      alert("Item atualizado com sucesso!");
-      navigate(`/inventory/${id}`);
+      setFeedback({ type: "success", message: "Item atualizado com sucesso!" });
+      setTimeout(() => navigate(`/inventory/${id}`), 1200);
     } catch (error) {
       console.error("Erro ao atualizar item:", error);
-      alert("Erro ao atualizar item");
+      setFeedback({ type: "error", message: "Erro ao atualizar item" });
     }
   };
 
@@ -116,6 +125,10 @@ const EditInventoryItemPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Editar Item</h1>
           <p className="text-sm sm:text-base opacity-60 mt-1">

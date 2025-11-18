@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { createInventoryItem } from "../../../services/inventoryService";
@@ -39,17 +40,27 @@ const NewInventoryItemPage = () => {
     }
   };
 
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFeedback(null);
     try {
       await createInventoryItem({
         ...formData,
         equipeId: Number(formData.equipeId),
       } as any);
-      alert("Item cadastrado com sucesso!");
-      navigate("/inventory");
+      setFeedback({ type: "success", message: "Item cadastrado com sucesso!" });
+      setTimeout(() => navigate("/inventory"), 1200);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Erro ao cadastrar item");
+      setFeedback({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Erro ao cadastrar item",
+      });
     }
   };
 
@@ -80,6 +91,10 @@ const NewInventoryItemPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Novo Item</h1>
           <p className="text-sm sm:text-base opacity-60 mt-1">

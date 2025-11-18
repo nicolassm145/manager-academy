@@ -5,6 +5,8 @@ import {
   getTransactions,
   deleteTransaction,
 } from "../../../services/financeService";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialogComponent";
 import { getTeams } from "../../../services/teamService";
 import type { Transaction } from "../../../types/finance";
 import type { Team } from "../../../types/admin";
@@ -43,6 +45,14 @@ const FinanceListPage = () => {
   const [filterEquipe, setFilterEquipe] = useState("");
   const { can } = usePermissions();
   const [showDashboard, setShowDashboard] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    id: string;
+    descricao: string;
+  } | null>(null);
   const [dashboardSummary, setDashboardSummary] = useState<{
     entradas: number;
     saidas: number;
@@ -90,16 +100,24 @@ const FinanceListPage = () => {
     }
   };
 
-  const handleDelete = async (id: string, descricao: string) => {
-    if (confirm(`Tem certeza que deseja excluir "${descricao}"?`)) {
-      try {
-        await deleteTransaction(id);
-        await loadTransactions();
-        alert("Transação excluída com sucesso!");
-      } catch (error) {
-        console.error("Erro ao excluir transação:", error);
-        alert("Erro ao excluir transação");
-      }
+  const handleDelete = (id: string, descricao: string) => {
+    setConfirmDelete({ id, descricao });
+  };
+
+  const confirmDeleteTransaction = async () => {
+    if (!confirmDelete) return;
+    try {
+      await deleteTransaction(confirmDelete.id);
+      await loadTransactions();
+      setFeedback({
+        type: "success",
+        message: "Transação excluída com sucesso!",
+      });
+    } catch (error) {
+      console.error("Erro ao excluir transação:", error);
+      setFeedback({ type: "error", message: "Erro ao excluir transação" });
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -144,6 +162,24 @@ const FinanceListPage = () => {
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
+        {/* Dialogo de confirmação de exclusão */}
+        <ConfirmDialog
+          open={!!confirmDelete}
+          title="Excluir transação?"
+          description={
+            confirmDelete
+              ? `Tem certeza que deseja excluir "${confirmDelete.descricao}"? Essa ação não poderá ser desfeita.`
+              : ""
+          }
+          confirmText="Excluir"
+          cancelText="Cancelar"
+          onConfirm={confirmDeleteTransaction}
+          onCancel={() => setConfirmDelete(null)}
+        />
         <PageHeader
           title="Financeiro"
           description="Controle de entradas e saídas financeiras"

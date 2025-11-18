@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { createTransaction } from "../../../services/financeService";
@@ -32,6 +33,10 @@ const FinanceNewPage = () => {
     categoria: "",
     equipe: user?.role === "admin" ? "" : user?.equipe || "",
   });
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadTeams();
@@ -49,20 +54,21 @@ const FinanceNewPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      if (!formData.descricao.trim()) {
-        alert("Descrição é obrigatória");
-        return;
-      }
-      if (!formData.valor || parseFloat(formData.valor) <= 0) {
-        alert("Valor deve ser maior que zero");
-        return;
-      }
-      if (!formData.categoria) {
-        alert("Categoria é obrigatória");
-        return;
-      }
+    setFeedback(null);
+    if (!formData.descricao.trim()) {
+      setFeedback({ type: "error", message: "Descrição é obrigatória." });
+      return;
+    }
+    if (!formData.valor || parseFloat(formData.valor) <= 0) {
+      setFeedback({ type: "error", message: "Valor deve ser maior que zero." });
+      return;
+    }
+    if (!formData.categoria) {
+      setFeedback({ type: "error", message: "Categoria é obrigatória." });
+      return;
+    }
 
+    try {
       const transactionData = {
         descricao: formData.descricao.trim(),
         valor: parseFloat(formData.valor),
@@ -74,10 +80,17 @@ const FinanceNewPage = () => {
       };
 
       await createTransaction(transactionData);
-      alert("Transação criada com sucesso!");
-      navigate("/finance");
+      setFeedback({
+        type: "success",
+        message: "Transação criada com sucesso!",
+      });
+      setTimeout(() => navigate("/finance"), 1200);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Erro ao criar transação");
+      setFeedback({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Erro ao criar transação",
+      });
     }
   };
 
@@ -95,6 +108,10 @@ const FinanceNewPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+        {/* Feedback visual */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Nova Transação</h1>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import {
@@ -37,6 +38,10 @@ const FinanceEditPage = () => {
     categoria: "",
     equipe: "",
   });
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadTeams();
@@ -71,30 +76,31 @@ const FinanceEditPage = () => {
       setLoading(false);
     } catch (error) {
       console.error("Erro ao carregar transação:", error);
-      alert("Erro ao carregar transação");
-      navigate("/finance");
+      setFeedback({ type: "error", message: "Erro ao carregar transação" });
+      setTimeout(() => navigate("/finance"), 1200);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setFeedback(null);
     if (!id) return;
 
-    try {
-      if (!formData.descricao.trim()) {
-        alert("Descrição é obrigatória");
-        return;
-      }
-      if (!formData.valor || parseFloat(formData.valor) <= 0) {
-        alert("Valor deve ser maior que zero");
-        return;
-      }
-      if (!formData.categoria) {
-        alert("Categoria é obrigatória");
-        return;
-      }
+    if (!formData.descricao.trim()) {
+      setFeedback({ type: "error", message: "Descrição é obrigatória." });
+      return;
+    }
+    if (!formData.valor || parseFloat(formData.valor) <= 0) {
+      setFeedback({ type: "error", message: "Valor deve ser maior que zero." });
+      return;
+    }
+    if (!formData.categoria) {
+      setFeedback({ type: "error", message: "Categoria é obrigatória." });
+      return;
+    }
 
+    try {
       const transactionData = {
         descricao: formData.descricao.trim(),
         valor: parseFloat(formData.valor),
@@ -105,12 +111,19 @@ const FinanceEditPage = () => {
       };
 
       await updateTransaction(id, transactionData);
-      alert("Transação atualizada com sucesso!");
-      navigate("/finance");
+      setFeedback({
+        type: "success",
+        message: "Transação atualizada com sucesso!",
+      });
+      setTimeout(() => navigate("/finance"), 1200);
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Erro ao atualizar transação"
-      );
+      setFeedback({
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Erro ao atualizar transação",
+      });
     }
   };
 
@@ -141,6 +154,10 @@ const FinanceEditPage = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+        {/* Feedback visual global */}
+        {feedback && (
+          <Feedback type={feedback.type} message={feedback.message} />
+        )}
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Editar Transação</h1>
