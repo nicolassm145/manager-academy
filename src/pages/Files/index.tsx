@@ -67,7 +67,10 @@ const FileListPage = () => {
       setDriveConnected(true);
     } catch (error: any) {
       // Detecta erro 404 de Drive não vinculado
-      if (error?.message?.includes("Drive vinculado") || error?.message?.includes("404")) {
+      if (
+        error?.message?.includes("Drive vinculado") ||
+        error?.message?.includes("404")
+      ) {
         setDriveConnected(false);
         setFiles([]);
       } else {
