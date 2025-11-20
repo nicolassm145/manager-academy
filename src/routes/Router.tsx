@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "../components/ProtectedRouteComponent";
-import LoginPage from "../pages/Auth/Login";
-import GoogleDriveListPage from "../pages/Auth/Drive";
+import LoginPage from "../pages/Auth";
 import DashboardPage from "../pages/Dashboard";
 import SettingsPage from "../pages/Settings";
 import NotFoundPage from "../pages/NotFound";
@@ -228,18 +227,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-   path: "/calendar",
+    path: "/calendar",
     element: (
       <ProtectedRoute>
         <CalendarListPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/drive",
-    element: (
-      <ProtectedRoute>
-        <GoogleDriveListPage />
       </ProtectedRoute>
     ),
   },
