@@ -28,7 +28,12 @@ import InventoryListPage from "../pages/Inventory/List";
 import InventoryNewPage from "../pages/Inventory/New";
 import InventoryDetailPage from "../pages/Inventory/Detail";
 import InventoryEditPage from "../pages/Inventory/Edit";
+
+// Crud de Arquivos
+import FileListPage from "../pages/Files/List";
+// (futuro: importar New/Edit/Detail se necessário)
 import FinanceResumePage from "../pages/Finance/Resume";
+import CalendarListPage from "../pages/Calendar/List";
 
 const router = createBrowserRouter([
   {
@@ -208,6 +213,24 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requiredPermission="canEditInventory">
         <InventoryEditPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Arquivos Routes
+  {
+    path: "/files",
+    element: (
+      <ProtectedRoute>
+        <FileListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+   path: "/calendar",
+    element: (
+      <ProtectedRoute>
+        <CalendarListPage />
       </ProtectedRoute>
     ),
   },

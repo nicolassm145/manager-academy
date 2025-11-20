@@ -11,6 +11,8 @@ import {
   ArrowRightStartOnRectangleIcon,
   BanknotesIcon,
   UserGroupIcon,
+  FolderIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { usePermissions } from "../hooks/usePermissions";
@@ -27,7 +29,6 @@ interface MenuItem {
 }
 
 const allMenuItems: MenuItem[] = [
-  { name: "Home", path: "/dashboard", icon: HomeIcon },
   {
     name: "Membros",
     path: "/members",
@@ -49,11 +50,62 @@ const allMenuItems: MenuItem[] = [
   {
     name: "Inventário",
     path: "/inventory",
-    icon: QueueListIcon, // Substitua por ArchiveBoxIcon se existir/importado
+    icon: QueueListIcon,
     permission: "canViewInventory",
+  },
+  {
+    name: "Arquivos",
+    path: "/files",
+    icon: FolderIcon,
+    permission: "canViewFiles",
+  },
+  {
+    name: "Calendário",
+    path: "/calendar",
+    icon: CalendarIcon,
+    permission: "canViewCalendar",
   },
   { name: "Configurações", path: "/settings", icon: Cog8ToothIcon },
 ];
+
+const getRoleLabel = (role?: string, cargo?: string) => {
+  if (role === "admin") return "Administrador";
+  if (role === "professor") return "Professor Orientador";
+  if (role === "membro") return "Membro";
+  if (role === "lider") {
+    return cargo === "Professor Orientador"
+      ? "Professor Orientador"
+      : "Líder de Equipe";
+  }
+  return "";
+};
+
+// Componente de Item do Menu
+function MenuItemComponent({
+  item,
+  isActive,
+  onClick,
+}: {
+  item: MenuItem;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const Icon = item.icon;
+  return (
+    <Link
+      to={item.path}
+      onClick={onClick}
+      className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+        isActive
+          ? "bg-primary/10 text-primary font-semibold"
+          : "hover:bg-base-200"
+      }`}
+    >
+      <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
+      <span className="font-medium">{item.name}</span>
+    </Link>
+  );
+}
 
 export function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
@@ -66,10 +118,7 @@ export function Layout({ children }: LayoutProps) {
     if (!permissions) return [];
     return allMenuItems.filter((item) => {
       if (item.path === "/dashboard") return true;
-
-      if (item.permission) {
-        return (permissions as any)[item.permission];
-      }
+      if (item.permission) return (permissions as any)[item.permission];
       return true;
     });
   }, [permissions]);
@@ -79,10 +128,65 @@ export function Layout({ children }: LayoutProps) {
     navigate("/login");
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+  const goToDashboard = () => navigate("/dashboard");
+
+  // Componente de Navegação
+  const renderNavigation = (showHome: boolean = false) => (
+    <nav className="flex-1 px-4 py-6 space-y-2 mt-16 lg:mt-0 overflow-y-auto">
+      {showHome && (
+        <div className="block lg:hidden mb-2">
+          <MenuItemComponent
+            item={{ name: "Home", path: "/dashboard", icon: HomeIcon }}
+            isActive={location.pathname === "/dashboard"}
+            onClick={closeSidebar}
+          />
+        </div>
+      )}
+      {menuItems.map((item) => (
+        <MenuItemComponent
+          key={item.path}
+          item={item}
+          isActive={location.pathname.startsWith(item.path)}
+          onClick={closeSidebar}
+        />
+      ))}
+    </nav>
+  );
+
+  // Componente de Perfil
+  const renderUserProfile = () => (
+    <div className="p-4 border-t">
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{user?.nome}</p>
+          <p className="text-xs opacity-60 truncate">{user?.email}</p>
+          <p className="text-xs text-blue-600 font-medium mt-1">
+            {getRoleLabel(user?.role, user?.cargo)}
+          </p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="btn btn-ghost btn-sm ml-3 flex-shrink-0"
+          title="Sair"
+        >
+          <ArrowRightStartOnRectangleIcon className="w-6 h-6" />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-base-100">
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 shadow-md z-50 flex items-center justify-between px-4">
-        <h1 className="text-lg font-bold">League Manager</h1>
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 shadow-md z-50 flex items-center justify-between px-4 bg-base-100">
+        <button
+          className="btn btn-ghost text-xl btn-sm"
+          onClick={goToDashboard}
+          aria-label="Ir para o dashboard"
+        >
+          League Manager
+        </button>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="btn btn-ghost btn-sm"
@@ -95,33 +199,55 @@ export function Layout({ children }: LayoutProps) {
         </button>
       </div>
 
+      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-base-100 bg-opacity-50 z-40"
-          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={closeSidebar}
         />
       )}
 
+
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-base-100 shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-base-100 shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        }`}
       >
         <div className="flex flex-col h-full">
           <div className="hidden lg:flex items-center justify-center h-16 border-b">
-            <h1 className="text-xl font-bold">League Manager</h1>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={goToDashboard}
+              aria-label="Ir para o dashboard"
+            >
+              League Manager
+            </button>
           </div>
+          {renderNavigation(true)}
+          {renderUserProfile()}
+        </div>
+      </aside>
 
-          <nav className="flex-1 px-4 py-6 space-y-2 mt-16 lg:mt-0 overflow-y-auto">
+
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:bg-base-100 lg:shadow-lg lg:z-50 lg:flex lg:flex-col">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-center h-16 border-b">
+            <button
+              className="btn btn-ghost btn-6xl font-bold text-2xl"
+              onClick={goToDashboard}
+              aria-label="Ir para o dashboard"
+            >
+              League Manager
+            </button>
+          </div>
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname.startsWith(item.path);
-
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary font-semibold"
@@ -134,34 +260,11 @@ export function Layout({ children }: LayoutProps) {
               );
             })}
           </nav>
-
-          <div className="p-4 border-t">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.nome}</p>
-                <p className="text-xs opacity-60 truncate">{user?.email}</p>
-                <p className="text-xs text-blue-600 font-medium mt-1">
-                  {user?.role === "admin" && "Administrador"}
-                  {user?.role === "professor" && "Professor Orientador"}
-                  {user?.role === "membro" && "Membro"}
-                  {user?.role === "lider" &&
-                    (user?.cargo === "Professor Orientador"
-                      ? "Professor Orientador"
-                      : "Líder de Equipe")}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="btn btn-ghost btn-sm ml-3 flex-shrink-0"
-                title="Sair"
-              >
-                <ArrowRightStartOnRectangleIcon className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
+          {renderUserProfile()}
         </div>
       </aside>
 
+      {/* Main Content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
