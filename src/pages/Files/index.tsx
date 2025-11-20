@@ -405,7 +405,7 @@ const FileListPage = () => {
                 const [type = "-", subtype = "-"] = (
                   file.mimeType || "-"
                 ).split("/");
-                const prettySubtype = subtype.split('.').pop();
+                const prettySubtype = subtype.split(".").pop();
                 return (
                   <TableRow key={file.id}>
                     <TableCell>
