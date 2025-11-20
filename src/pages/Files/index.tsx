@@ -7,9 +7,9 @@ import {
   uploadFile,
   downloadFile,
   getAuthorizationUrl,
+  deleteDriveFile,
   type DriveFile,
 } from "../../services/googleDriveService";
-
 import {
   PageHeader,
   Card,
@@ -26,13 +26,13 @@ import {
   FilterSelect,
   SearchBar,
 } from "../../components/ui";
-
 import {
   CloudArrowUpIcon,
   CloudIcon,
   ArrowDownTrayIcon,
   LinkIcon,
   EyeIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 
 import { Feedback } from "../../components/ui/FeedbackComponent";
@@ -51,6 +51,8 @@ const FileListPage = () => {
   const [filterType, setFilterType] = useState("");
   const [filterSubtype, setFilterSubtype] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadFiles();
@@ -154,6 +156,23 @@ const FileListPage = () => {
         type: "error",
         message: "Erro ao baixar arquivo",
       });
+    }
+  };
+
+  const handleDelete = async (fileId: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir este arquivo?")) return;
+    setDeletingId(fileId);
+    try {
+      await deleteDriveFile(fileId);
+      setFeedback({
+        type: "success",
+        message: "Arquivo excluído com sucesso!",
+      });
+      await loadFiles();
+    } catch (error) {
+      setFeedback({ type: "error", message: "Erro ao excluir arquivo" });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -386,6 +405,7 @@ const FileListPage = () => {
                 const [type = "-", subtype = "-"] = (
                   file.mimeType || "-"
                 ).split("/");
+                const prettySubtype = subtype.split('.').pop();
                 return (
                   <TableRow key={file.id}>
                     <TableCell>
@@ -394,7 +414,7 @@ const FileListPage = () => {
                       </div>
                     </TableCell>
                     <TableCell>{type}</TableCell>
-                    <TableCell>{subtype}</TableCell>
+                    <TableCell>{prettySubtype}</TableCell>
                     <TableCell>{formatFileSize(file.size)}</TableCell>
                     <TableCell>{formatDate(file.modifiedTime)}</TableCell>
                     <TableCell className="text-center">
@@ -404,6 +424,14 @@ const FileListPage = () => {
                           className="btn btn-primary btn-xs"
                         >
                           <ArrowDownTrayIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(file.id)}
+                          className="btn btn-error btn-xs flex items-center gap-1"
+                          disabled={deletingId === file.id}
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                          {deletingId === file.id ? "Excluindo..." : "Excluir"}
                         </button>
 
                         {file.webViewLink && (

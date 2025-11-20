@@ -1,3 +1,30 @@
+// Deleta arquivo do Google Drive
+export const deleteDriveFile = async (fileId: string): Promise<void> => {
+  const authHeaders = getAuthHeaders();
+  let authorization = "";
+  if (authHeaders instanceof Headers) {
+    authorization = authHeaders.get("Authorization") || "";
+  } else if (typeof authHeaders === "object" && authHeaders !== null) {
+    authorization =
+      (authHeaders as Record<string, string>)["Authorization"] || "";
+  }
+  const headers: Record<string, string> = {};
+  if (authorization) {
+    headers["Authorization"] = authorization;
+  }
+  const response = await fetch(
+    `${API_BASE_URL}/google-drive/delete/${encodeURIComponent(fileId)}`,
+    {
+      method: "DELETE",
+      headers,
+    }
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Erro ao deletar arquivo:", errorText);
+  }
+  await handleApiError(response);
+};
 import { API_BASE_URL, getAuthHeaders, handleApiError } from "../config/api";
 
 export interface DriveFile {
