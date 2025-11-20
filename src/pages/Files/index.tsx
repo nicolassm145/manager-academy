@@ -43,6 +43,7 @@ const FileListPage = () => {
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [driveConnected, setDriveConnected] = useState(true);
   const [feedback, setFeedback] = useState<{
     type: "error" | "success";
     message: string;
@@ -63,11 +64,18 @@ const FileListPage = () => {
       setLoading(true);
       const data = await listDriveFiles();
       setFiles(data);
-    } catch (error) {
-      setFeedback({
-        type: "error",
-        message: "Erro ao carregar arquivos do Google Drive",
-      });
+      setDriveConnected(true);
+    } catch (error: any) {
+      // Detecta erro 404 de Drive não vinculado
+      if (error?.message?.includes("Drive vinculado") || error?.message?.includes("404")) {
+        setDriveConnected(false);
+        setFiles([]);
+      } else {
+        setFeedback({
+          type: "error",
+          message: "Erro ao carregar arquivos do Google Drive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -252,19 +260,19 @@ const FileListPage = () => {
     );
   }
 
-  if (files.length === 0) {
+  // Se não está conectado ao Drive, mostra o EmptyState para conectar
+  if (!driveConnected) {
     return (
       <Layout>
         <div className="space-y-6">
           <PageHeader
             title="Gerenciamento de Arquivos"
             description="Integração com Google Drive da equipe"
-          ></PageHeader>
-
+          />
           <Card>
             <EmptyState
               icon={CloudIcon}
-              title="Google Drive não conectado ou sem arquivos"
+              title="Google Drive não conectado"
               description={
                 user?.role === "lider"
                   ? "Conecte sua equipe ao Google Drive para compartilhar arquivos"
