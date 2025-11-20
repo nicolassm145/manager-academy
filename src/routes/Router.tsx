@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "../components/ProtectedRouteComponent";
-import LoginPage from "../pages/Auth";
+import LoginPage from "../pages/Auth/Login";
+import GoogleDriveListPage from "../pages/Auth/Drive";
 import DashboardPage from "../pages/Dashboard";
 import SettingsPage from "../pages/Settings";
 import NotFoundPage from "../pages/NotFound";
@@ -234,7 +235,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
+  {
+    path: "/drive",
+    element: (
+      <ProtectedRoute>
+        <GoogleDriveListPage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "*",
     element: <NotFoundPage />,

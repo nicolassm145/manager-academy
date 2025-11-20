@@ -80,7 +80,6 @@ const getRoleLabel = (role?: string, cargo?: string) => {
   return "";
 };
 
-// Componente de Item do Menu
 function MenuItemComponent({
   item,
   isActive,
@@ -131,7 +130,6 @@ export function Layout({ children }: LayoutProps) {
   const closeSidebar = () => setSidebarOpen(false);
   const goToDashboard = () => navigate("/dashboard");
 
-  // Componente de Navegação
   const renderNavigation = (showHome: boolean = false) => (
     <nav className="flex-1 px-4 py-6 space-y-2 mt-16 lg:mt-0 overflow-y-auto">
       {showHome && (
@@ -154,7 +152,6 @@ export function Layout({ children }: LayoutProps) {
     </nav>
   );
 
-  // Componente de Perfil
   const renderUserProfile = () => (
     <div className="p-4 border-t">
       <div className="flex items-center justify-between">
@@ -178,7 +175,6 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-base-100">
-      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 shadow-md z-50 flex items-center justify-between px-4 bg-base-100">
         <button
           className="btn btn-ghost text-xl btn-sm"
@@ -199,14 +195,12 @@ export function Layout({ children }: LayoutProps) {
         </button>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={closeSidebar}
         />
       )}
-
 
       <aside
         className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-base-100 shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
@@ -227,7 +221,6 @@ export function Layout({ children }: LayoutProps) {
           {renderUserProfile()}
         </div>
       </aside>
-
 
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:bg-base-100 lg:shadow-lg lg:z-50 lg:flex lg:flex-col">
         <div className="flex flex-col h-full">
@@ -264,7 +257,6 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
