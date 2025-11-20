@@ -21,7 +21,9 @@ export interface DriveIntegrationStatus {
 // getAuthorizationUrl agora exige o parâmetro equipeId e envia o header Authorization.
 // Lembre-se: se o backend retornar 422, lançamos um erro claro.
 
-export const getAuthorizationUrl = async (equipeId: number): Promise<string> => {
+export const getAuthorizationUrl = async (
+  equipeId: number
+): Promise<string> => {
   if (!equipeId || isNaN(equipeId)) {
     throw new Error("Parâmetro 'equipeId' inválido ou ausente.");
   }
@@ -38,7 +40,9 @@ export const getAuthorizationUrl = async (equipeId: number): Promise<string> => 
   if (response.status === 422) {
     const body = await response.text().catch(() => null);
     throw new Error(
-      `Erro 422: parâmetro 'equipeId' inválido ou ausente na query string. ${body ? `(${body})` : ""}`
+      `Erro 422: parâmetro 'equipeId' inválido ou ausente na query string. ${
+        body ? `(${body})` : ""
+      }`
     );
   }
 
@@ -61,18 +65,49 @@ export const listDriveFiles = async (): Promise<DriveFile[]> => {
   }
 };
 
-export const uploadFile = async (file: File): Promise<DriveFile> => {
+export const uploadFile = async (
+  file: File,
+  equipeId: number
+): Promise<DriveFile> => {
+  // Debug: log do arquivo
+  console.log("Arquivo para upload:", file);
+  if (!file || file.size === 0) {
+    throw new Error("Arquivo vazio ou inválido.");
+  }
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/google-drive/upload`, {
-    method: "POST",
-    headers: {
-      // não setamos 'Content-Type' para FormData manualmente
-      ...getAuthHeaders(),
-    },
-    body: formData,
-  });
+  // Debug: log do header de autenticação
+  const authHeaders = getAuthHeaders();
+  console.log("Headers de autenticação:", authHeaders);
+
+  // Extrai Authorization corretamente (caso seja Headers ou objeto)
+  let authorization = "";
+  if (authHeaders instanceof Headers) {
+    authorization = authHeaders.get("Authorization") || "";
+  } else if (typeof authHeaders === "object" && authHeaders !== null) {
+    // Pode ser Record<string, string>
+    authorization =
+      (authHeaders as Record<string, string>)["Authorization"] || "";
+  }
+  const headers: Record<string, string> = {};
+  if (authorization) {
+    headers["Authorization"] = authorization;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/google-drive/upload?equipeId=${equipeId}`,
+    {
+      method: "POST",
+      headers,
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Erro detalhado do backend:", errorText);
+  }
 
   await handleApiError(response);
   return await response.json();

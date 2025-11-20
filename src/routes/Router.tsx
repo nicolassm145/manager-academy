@@ -30,7 +30,7 @@ import InventoryDetailPage from "../pages/Inventory/Detail";
 import InventoryEditPage from "../pages/Inventory/Edit";
 
 // Crud de Arquivos
-import FileListPage from "../pages/Files/List";
+import FileListPage from "../pages/Files";
 // (futuro: importar New/Edit/Detail se necessário)
 import FinanceResumePage from "../pages/Finance/Resume";
 import CalendarListPage from "../pages/Calendar/List";
@@ -217,7 +217,7 @@ const router = createBrowserRouter([
     ),
   },
 
-  // Arquivos Routes
+
   {
     path: "/files",
     element: (

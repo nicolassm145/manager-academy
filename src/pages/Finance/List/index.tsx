@@ -205,7 +205,7 @@ const FinanceListPage = () => {
         </PageHeader>
 
         <Card>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}

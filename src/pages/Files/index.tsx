@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Layout } from "../../../components/LayoutComponent";
-import { useAuth } from "../../../context/AuthContext";
+import React, { useState, useEffect, useMemo } from "react";
+import { Layout } from "../../components/LayoutComponent";
+import { useAuth } from "../../context/AuthContext";
 
 import {
   listDriveFiles,
@@ -8,7 +8,7 @@ import {
   downloadFile,
   getAuthorizationUrl,
   type DriveFile,
-} from "../../../services/googleDriveService";
+} from "../../services/googleDriveService";
 
 import {
   PageHeader,
@@ -23,16 +23,19 @@ import {
   MobileCard,
   MobileCardItem,
   MobileCardActions,
-} from "../../../components/ui";
+  FilterSelect,
+  SearchBar,
+} from "../../components/ui";
 
 import {
   CloudArrowUpIcon,
   CloudIcon,
   ArrowDownTrayIcon,
   LinkIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 
-import { Feedback } from "../../../components/ui/FeedbackComponent";
+import { Feedback } from "../../components/ui/FeedbackComponent";
 
 const FileListPage = () => {
   const { user } = useAuth();
@@ -44,6 +47,10 @@ const FileListPage = () => {
     type: "error" | "success";
     message: string;
   } | null>(null);
+
+  const [filterType, setFilterType] = useState("");
+  const [filterSubtype, setFilterSubtype] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadFiles();
@@ -85,7 +92,6 @@ const FileListPage = () => {
 
       const authUrl = await getAuthorizationUrl(equipeIdNumber);
       window.location.href = authUrl;
-
     } catch (error: any) {
       setFeedback({
         type: "error",
@@ -101,7 +107,24 @@ const FileListPage = () => {
     try {
       setUploading(true);
       setFeedback(null);
-      await uploadFile(file);
+      if (!user?.equipe) {
+        setFeedback({
+          type: "error",
+          message: "ID da equipe não encontrado.",
+        });
+        setUploading(false);
+        return;
+      }
+      const equipeIdNumber = Number(user.equipe);
+      if (!equipeIdNumber || isNaN(equipeIdNumber)) {
+        setFeedback({
+          type: "error",
+          message: "ID da equipe inválido.",
+        });
+        setUploading(false);
+        return;
+      }
+      await uploadFile(file, equipeIdNumber);
       setFeedback({
         type: "success",
         message: "Arquivo enviado com sucesso!",
@@ -134,9 +157,11 @@ const FileListPage = () => {
     }
   };
 
-  const formatFileSize = (bytes?: number) => {
+  const formatFileSize = (bytes?: number | string) => {
     if (!bytes) return "N/A";
-    const kb = bytes / 1024;
+    const num = typeof bytes === "string" ? Number(bytes) : bytes;
+    if (!num || isNaN(num)) return "N/A";
+    const kb = num / 1024;
     const mb = kb / 1024;
     return mb >= 1 ? `${mb.toFixed(2)} MB` : `${kb.toFixed(2)} KB`;
   };
@@ -151,7 +176,50 @@ const FileListPage = () => {
     });
   };
 
-  // LOADING SCREEN
+  const allTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          files.map((f) => {
+            const t = (f.mimeType || "").split("/")[0] || "-";
+            return t;
+          })
+        )
+      ).filter(Boolean),
+    [files]
+  );
+
+  const allSubtypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          files.map((f) => {
+            const s = (f.mimeType || "").split("/")[1] || "-";
+            return s;
+          })
+        )
+      ).filter(Boolean),
+    [files]
+  );
+
+  const filteredFiles = useMemo(() => {
+    const q = (searchTerm || "").trim().toLowerCase();
+    return files.filter((file) => {
+      const [type = "-", subtype = "-"] = (file.mimeType || "-").split("/");
+
+      const matchType = !filterType || type === filterType;
+      const matchSubtype = !filterSubtype || subtype === filterSubtype;
+
+      const inName = file.name?.toLowerCase().includes(q);
+      const inType = type.toLowerCase().includes(q);
+      const inSubtype = subtype.toLowerCase().includes(q);
+
+      const matchSearch = !q || inName || inType || inSubtype;
+
+      return matchType && matchSubtype && matchSearch;
+    });
+  }, [files, filterType, filterSubtype, searchTerm]);
+
   if (loading) {
     return (
       <Layout>
@@ -165,7 +233,6 @@ const FileListPage = () => {
     );
   }
 
-  // EMPTY STATE
   if (files.length === 0) {
     return (
       <Layout>
@@ -173,7 +240,7 @@ const FileListPage = () => {
           <PageHeader
             title="Gerenciamento de Arquivos"
             description="Integração com Google Drive da equipe"
-          />
+          ></PageHeader>
 
           <Card>
             <EmptyState
@@ -201,7 +268,6 @@ const FileListPage = () => {
     );
   }
 
-  // LISTA COMPLETA
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
@@ -227,20 +293,57 @@ const FileListPage = () => {
           )}
         </PageHeader>
 
+        <Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 items-center">
+            <div>
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar por nome, tipo ou subtipo..."
+              />
+            </div>
+
+            <FilterSelect
+              value={filterType}
+              onChange={setFilterType}
+              options={allTypes.map((type) => ({ value: type, label: type }))}
+              placeholder="Todos os Tipos"
+            />
+
+            <FilterSelect
+              value={filterSubtype}
+              onChange={setFilterSubtype}
+              options={allSubtypes.map((subtype) => ({
+                value: subtype,
+                label: subtype,
+              }))}
+              placeholder="Todos os Subtipos"
+            />
+          </div>
+        </Card>
+
         {/* MOBILE */}
         <div className="block lg:hidden space-y-3">
-          {files.map((file) => (
+          {filteredFiles.map((file) => (
             <MobileCard key={file.id}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{file.name}</p>
-                  <p className="text-xs opacity-60">{formatFileSize(file.size)}</p>
+                  <p className="text-xs opacity-60">
+                    {formatFileSize(file.size)}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <MobileCardItem label="Criado em" value={formatDate(file.createdTime)} />
-                <MobileCardItem label="Modificado" value={formatDate(file.modifiedTime)} />
+                <MobileCardItem
+                  label="Modificado"
+                  value={formatDate(file.modifiedTime)}
+                />
+                <MobileCardItem
+                  label="Tipo"
+                  value={(file.mimeType || "-").split("/")[0]}
+                />
               </div>
 
               <MobileCardActions>
@@ -272,44 +375,52 @@ const FileListPage = () => {
           <Table>
             <TableHeader>
               <TableHeadCell>Nome</TableHeadCell>
+              <TableHeadCell>Tipo</TableHeadCell>
+              <TableHeadCell>Subtipo</TableHeadCell>
               <TableHeadCell>Tamanho</TableHeadCell>
-              <TableHeadCell>Criado em</TableHeadCell>
               <TableHeadCell>Modificado</TableHeadCell>
               <TableHeadCell className="text-center">Ações</TableHeadCell>
             </TableHeader>
             <TableBody>
-              {files.map((file) => (
-                <TableRow key={file.id}>
-                  <TableCell>
-                    <div className="font-medium truncate max-w-xs">{file.name}</div>
-                  </TableCell>
-                  <TableCell>{formatFileSize(file.size)}</TableCell>
-                  <TableCell>{formatDate(file.createdTime)}</TableCell>
-                  <TableCell>{formatDate(file.modifiedTime)}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleDownload(file.id, file.name)}
-                        className="btn btn-primary btn-xs"
-                      >
-                        <ArrowDownTrayIcon className="w-4 h-4 mr-1" />
-                        Baixar
-                      </button>
-
-                      {file.webViewLink && (
-                        <a
-                          href={file.webViewLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-ghost btn-xs"
+              {filteredFiles.map((file) => {
+                const [type = "-", subtype = "-"] = (
+                  file.mimeType || "-"
+                ).split("/");
+                return (
+                  <TableRow key={file.id}>
+                    <TableCell>
+                      <div className="font-medium truncate max-w-xs">
+                        {file.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>{type}</TableCell>
+                    <TableCell>{subtype}</TableCell>
+                    <TableCell>{formatFileSize(file.size)}</TableCell>
+                    <TableCell>{formatDate(file.modifiedTime)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleDownload(file.id, file.name)}
+                          className="btn btn-primary btn-xs"
                         >
-                          <LinkIcon className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                          <ArrowDownTrayIcon className="w-4 h-4" />
+                        </button>
+
+                        {file.webViewLink && (
+                          <a
+                            href={file.webViewLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-accent btn-xs"
+                          >
+                            <EyeIcon className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
