@@ -45,7 +45,9 @@ const CalendarDetailsPage = () => {
   const [participarLoading, setParticiparLoading] = useState(false);
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loadingParticipantes, setLoadingParticipantes] = useState(true);
-  const [participanteAtualId, setParticipanteAtualId] = useState<number | null>(null);
+  const [participanteAtualId, setParticipanteAtualId] = useState<number | null>(
+    null
+  );
 
   // Estados para tarefas
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);

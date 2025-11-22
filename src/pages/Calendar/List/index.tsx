@@ -38,7 +38,9 @@ const CalendarListPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [participantesCount, setParticipantesCount] = useState<Record<string, number>>({});
+  const [participantesCount, setParticipantesCount] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     loadEvents();
@@ -68,10 +70,16 @@ const CalendarListPage = () => {
       for (const evt of mapped) {
         try {
           const participantes = await listarParticipantes(evt.id);
-          const participantesArray = Array.isArray(participantes) ? participantes : [];
+          const participantesArray = Array.isArray(participantes)
+            ? participantes
+            : [];
           counts[evt.id] = participantesArray.length;
           // Só adiciona evento se o usuário logado está entre os participantes
-          if (participantesArray.some((p: any) => p.membroId === parseInt(user?.id || "0"))) {
+          if (
+            participantesArray.some(
+              (p: any) => p.membroId === parseInt(user?.id || "0")
+            )
+          ) {
             eventosVisiveis.push(evt);
           }
         } catch {

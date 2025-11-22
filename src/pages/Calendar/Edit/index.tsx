@@ -131,7 +131,9 @@ const CalendarEditPage = () => {
           const participantesArray = Array.isArray(participantes)
             ? participantes
             : [];
-          const participantesIds = participantesArray.map((p: any) => p.membroId);
+          const participantesIds = participantesArray.map(
+            (p: any) => p.membroId
+          );
           setParticipantesSelecionados(participantesIds);
           setParticipantesOriginais(participantesIds); // Guarda os originais
         } catch (err) {
@@ -247,13 +249,13 @@ const CalendarEditPage = () => {
           (membroId) => !participantesOriginais.includes(membroId)
         );
 
-            for (const membroId of novosParticipantes) {
-              console.log("Adicionando participante:", {
-                eventoId,
-                membroId,
-                status: "pendente",
-                observacao: "",
-              });
+        for (const membroId of novosParticipantes) {
+          console.log("Adicionando participante:", {
+            eventoId,
+            membroId,
+            status: "pendente",
+            observacao: "",
+          });
           try {
             // Usa o eventoId (string) diretamente, não converte para int
             await participarEvento(eventoId, {
@@ -280,7 +282,7 @@ const CalendarEditPage = () => {
         });
         eventoId = novoEvento.googleEventId;
 
-            console.log("Participantes selecionados:", participantesSelecionados);
+        console.log("Participantes selecionados:", participantesSelecionados);
         // Adiciona TODOS os participantes selecionados como "pendente"
         for (const membroId of participantesSelecionados) {
           try {
