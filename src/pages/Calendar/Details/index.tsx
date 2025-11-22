@@ -18,12 +18,10 @@ import {
 } from "../../../services/googleCalendarService";
 import {
   listarParticipantes,
-  participarEvento,
   atualizarParticipante,
 } from "../../../services/eventoService";
 import {
   listarTarefas,
-  adicionarTarefa,
   atualizarTarefa,
   type Tarefa,
 } from "../../../services/tarefaService";
@@ -34,10 +32,7 @@ import {
   CalendarIcon,
   ClockIcon,
   UserGroupIcon,
-  CheckIcon,
-  XMarkIcon,
   ClipboardDocumentListIcon,
-  PlusIcon,
 } from "@heroicons/react/24/outline";
 
 const CalendarDetailsPage = () => {
@@ -50,14 +45,11 @@ const CalendarDetailsPage = () => {
   const [participarLoading, setParticiparLoading] = useState(false);
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loadingParticipantes, setLoadingParticipantes] = useState(true);
+  const [participanteAtualId, setParticipanteAtualId] = useState<number | null>(null);
 
   // Estados para tarefas
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [loadingTarefas, setLoadingTarefas] = useState(true);
-  const [showNovaTarefa, setShowNovaTarefa] = useState(false);
-  const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
-  const [novaTarefaMembroId, setNovaTarefaMembroId] = useState<number | "">("");
-  const [tarefaLoading, setTarefaLoading] = useState(false);
 
   const { id } = useParams();
   const { user } = useAuth();
@@ -107,7 +99,7 @@ const CalendarDetailsPage = () => {
   const loadParticipantes = async (eventoId: string) => {
     setLoadingParticipantes(true);
     try {
-      const lista = await listarParticipantes(eventoId); // Usa googleEventId (string)
+      const lista = await listarParticipantes(eventoId);
       setParticipantes(Array.isArray(lista) ? lista : []);
 
       if (user?.equipe) {
@@ -157,10 +149,19 @@ const CalendarDetailsPage = () => {
   };
 
   const handleParticipar = async () => {
+    if (!participanteAtualId) {
+      setFeedback({
+        type: "error",
+        message: "Erro ao identificar participação",
+      });
+      return;
+    }
+
     setParticiparLoading(true);
     setFeedback(null);
     try {
-      await participarEvento(event.id, {
+      // ATUALIZA o participante existente ao invés de criar novo
+      await atualizarParticipante(participanteAtualId, {
         membroId: parseInt(user?.id || "0"),
         status: participarStatus,
         observacao: participarObs,
@@ -168,73 +169,19 @@ const CalendarDetailsPage = () => {
       setShowParticipar(false);
       setParticiparObs("");
       setParticiparStatus("confirmado");
+      setParticipanteAtualId(null);
       setFeedback({
         type: "success",
-        message: "Participação confirmada com sucesso!",
+        message: "Participação atualizada com sucesso!",
       });
       await loadParticipantes(event.id);
     } catch (err: any) {
       setFeedback({
         type: "error",
-        message: err.message || "Erro ao confirmar participação",
+        message: err.message || "Erro ao atualizar participação",
       });
     } finally {
       setParticiparLoading(false);
-    }
-  };
-
-  const handleAtualizarStatus = async (
-    participanteId: number,
-    novoStatus: string
-  ) => {
-    try {
-      await atualizarParticipante(participanteId, {
-        status: novoStatus as any,
-      });
-      setFeedback({
-        type: "success",
-        message: "Status atualizado com sucesso!",
-      });
-      await loadParticipantes(event.id);
-    } catch (err: any) {
-      setFeedback({
-        type: "error",
-        message: err.message || "Erro ao atualizar status",
-      });
-    }
-  };
-
-  const handleAdicionarTarefa = async () => {
-    if (!novaTarefaDescricao.trim() || novaTarefaMembroId === "") {
-      setFeedback({
-        type: "error",
-        message: "Preencha todos os campos obrigatórios",
-      });
-      return;
-    }
-
-    setTarefaLoading(true);
-    setFeedback(null);
-    try {
-      await adicionarTarefa(event.id, {
-        membroId: novaTarefaMembroId as number,
-        descricao: novaTarefaDescricao,
-      });
-      setShowNovaTarefa(false);
-      setNovaTarefaDescricao("");
-      setNovaTarefaMembroId("");
-      setFeedback({
-        type: "success",
-        message: "Tarefa adicionada com sucesso!",
-      });
-      await loadTarefas(event.id);
-    } catch (err: any) {
-      setFeedback({
-        type: "error",
-        message: err.message || "Erro ao adicionar tarefa",
-      });
-    } finally {
-      setTarefaLoading(false);
     }
   };
 
@@ -502,16 +449,6 @@ const CalendarDetailsPage = () => {
                 <UserGroupIcon className="w-6 h-6 text-blue-600" />
                 <h2 className="text-xl font-bold">Participantes</h2>
               </div>
-
-              {!userParticipante && (
-                <button
-                  onClick={() => setShowParticipar(true)}
-                  className="btn btn-primary btn-sm gap-2"
-                >
-                  <CheckIcon className="w-4 h-4" />
-                  Participar
-                </button>
-              )}
             </div>
 
             {loadingParticipantes ? (
@@ -523,7 +460,7 @@ const CalendarDetailsPage = () => {
               <EmptyState
                 icon={UserGroupIcon}
                 title="Nenhum participante ainda"
-                description="Seja o primeiro a confirmar presença neste evento!"
+                description="Aguardando confirmação de presença"
               />
             ) : (
               <div className="space-y-3">
@@ -561,38 +498,15 @@ const CalendarDetailsPage = () => {
                         <button
                           onClick={() => {
                             setShowParticipar(true);
+                            setParticipanteAtualId(p.id);
                             setParticiparStatus(p.status);
                             setParticiparObs(p.observacao || "");
                           }}
                           className="btn btn-ghost btn-xs"
                           title="Editar participação"
                         >
-                          <PencilIcon className="w-3 h-3" />
+                          <PencilIcon className="w-4 h-4" />
                         </button>
-                      )}
-
-                      {/* Ações rápidas para líder */}
-                      {user?.role === "lider" && p.status === "pendente" && (
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() =>
-                              handleAtualizarStatus(p.id, "confirmado")
-                            }
-                            className="btn btn-success btn-xs btn-circle"
-                            title="Confirmar"
-                          >
-                            <CheckIcon className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleAtualizarStatus(p.id, "recusado")
-                            }
-                            className="btn btn-error btn-xs btn-circle"
-                            title="Recusar"
-                          >
-                            <XMarkIcon className="w-3 h-3" />
-                          </button>
-                        </div>
                       )}
                     </div>
                   </div>
@@ -601,6 +515,7 @@ const CalendarDetailsPage = () => {
             )}
           </DetailSection>
         </Card>
+
         {/* Card de Tarefas */}
         <Card>
           <DetailSection>
@@ -609,16 +524,6 @@ const CalendarDetailsPage = () => {
                 <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />
                 <h2 className="text-xl font-bold">Tarefas do Evento</h2>
               </div>
-
-              {user?.role === "lider" && (
-                <button
-                  onClick={() => setShowNovaTarefa(true)}
-                  className="btn btn-primary btn-sm gap-2"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  Nova Tarefa
-                </button>
-              )}
             </div>
 
             {loadingTarefas ? (
@@ -630,7 +535,7 @@ const CalendarDetailsPage = () => {
               <EmptyState
                 icon={ClipboardDocumentListIcon}
                 title="Nenhuma tarefa criada"
-                description="Adicione tarefas para organizar as responsabilidades do evento!"
+                description="Não há tarefas associadas a este evento"
               />
             ) : (
               <div className="space-y-3">
@@ -643,7 +548,7 @@ const CalendarDetailsPage = () => {
                     <div
                       key={tarefa.id}
                       className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
-                        tarefa.concluida
+                        tarefa.concluido
                           ? "bg-gray-50 opacity-75"
                           : "hover:bg-gray-50"
                       }`}
@@ -651,7 +556,7 @@ const CalendarDetailsPage = () => {
                       {/* Checkbox */}
                       <input
                         type="checkbox"
-                        checked={tarefa.concluida}
+                        checked={tarefa.concluido}
                         onChange={(e) =>
                           handleToggleTarefa(tarefa.id, e.target.checked)
                         }
@@ -670,7 +575,7 @@ const CalendarDetailsPage = () => {
                       <div className="flex-1 min-w-0">
                         <p
                           className={`font-medium ${
-                            tarefa.concluida ? "line-through text-gray-500" : ""
+                            tarefa.concluido ? "line-through text-gray-500" : ""
                           }`}
                         >
                           {tarefa.descricao}
@@ -721,7 +626,7 @@ const CalendarDetailsPage = () => {
       {showParticipar && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Confirmar Participação</h3>
+            <h3 className="text-xl font-bold mb-4">Atualizar Participação</h3>
 
             <div className="space-y-4">
               <div>
@@ -759,82 +664,16 @@ const CalendarDetailsPage = () => {
                 disabled={participarLoading}
                 className="btn btn-primary flex-1"
               >
-                {participarLoading ? "Salvando..." : "Confirmar"}
+                {participarLoading ? "Salvando..." : "Salvar"}
               </button>
               <button
                 onClick={() => {
                   setShowParticipar(false);
                   setParticiparObs("");
                   setParticiparStatus("confirmado");
+                  setParticipanteAtualId(null);
                 }}
                 disabled={participarLoading}
-                className="btn btn-ghost flex-1"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Nova Tarefa */}
-      {showNovaTarefa && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Nova Tarefa</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Descrição *
-                </label>
-                <textarea
-                  value={novaTarefaDescricao}
-                  onChange={(e) => setNovaTarefaDescricao(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="Descreva a tarefa..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Responsável *
-                </label>
-                <select
-                  value={novaTarefaMembroId}
-                  onChange={(e) =>
-                    setNovaTarefaMembroId(
-                      e.target.value ? parseInt(e.target.value) : ""
-                    )
-                  }
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Selecione um membro</option>
-                  {membrosEquipe.map((membro) => (
-                    <option key={membro.id} value={membro.id}>
-                      {membro.nomeCompleto}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleAdicionarTarefa}
-                disabled={tarefaLoading}
-                className="btn btn-primary flex-1"
-              >
-                {tarefaLoading ? "Salvando..." : "Adicionar"}
-              </button>
-              <button
-                onClick={() => {
-                  setShowNovaTarefa(false);
-                  setNovaTarefaDescricao("");
-                  setNovaTarefaMembroId("");
-                }}
-                disabled={tarefaLoading}
                 className="btn btn-ghost flex-1"
               >
                 Cancelar

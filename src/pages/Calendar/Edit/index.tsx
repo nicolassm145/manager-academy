@@ -46,6 +46,9 @@ const CalendarEditPage = () => {
   const [participantesSelecionados, setParticipantesSelecionados] = useState<
     number[]
   >([]);
+  const [participantesOriginais, setParticipantesOriginais] = useState<
+    number[]
+  >([]);
 
   // Estados para tarefas
   const [tarefas, setTarefas] = useState<
@@ -128,9 +131,9 @@ const CalendarEditPage = () => {
           const participantesArray = Array.isArray(participantes)
             ? participantes
             : [];
-          setParticipantesSelecionados(
-            participantesArray.map((p: any) => p.membroId)
-          );
+          const participantesIds = participantesArray.map((p: any) => p.membroId);
+          setParticipantesSelecionados(participantesIds);
+          setParticipantesOriginais(participantesIds); // Guarda os originais
         } catch (err) {
           console.error("Erro ao carregar participantes:", err);
         }
@@ -230,7 +233,7 @@ const CalendarEditPage = () => {
       let eventoId: string;
 
       if (id) {
-        // Atualização
+        // MODO EDIÇÃO
         const eventoAtualizado = await updateCalendarEvent(id, {
           titulo,
           descricao,
@@ -238,12 +241,37 @@ const CalendarEditPage = () => {
           endDatetime: endDateTime,
         });
         eventoId = eventoAtualizado.googleEventId;
+
+        // Adiciona apenas NOVOS participantes (que não estavam antes)
+        const novosParticipantes = participantesSelecionados.filter(
+          (membroId) => !participantesOriginais.includes(membroId)
+        );
+
+            for (const membroId of novosParticipantes) {
+              console.log("Adicionando participante:", {
+                eventoId,
+                membroId,
+                status: "pendente",
+                observacao: "",
+              });
+          try {
+            // Usa o eventoId (string) diretamente, não converte para int
+            await participarEvento(eventoId, {
+              membroId,
+              status: "pendente",
+              observacao: "",
+            });
+          } catch (err) {
+            console.error("Erro ao adicionar participante:", err);
+          }
+        }
+
         setFeedback({
           type: "success",
           message: "Evento atualizado com sucesso!",
         });
       } else {
-        // Criação
+        // MODO CRIAÇÃO
         const novoEvento = await createCalendarEvent({
           titulo,
           descricao,
@@ -251,30 +279,26 @@ const CalendarEditPage = () => {
           endDatetime: endDateTime,
         });
         eventoId = novoEvento.googleEventId;
+
+            console.log("Participantes selecionados:", participantesSelecionados);
+        // Adiciona TODOS os participantes selecionados como "pendente"
+        for (const membroId of participantesSelecionados) {
+          try {
+            // Usa o eventoId (string) diretamente, não converte para int
+            await participarEvento(eventoId, {
+              membroId,
+              status: "pendente",
+              observacao: "",
+            });
+          } catch (err) {
+            console.error("Erro ao adicionar participante:", err);
+          }
+        }
+
         setFeedback({
           type: "success",
           message: "Evento criado com sucesso!",
         });
-      }
-
-      // Adiciona participantes
-      for (const membroId of participantesSelecionados) {
-        try {
-          if (!eventoId) {
-            console.error(
-              "googleEventId inválido ao adicionar participante:",
-              eventoId
-            );
-            continue;
-          }
-          await participarEvento(parseInt(eventoId), {
-            membroId,
-            status: "pendente",
-            observacao: "",
-          });
-        } catch (err) {
-          console.error("Erro ao adicionar participante:", err);
-        }
       }
 
       // Adiciona tarefas

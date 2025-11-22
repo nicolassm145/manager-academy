@@ -12,7 +12,7 @@ export async function listarParticipantes(eventoId: string) {
 }
 
 export async function participarEvento(
-  eventoId: number,
+  eventoId: string | number,
   payload: {
     membroId?: number;
     status: "pendente" | "confirmado" | "recusado";
@@ -33,6 +33,7 @@ export async function participarEvento(
 export async function atualizarParticipante(
   participanteId: number,
   payload: {
+    membroId?: number;
     status?: "pendente" | "confirmado" | "recusado";
     observacao?: string;
   }
