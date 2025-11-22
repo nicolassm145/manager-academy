@@ -50,7 +50,7 @@ const CalendarDetailsPage = () => {
   const [participarLoading, setParticiparLoading] = useState(false);
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loadingParticipantes, setLoadingParticipantes] = useState(true);
-  
+
   // Estados para tarefas
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [loadingTarefas, setLoadingTarefas] = useState(true);
@@ -58,7 +58,7 @@ const CalendarDetailsPage = () => {
   const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
   const [novaTarefaMembroId, setNovaTarefaMembroId] = useState<number | "">("");
   const [tarefaLoading, setTarefaLoading] = useState(false);
-  
+
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -75,16 +75,20 @@ const CalendarDetailsPage = () => {
     loadEvent();
   }, [id, user?.equipe]);
 
+  type CalendarEventsResponse = any[] | { eventos: any[] };
+
   const loadEvent = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchCalendarEvents(user?.equipe);
+      const data: CalendarEventsResponse = await fetchCalendarEvents(
+        user?.equipe
+      );
       let eventsArray: any[] = [];
       if (Array.isArray(data)) {
         eventsArray = data;
-      } else if (Array.isArray(data?.eventos)) {
-        eventsArray = data.eventos;
+      } else if (data && Array.isArray((data as any).eventos)) {
+        eventsArray = (data as any).eventos;
       }
       const foundEvent = eventsArray.find((ev: any) => ev.id === id);
       setEvent(foundEvent || null);
@@ -103,9 +107,9 @@ const CalendarDetailsPage = () => {
   const loadParticipantes = async (eventoId: string) => {
     setLoadingParticipantes(true);
     try {
-      const lista = await listarParticipantes(eventoId);
+      const lista = await listarParticipantes(eventoId); // Usa googleEventId (string)
       setParticipantes(Array.isArray(lista) ? lista : []);
-      
+
       if (user?.equipe) {
         try {
           const membros = await getEquipeMembros(user.equipe);
@@ -179,9 +183,14 @@ const CalendarDetailsPage = () => {
     }
   };
 
-  const handleAtualizarStatus = async (participanteId: number, novoStatus: string) => {
+  const handleAtualizarStatus = async (
+    participanteId: number,
+    novoStatus: string
+  ) => {
     try {
-      await atualizarParticipante(participanteId, { status: novoStatus as any });
+      await atualizarParticipante(participanteId, {
+        status: novoStatus as any,
+      });
       setFeedback({
         type: "success",
         message: "Status atualizado com sucesso!",
@@ -245,7 +254,10 @@ const CalendarDetailsPage = () => {
     }
   };
 
-  const handleEditarTarefaDescricao = async (tarefaId: number, novaDescricao: string) => {
+  const handleEditarTarefaDescricao = async (
+    tarefaId: number,
+    novaDescricao: string
+  ) => {
     try {
       await atualizarTarefa(tarefaId, { descricao: novaDescricao });
       setFeedback({
@@ -344,9 +356,7 @@ const CalendarDetailsPage = () => {
 
   return (
     <Layout>
-      {feedback && (
-        <Feedback type={feedback.type} message={feedback.message} />
-      )}
+      {feedback && <Feedback type={feedback.type} message={feedback.message} />}
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
@@ -492,7 +502,7 @@ const CalendarDetailsPage = () => {
                 <UserGroupIcon className="w-6 h-6 text-blue-600" />
                 <h2 className="text-xl font-bold">Participantes</h2>
               </div>
-              
+
               {!userParticipante && (
                 <button
                   onClick={() => setShowParticipar(true)}
@@ -539,25 +549,44 @@ const CalendarDetailsPage = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <StatusBadge
                         status={p.status}
                         type={getStatusBadgeType(p.status)}
                       />
-                      
+
+                      {/* Botão para editar própria participação */}
+                      {p.membroId === parseInt(user?.id || "0") && (
+                        <button
+                          onClick={() => {
+                            setShowParticipar(true);
+                            setParticiparStatus(p.status);
+                            setParticiparObs(p.observacao || "");
+                          }}
+                          className="btn btn-ghost btn-xs"
+                          title="Editar participação"
+                        >
+                          <PencilIcon className="w-3 h-3" />
+                        </button>
+                      )}
+
                       {/* Ações rápidas para líder */}
                       {user?.role === "lider" && p.status === "pendente" && (
                         <div className="flex gap-1">
                           <button
-                            onClick={() => handleAtualizarStatus(p.id, "confirmado")}
+                            onClick={() =>
+                              handleAtualizarStatus(p.id, "confirmado")
+                            }
                             className="btn btn-success btn-xs btn-circle"
                             title="Confirmar"
                           >
                             <CheckIcon className="w-3 h-3" />
                           </button>
                           <button
-                            onClick={() => handleAtualizarStatus(p.id, "recusado")}
+                            onClick={() =>
+                              handleAtualizarStatus(p.id, "recusado")
+                            }
                             className="btn btn-error btn-xs btn-circle"
                             title="Recusar"
                           >
@@ -580,7 +609,7 @@ const CalendarDetailsPage = () => {
                 <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />
                 <h2 className="text-xl font-bold">Tarefas do Evento</h2>
               </div>
-              
+
               {user?.role === "lider" && (
                 <button
                   onClick={() => setShowNovaTarefa(true)}
@@ -605,62 +634,83 @@ const CalendarDetailsPage = () => {
               />
             ) : (
               <div className="space-y-3">
-                {tarefas.map((tarefa) => (
-                  <div
-                    key={tarefa.id}
-                    className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
-                      tarefa.concluida ? "bg-gray-50 opacity-75" : "hover:bg-gray-50"
-                    }`}
-                  >
-                    {/* Checkbox */}
-                    <input
-                      type="checkbox"
-                      checked={tarefa.concluida}
-                      onChange={(e) => handleToggleTarefa(tarefa.id, e.target.checked)}
-                      className="checkbox checkbox-primary mt-1 flex-shrink-0"
-                    />
+                {tarefas.map((tarefa) => {
+                  const podeMarcar =
+                    user?.role === "lider" ||
+                    tarefa.membroId === parseInt(user?.id || "0");
 
-                    {/* Conteúdo */}
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`font-medium ${
-                          tarefa.concluida ? "line-through text-gray-500" : ""
+                  return (
+                    <div
+                      key={tarefa.id}
+                      className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
+                        tarefa.concluida
+                          ? "bg-gray-50 opacity-75"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      {/* Checkbox */}
+                      <input
+                        type="checkbox"
+                        checked={tarefa.concluida}
+                        onChange={(e) =>
+                          handleToggleTarefa(tarefa.id, e.target.checked)
+                        }
+                        disabled={!podeMarcar}
+                        className={`checkbox checkbox-primary mt-1 flex-shrink-0 ${
+                          !podeMarcar ? "opacity-50 cursor-not-allowed" : ""
                         }`}
-                      >
-                        {tarefa.descricao}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-semibold text-purple-600">
-                            {getMemberName(tarefa.membroId).charAt(0)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 truncate">
-                          {getMemberName(tarefa.membroId)}
-                        </p>
-                      </div>
-                    </div>
+                        title={
+                          podeMarcar
+                            ? "Marcar como concluída/não concluída"
+                            : "Apenas o responsável ou líder pode marcar"
+                        }
+                      />
 
-                    {/* Ações */}
-                    {user?.role === "lider" && (
-                      <button
-                        onClick={() => {
-                          const novaDescricao = prompt(
-                            "Editar descrição:",
-                            tarefa.descricao
-                          );
-                          if (novaDescricao && novaDescricao.trim()) {
-                            handleEditarTarefaDescricao(tarefa.id, novaDescricao);
-                          }
-                        }}
-                        className="btn btn-ghost btn-xs"
-                        title="Editar"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                      {/* Conteúdo */}
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`font-medium ${
+                            tarefa.concluida ? "line-through text-gray-500" : ""
+                          }`}
+                        >
+                          {tarefa.descricao}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-semibold text-purple-600">
+                              {getMemberName(tarefa.membroId).charAt(0)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 truncate">
+                            {getMemberName(tarefa.membroId)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Ações */}
+                      {user?.role === "lider" && (
+                        <button
+                          onClick={() => {
+                            const novaDescricao = prompt(
+                              "Editar descrição:",
+                              tarefa.descricao
+                            );
+                            if (novaDescricao && novaDescricao.trim()) {
+                              handleEditarTarefaDescricao(
+                                tarefa.id,
+                                novaDescricao
+                              );
+                            }
+                          }}
+                          className="btn btn-ghost btn-xs"
+                          title="Editar"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </DetailSection>
@@ -672,7 +722,7 @@ const CalendarDetailsPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
             <h3 className="text-xl font-bold mb-4">Confirmar Participação</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -732,7 +782,7 @@ const CalendarDetailsPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
             <h3 className="text-xl font-bold mb-4">Nova Tarefa</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -753,7 +803,11 @@ const CalendarDetailsPage = () => {
                 </label>
                 <select
                   value={novaTarefaMembroId}
-                  onChange={(e) => setNovaTarefaMembroId(e.target.value ? parseInt(e.target.value) : "")}
+                  onChange={(e) =>
+                    setNovaTarefaMembroId(
+                      e.target.value ? parseInt(e.target.value) : ""
+                    )
+                  }
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Selecione um membro</option>

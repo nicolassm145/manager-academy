@@ -10,9 +10,23 @@ import {
   createCalendarEvent,
 } from "../../../services/googleCalendarService";
 import {
+  listarParticipantes,
+  participarEvento,
+} from "../../../services/eventoService";
+import {
+  listarTarefas,
+  adicionarTarefa,
+  type Tarefa,
+} from "../../../services/tarefaService";
+import { getEquipeMembros } from "../../../services/equipeService";
+import {
   CalendarIcon,
   ClockIcon,
   DocumentTextIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+  XMarkIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 
 const CalendarEditPage = () => {
@@ -27,6 +41,19 @@ const CalendarEditPage = () => {
   const [endDate, setEndDate] = useState("");
   const [endTime, setEndTime] = useState("");
 
+  // Estados para participantes
+  const [membrosEquipe, setMembrosEquipe] = useState<any[]>([]);
+  const [participantesSelecionados, setParticipantesSelecionados] = useState<
+    number[]
+  >([]);
+
+  // Estados para tarefas
+  const [tarefas, setTarefas] = useState<
+    { descricao: string; membroId: number }[]
+  >([]);
+  const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
+  const [novaTarefaMembroId, setNovaTarefaMembroId] = useState<number | "">("");
+
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [feedback, setFeedback] = useState<{
@@ -37,6 +64,7 @@ const CalendarEditPage = () => {
   const isEditMode = !!id;
 
   useEffect(() => {
+    loadMembros();
     if (id) {
       loadEvent();
     } else {
@@ -57,12 +85,21 @@ const CalendarEditPage = () => {
     }
   }, [id, user?.equipe]);
 
+  const loadMembros = async () => {
+    if (!user?.equipe) return;
+    try {
+      const membros = await getEquipeMembros(user.equipe);
+      setMembrosEquipe(Array.isArray(membros) ? membros : []);
+    } catch (error) {
+      console.error("Erro ao carregar membros:", error);
+    }
+  };
+
   const loadEvent = async () => {
     try {
       setInitialLoading(true);
       setFeedback(null);
       const data = await fetchCalendarEvents(user?.equipe);
-      // Backend retorna { eventos: Array } ao invés de Array diretamente
       const eventsArray = (data as any)?.eventos || [];
       const events = Array.isArray(eventsArray) ? eventsArray : [];
       const event = events.find((ev: any) => ev.id === id);
@@ -82,6 +119,35 @@ const CalendarEditPage = () => {
           setEndDate(endDateTime.toISOString().split("T")[0]);
           setEndTime(endDateTime.toTimeString().slice(0, 5));
         }
+
+        // Carrega participantes existentes
+        try {
+          const participantes = await listarParticipantes(
+            event.googleEventId || event.id
+          );
+          const participantesArray = Array.isArray(participantes)
+            ? participantes
+            : [];
+          setParticipantesSelecionados(
+            participantesArray.map((p: any) => p.membroId)
+          );
+        } catch (err) {
+          console.error("Erro ao carregar participantes:", err);
+        }
+
+        // Carrega tarefas existentes
+        try {
+          const tarefasData = await listarTarefas(event.id);
+          const tarefasArray = Array.isArray(tarefasData) ? tarefasData : [];
+          setTarefas(
+            tarefasArray.map((t: any) => ({
+              descricao: t.descricao,
+              membroId: t.membroId,
+            }))
+          );
+        } catch (err) {
+          console.error("Erro ao carregar tarefas:", err);
+        }
       }
     } catch (err: any) {
       setFeedback({
@@ -93,6 +159,40 @@ const CalendarEditPage = () => {
     }
   };
 
+  const handleToggleParticipante = (membroId: number) => {
+    setParticipantesSelecionados((prev) => {
+      if (prev.includes(membroId)) {
+        return prev.filter((id) => id !== membroId);
+      } else {
+        return [...prev, membroId];
+      }
+    });
+  };
+
+  const handleAdicionarTarefa = () => {
+    if (!novaTarefaDescricao.trim() || novaTarefaMembroId === "") {
+      setFeedback({
+        type: "error",
+        message: "Preencha todos os campos da tarefa",
+      });
+      return;
+    }
+
+    setTarefas((prev) => [
+      ...prev,
+      {
+        descricao: novaTarefaDescricao,
+        membroId: novaTarefaMembroId as number,
+      },
+    ]);
+    setNovaTarefaDescricao("");
+    setNovaTarefaMembroId("");
+  };
+
+  const handleRemoverTarefa = (index: number) => {
+    setTarefas((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -101,6 +201,15 @@ const CalendarEditPage = () => {
     // Validações
     if (!titulo.trim()) {
       setFeedback({ type: "error", message: "Título é obrigatório" });
+      setLoading(false);
+      return;
+    }
+
+    if (participantesSelecionados.length === 0) {
+      setFeedback({
+        type: "error",
+        message: "Selecione pelo menos um participante",
+      });
       setLoading(false);
       return;
     }
@@ -118,31 +227,69 @@ const CalendarEditPage = () => {
     }
 
     try {
+      let eventoId: string;
+
       if (id) {
-        await updateCalendarEvent(id, {
+        // Atualização
+        const eventoAtualizado = await updateCalendarEvent(id, {
           titulo,
           descricao,
           startDatetime: startDateTime,
           endDatetime: endDateTime,
         });
+        eventoId = eventoAtualizado.googleEventId;
         setFeedback({
           type: "success",
           message: "Evento atualizado com sucesso!",
         });
-        setTimeout(() => navigate(`/calendar/details/${id}`), 1200);
       } else {
-        await createCalendarEvent({
+        // Criação
+        const novoEvento = await createCalendarEvent({
           titulo,
           descricao,
           startDatetime: startDateTime,
           endDatetime: endDateTime,
         });
+        eventoId = novoEvento.googleEventId;
         setFeedback({
           type: "success",
           message: "Evento criado com sucesso!",
         });
-        setTimeout(() => navigate("/calendar"), 1200);
       }
+
+      // Adiciona participantes
+      for (const membroId of participantesSelecionados) {
+        try {
+          if (!eventoId) {
+            console.error(
+              "googleEventId inválido ao adicionar participante:",
+              eventoId
+            );
+            continue;
+          }
+          await participarEvento(parseInt(eventoId), {
+            membroId,
+            status: "pendente",
+            observacao: "",
+          });
+        } catch (err) {
+          console.error("Erro ao adicionar participante:", err);
+        }
+      }
+
+      // Adiciona tarefas
+      for (const tarefa of tarefas) {
+        try {
+          await adicionarTarefa(eventoId, {
+            membroId: tarefa.membroId,
+            descricao: tarefa.descricao,
+          });
+        } catch (err) {
+          console.error("Erro ao adicionar tarefa:", err);
+        }
+      }
+
+      setTimeout(() => navigate(`/calendar/details/${eventoId}`), 1200);
     } catch (err: any) {
       let errorMsg = err.message || "Erro ao salvar evento";
       if (err.response && err.response.text) {
@@ -157,6 +304,11 @@ const CalendarEditPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getMemberName = (membroId: number) => {
+    const membro = membrosEquipe.find((m) => m.id === membroId);
+    return membro ? membro.nomeCompleto : `ID: ${membroId}`;
   };
 
   if (initialLoading) {
@@ -306,6 +458,130 @@ const CalendarEditPage = () => {
                     />
                   </div>
                 </FormField>
+              </div>
+
+              {/* Seção de Participantes */}
+              <div className="pt-6 border-t">
+                <div className="flex items-center gap-2 mb-4">
+                  <UserGroupIcon className="w-6 h-6 text-blue-600" />
+                  <h3 className="text-lg font-semibold">Participantes *</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Selecione os membros que participarão deste evento
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-2 border rounded-lg">
+                  {membrosEquipe.map((membro) => (
+                    <label
+                      key={membro.id}
+                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={participantesSelecionados.includes(membro.id)}
+                        onChange={() => handleToggleParticipante(membro.id)}
+                        className="checkbox checkbox-primary"
+                      />
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-semibold text-blue-600">
+                            {membro.nomeCompleto.charAt(0)}
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium truncate">
+                          {membro.nomeCompleto}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                {participantesSelecionados.length > 0 && (
+                  <p className="text-sm text-blue-600 mt-2">
+                    {participantesSelecionados.length} participante(s)
+                    selecionado(s)
+                  </p>
+                )}
+              </div>
+
+              {/* Seção de Tarefas */}
+              <div className="pt-6 border-t">
+                <div className="flex items-center gap-2 mb-4">
+                  <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />
+                  <h3 className="text-lg font-semibold">Tarefas do Evento</h3>
+                </div>
+
+                {/* Lista de tarefas adicionadas */}
+                {tarefas.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {tarefas.map((tarefa, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">
+                            {tarefa.descricao}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            Responsável: {getMemberName(tarefa.membroId)}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoverTarefa(index)}
+                          className="btn btn-ghost btn-sm btn-circle"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Adicionar nova tarefa */}
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <p className="text-sm font-medium mb-3">Adicionar Tarefa</p>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={novaTarefaDescricao}
+                      onChange={(e) => setNovaTarefaDescricao(e.target.value)}
+                      placeholder="Descrição da tarefa..."
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={novaTarefaMembroId}
+                        onChange={(e) =>
+                          setNovaTarefaMembroId(
+                            e.target.value ? parseInt(e.target.value) : ""
+                          )
+                        }
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                      >
+                        <option value="">Selecione o responsável</option>
+                        {membrosEquipe
+                          .filter((m) =>
+                            participantesSelecionados.includes(m.id)
+                          )
+                          .map((membro) => (
+                            <option key={membro.id} value={membro.id}>
+                              {membro.nomeCompleto}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={handleAdicionarTarefa}
+                        className="btn btn-primary btn-sm gap-2"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                        Adicionar
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Botões */}

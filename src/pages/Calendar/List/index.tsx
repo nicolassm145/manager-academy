@@ -39,10 +39,11 @@ const CalendarListPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [participantesCount, setParticipantesCount] = useState<Record<string, number>>({});
+  const [userEventIds, setUserEventIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadEvents();
-  }, [user?.equipe]);
+  }, [user?.equipe, user?.id]);
 
   const loadEvents = async () => {
     try {
@@ -61,26 +62,45 @@ const CalendarListPage = () => {
         googleEventId: ev.id,
         createdAt: ev.created || "",
       }));
-      setEvents(mapped);
 
-      // Carrega contagem de participantes para cada evento
+      // Filtra eventos onde o usuário é participante
+      const userParticipatingEvents: string[] = [];
       const counts: Record<string, number> = {};
+      
       for (const evt of mapped) {
         try {
           const participantes = await listarParticipantes(evt.id);
-          counts[evt.id] = Array.isArray(participantes) ? participantes.length : 0;
+          const participantesArray = Array.isArray(participantes) ? participantes : [];
+          counts[evt.id] = participantesArray.length;
+          
+          // Verifica se o usuário é participante
+          const isParticipant = participantesArray.some(
+            (p: any) => p.membroId === parseInt(user?.id || "0")
+          );
+          
+          if (isParticipant || user?.role === "lider") {
+            userParticipatingEvents.push(evt.id);
+          }
         } catch {
           counts[evt.id] = 0;
         }
       }
+
+      // Filtra apenas eventos onde usuário participa (ou líder vê todos)
+      const filteredEvents = user?.role === "lider" 
+        ? mapped 
+        : mapped.filter((ev: any) => userParticipatingEvents.includes(ev.id));
+
+      setEvents(filteredEvents);
       setParticipantesCount(counts);
+      setUserEventIds(new Set(userParticipatingEvents));
 
       if (!Array.isArray((data as any).eventos)) {
         setError(
           "Resposta inesperada do backend: propriedade 'eventos' não é um array"
         );
-      } else if (mapped.length === 0) {
-        setError("Nenhum evento encontrado");
+      } else if (filteredEvents.length === 0) {
+        setError(user?.role === "lider" ? "Nenhum evento encontrado" : "Você não está participando de nenhum evento");
       }
     } catch (err: any) {
       setError(err.message || "Erro ao carregar eventos");
@@ -235,7 +255,7 @@ const CalendarListPage = () => {
 
         {error && (
           <Card>
-            <div className="text-center py-8 text-red-500">{error}</div>
+            <div className="text-center py-8 text-gray-500">{error}</div>
           </Card>
         )}
 
@@ -358,7 +378,11 @@ const CalendarListPage = () => {
                 <EmptyState
                   icon={CalendarIcon}
                   title="Nenhum evento encontrado"
-                  description="Não há eventos cadastrados para este período."
+                  description={
+                    user?.role === "lider" 
+                      ? "Não há eventos cadastrados para este período."
+                      : "Você não está participando de nenhum evento."
+                  }
                 />
               ) : (
                 <div className="space-y-3">

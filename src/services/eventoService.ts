@@ -1,7 +1,7 @@
 // Serviços para participantes de eventos
 import { getAuthHeaders } from "../config/api";
 
-export async function listarParticipantes(eventoId: number) {
+export async function listarParticipantes(eventoId: string) {
   const url = `/api/v1/eventos/${eventoId}/participantes`;
   const res = await fetch(url, {
     headers: getAuthHeaders(),
