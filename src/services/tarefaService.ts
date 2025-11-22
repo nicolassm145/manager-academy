@@ -3,6 +3,7 @@
 import { getAuthHeaders } from "../config/api";
 
 export interface Tarefa {
+  concluido: any;
   id: number;
   eventoId: number;
   membroId: number;

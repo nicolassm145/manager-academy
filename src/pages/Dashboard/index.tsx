@@ -1,12 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
 import { Link } from "react-router-dom";
 import { Layout } from "../../components/LayoutComponent";
 import { useAuth } from "../../context/AuthContext";
@@ -16,14 +8,8 @@ import { getTeams } from "../../services/teamService";
 import { getTransactions } from "../../services/financeService";
 import type { Transaction } from "../../types/finance";
 import { getFinanceSummary } from "../../services/financeDashboardService";
-import { StatCard } from "../../components/ui";
 import { getInventoryItems } from "../../services/inventoryService";
-import {
-  UsersIcon,
-  UserGroupIcon,
-  PlusIcon,
-  BanknotesIcon,
-} from "@heroicons/react/24/outline";
+import {  UsersIcon,  UserGroupIcon,  PlusIcon,  BanknotesIcon} from "@heroicons/react/24/outline";
 import { Card } from "../../components/ui";
 
 const DashboardPage = () => {
@@ -52,7 +38,6 @@ const DashboardPage = () => {
   const loadTransactions = async () => {
     try {
       const data = await getTransactions();
-      // Normaliza o campo 'tipo' para minúsculo
       setTransactions(
         data.map((t) => ({
           ...t,
@@ -65,40 +50,7 @@ const DashboardPage = () => {
       setTransactions([]);
     }
   };
-  // Agrupa transações por categoria para gráfico de pizza
-  const getPieData = (tipo: "entrada" | "saida") => {
-    const filtered = transactions.filter((t) => t.tipo === tipo);
-    const grouped: { [cat: string]: { valor: number; count: number } } = {};
-    filtered.forEach((t) => {
-      if (!grouped[t.categoria]) grouped[t.categoria] = { valor: 0, count: 0 };
-      grouped[t.categoria].valor += t.valor;
-      grouped[t.categoria].count += 1;
-    });
-    // Recharts espera o campo 'name' para o label
-    return Object.entries(grouped).map(([categoria, obj]) => ({
-      name: categoria,
-      valor: obj.valor,
-      count: obj.count,
-    }));
-  };
 
-  const COLORS = [
-    "#22c55e",
-    "#ef4444",
-    "#f59e42",
-    "#6366f1",
-    "#eab308",
-    "#06b6d4",
-    "#a21caf",
-    "#f472b6",
-    "#64748b",
-    "#facc15",
-    "#0ea5e9",
-    "#d97706",
-    "#84cc16",
-    "#db2777",
-    "#7c3aed",
-  ];
 
   const loadFinanceSummary = async () => {
     try {
@@ -111,8 +63,6 @@ const DashboardPage = () => {
 
   const loadStats = async () => {
     try {
-      // Carregar dados baseado no perfil
-      // Se for líder/membro, passa o equipeId para buscar apenas da sua equipe
       const userEquipeId = user?.equipe ? parseInt(user.equipe) : undefined;
       const membersData = can("canViewMembers")
         ? await getMembers(userEquipeId)
@@ -215,7 +165,6 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        {/* Cards de Resumo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {can("canViewMembers") && (
             <Card>
@@ -317,6 +266,39 @@ const DashboardPage = () => {
               </Link>
             )}
 
+            <Link
+              to="/files"
+              className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                  <PlusIcon className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="font-semibold">Adicionar Arquivo</p>
+                  <p className="text-sm opacity-60">Upload de novo arquivo</p>
+                </div>
+              </div>
+            </Link>
+
+            {can("canCreateCalendarEvent") && (
+              <Link
+                to="/calendar/edit"
+                className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <PlusIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Criar Evento</p>
+                    <p className="text-sm opacity-60">
+                      Novo evento no calendário
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )}
             {can("canCreateFinance") && (
               <Link
                 to="/finance/new"
@@ -369,161 +351,6 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
-
-        <br />
-
-        {/* Resumo Financeiro só para quem pode ver gráficos */}
-        {can("canViewFinance") &&
-          user?.role !== "admin" &&
-          user?.role !== "membro" && (
-            <>
-              <h2 className="text-xl font-bold mb-4">Resumo Financeiro</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <Card>
-                  <div className="p-4 sm:p-6">
-                    <h2 className="text-lg font-bold mb-4">
-                      Entradas por Categoria
-                    </h2>
-                    {getPieData("entrada").length === 0 ? (
-                      <div className="text-center opacity-60">
-                        Sem dados de entrada
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={260}>
-                        <PieChart>
-                          <Pie
-                            data={getPieData("entrada")}
-                            dataKey="valor"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            // Remove o label externo para deixar o gráfico mais limpo
-                          >
-                            {getPieData("entrada").map((_, idx) => (
-                              <Cell
-                                key={`cell-entrada-${idx}`}
-                                fill={COLORS[idx % COLORS.length]}
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            content={({ active, payload }) => {
-                              if (!active || !payload || !payload.length)
-                                return null;
-                              const entry = payload[0].payload;
-                              const total = getPieData("entrada").reduce(
-                                (sum, d) => sum + d.valor,
-                                0
-                              );
-                              const percent = total
-                                ? (entry.valor / total) * 100
-                                : 0;
-                              return (
-                                <div
-                                  style={{
-                                    background: "#fff",
-                                    border: "1px solid #ccc",
-                                    padding: 8,
-                                    borderRadius: 6,
-                                  }}
-                                >
-                                  <div>
-                                    <b>{entry.name}</b>
-                                  </div>
-                                  <div>
-                                    Valor:{" "}
-                                    {entry.valor.toLocaleString("pt-BR", {
-                                      style: "currency",
-                                      currency: "BRL",
-                                    })}
-                                  </div>
-                                  <div>Qtd: {entry.count}</div>
-                                  <div>{percent.toFixed(1)}% do total</div>
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </Card>
-                <Card>
-                  <div className="p-4 sm:p-6">
-                    <h2 className="text-lg font-bold mb-4">
-                      Saídas por Categoria
-                    </h2>
-                    {getPieData("saida").length === 0 ? (
-                      <div className="text-center opacity-60">
-                        Sem dados de saída
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={260}>
-                        <PieChart>
-                          <Pie
-                            data={getPieData("saida")}
-                            dataKey="valor"
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            label={false}
-                          >
-                            {getPieData("saida").map((_, idx) => (
-                              <Cell
-                                key={`cell-saida-${idx}`}
-                                fill={COLORS[idx % COLORS.length]}
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            content={({ active, payload }) => {
-                              if (!active || !payload || !payload.length)
-                                return null;
-                              const entry = payload[0].payload;
-                              const total = getPieData("saida").reduce(
-                                (sum, d) => sum + d.valor,
-                                0
-                              );
-                              const percent = total
-                                ? (entry.valor / total) * 100
-                                : 0;
-                              return (
-                                <div
-                                  style={{
-                                    background: "#fff",
-                                    border: "1px solid #ccc",
-                                    padding: 8,
-                                    borderRadius: 6,
-                                  }}
-                                >
-                                  <div>
-                                    <b>{entry.name}</b>
-                                  </div>
-                                  <div>
-                                    Valor:{" "}
-                                    {entry.valor.toLocaleString("pt-BR", {
-                                      style: "currency",
-                                      currency: "BRL",
-                                    })}
-                                  </div>
-                                  <div>Qtd: {entry.count}</div>
-                                  <div>{percent.toFixed(1)}% do total</div>
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </Card>
-              </div>
-            </>
-          )}
       </div>
     </Layout>
   );
