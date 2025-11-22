@@ -9,7 +9,12 @@ import { getTransactions } from "../../services/financeService";
 import type { Transaction } from "../../types/finance";
 import { getFinanceSummary } from "../../services/financeDashboardService";
 import { getInventoryItems } from "../../services/inventoryService";
-import {  UsersIcon,  UserGroupIcon,  PlusIcon,  BanknotesIcon} from "@heroicons/react/24/outline";
+import {
+  UsersIcon,
+  UserGroupIcon,
+  PlusIcon,
+  BanknotesIcon,
+} from "@heroicons/react/24/outline";
 import { Card } from "../../components/ui";
 
 const DashboardPage = () => {
@@ -50,7 +55,6 @@ const DashboardPage = () => {
       setTransactions([]);
     }
   };
-
 
   const loadFinanceSummary = async () => {
     try {
