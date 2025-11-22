@@ -28,6 +28,7 @@ export const deleteDriveFile = async (fileId: string): Promise<void> => {
 import { API_BASE_URL, getAuthHeaders, handleApiError } from "../config/api";
 
 export interface DriveFile {
+  thumbnailLink: boolean;
   id: string;
   name: string;
   mimeType: string;
@@ -79,9 +80,16 @@ export const getAuthorizationUrl = async (
   return data.authorization_url || data.authorizationUrl || data.url || "";
 };
 
-export const listDriveFiles = async (): Promise<DriveFile[]> => {
+export const listDriveFiles = async (
+  folderId?: string
+): Promise<DriveFile[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/google-drive/files`, {
+    const url = folderId
+      ? `${API_BASE_URL}/google-drive/files?folderId=${encodeURIComponent(
+          folderId
+        )}`
+      : `${API_BASE_URL}/google-drive/files`;
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
     await handleApiError(response);

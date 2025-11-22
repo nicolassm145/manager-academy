@@ -30,6 +30,8 @@ type PermissionMap = {
   canCreateCalendar: boolean;
   canEditCalendar: boolean;
   canDeleteCalendar: boolean;
+  canCreateCalendarEvent: boolean;
+  canEditCalendarEvent: boolean;
 };
 
 export const PERMISSIONS: Record<UserRole, PermissionMap> = {
@@ -63,6 +65,8 @@ export const PERMISSIONS: Record<UserRole, PermissionMap> = {
     canViewCalendar: false,
     canEditCalendar: true,
     canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 
   // Líder pode gerenciar membros, finanças e inventário da sua equipe
@@ -91,10 +95,12 @@ export const PERMISSIONS: Record<UserRole, PermissionMap> = {
     canUploadFiles: true,
     canDeleteFiles: true,
     canViewFiles: true,
-      canCreateCalendar: true,
+    canCreateCalendar: true,
     canViewCalendar: true,
     canEditCalendar: true,
     canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 
   // Professor tem as mesmas permissões que Líder
@@ -122,10 +128,13 @@ export const PERMISSIONS: Record<UserRole, PermissionMap> = {
     canDeleteInventory: true,
     canUploadFiles: true,
     canDeleteFiles: true,
-    canViewFiles: true,  canCreateCalendar: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
     canViewCalendar: true,
     canEditCalendar: true,
     canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 
   // Diretor pode ver finanças
@@ -153,10 +162,13 @@ export const PERMISSIONS: Record<UserRole, PermissionMap> = {
     canDeleteInventory: false,
     canUploadFiles: true,
     canDeleteFiles: true,
-    canViewFiles: true,  canCreateCalendar: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
     canViewCalendar: true,
     canEditCalendar: true,
     canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 
   // Membro pode ver membros e equipes (mas sem editar/criar/deletar)
@@ -184,10 +196,13 @@ export const PERMISSIONS: Record<UserRole, PermissionMap> = {
     canDeleteInventory: false,
     canUploadFiles: true,
     canDeleteFiles: true,
-    canViewFiles: true,  canCreateCalendar: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
     canViewCalendar: true,
     canEditCalendar: true,
     canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 } as const;
 

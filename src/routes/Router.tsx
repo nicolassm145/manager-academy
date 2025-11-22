@@ -34,6 +34,8 @@ import FileListPage from "../pages/Files";
 // (futuro: importar New/Edit/Detail se necessário)
 import FinanceResumePage from "../pages/Finance/Resume";
 import CalendarListPage from "../pages/Calendar/List";
+import CalendarEditPage from "../pages/Calendar/Edit";
+import CalendarDetailsPage from "../pages/Calendar/Details";
 
 const router = createBrowserRouter([
   {
@@ -217,7 +219,6 @@ const router = createBrowserRouter([
     ),
   },
 
-
   {
     path: "/files",
     element: (
@@ -231,6 +232,30 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <CalendarListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/edit",
+    element: (
+      <ProtectedRoute requiredPermission="canCreateCalendar">
+        <CalendarEditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/edit/:id",
+    element: (
+      <ProtectedRoute requiredPermission="canEditCalendarEvent">
+        <CalendarEditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/details/:id",
+    element: (
+      <ProtectedRoute>
+        <CalendarDetailsPage />
       </ProtectedRoute>
     ),
   },
