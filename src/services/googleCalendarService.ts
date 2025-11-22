@@ -50,11 +50,8 @@ export async function createCalendarEvent(
     credentials: "include",
   });
   if (!res.ok) {
-    let errorMsg = "Erro ao criar evento";
-    try {
-      errorMsg = await res.text();
-    } catch {}
-    throw new Error(errorMsg);
+    const errorMsg = await res.text();
+    throw new Error(errorMsg || "Erro ao criar evento");
   }
   return await res.json();
 }
@@ -71,7 +68,10 @@ export async function updateCalendarEvent(
     body: JSON.stringify(event),
     credentials: "include",
   });
-  if (!res.ok) throw new Error("Erro ao atualizar evento");
+  if (!res.ok) {
+    const errorMsg = await res.text();
+    throw new Error(errorMsg || "Erro ao atualizar evento");
+  }
   return await res.json();
 }
 
