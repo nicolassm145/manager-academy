@@ -7,8 +7,11 @@ import {
   DetailSection,
   DetailItem,
   DetailGrid,
+  EmptyState,
+  StatusBadge,
 } from "../../../components/ui";
 import { useAuth } from "../../../context/AuthContext";
+import { Feedback } from "../../../components/ui/FeedbackComponent";
 import {
   fetchCalendarEvents,
   deleteCalendarEvent,
@@ -16,14 +19,25 @@ import {
 import {
   listarParticipantes,
   participarEvento,
+  atualizarParticipante,
 } from "../../../services/eventoService";
+import {
+  listarTarefas,
+  adicionarTarefa,
+  atualizarTarefa,
+  type Tarefa,
+} from "../../../services/tarefaService";
 import { getEquipeMembros } from "../../../services/equipeService";
 import {
   PencilIcon,
   TrashIcon,
   CalendarIcon,
   ClockIcon,
-  MapPinIcon,
+  UserGroupIcon,
+  CheckIcon,
+  XMarkIcon,
+  ClipboardDocumentListIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 
 const CalendarDetailsPage = () => {
@@ -34,11 +48,17 @@ const CalendarDetailsPage = () => {
   >("confirmado");
   const [participarObs, setParticiparObs] = useState("");
   const [participarLoading, setParticiparLoading] = useState(false);
-  const [participarFeedback, setParticiparFeedback] = useState<string | null>(
-    null
-  );
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loadingParticipantes, setLoadingParticipantes] = useState(true);
+  
+  // Estados para tarefas
+  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  const [loadingTarefas, setLoadingTarefas] = useState(true);
+  const [showNovaTarefa, setShowNovaTarefa] = useState(false);
+  const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
+  const [novaTarefaMembroId, setNovaTarefaMembroId] = useState<number | "">("");
+  const [tarefaLoading, setTarefaLoading] = useState(false);
+  
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -46,6 +66,10 @@ const CalendarDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadEvent();
@@ -56,7 +80,6 @@ const CalendarDetailsPage = () => {
       setLoading(true);
       setError(null);
       const data = await fetchCalendarEvents(user?.equipe);
-      // Backend retorna { eventos: Array } ou objeto
       let eventsArray: any[] = [];
       if (Array.isArray(data)) {
         eventsArray = data;
@@ -65,29 +88,46 @@ const CalendarDetailsPage = () => {
       }
       const foundEvent = eventsArray.find((ev: any) => ev.id === id);
       setEvent(foundEvent || null);
-      // Carrega participantes se evento encontrado
+
       if (foundEvent && foundEvent.id) {
-        setLoadingParticipantes(true);
-        try {
-          const lista = await listarParticipantes(foundEvent.id);
-          setParticipantes(Array.isArray(lista) ? lista : []);
-          // Busca membros da equipe do usuário logado
-          if (user?.equipe) {
-            try {
-              const membros = await getEquipeMembros(user.equipe);
-              setMembrosEquipe(Array.isArray(membros) ? membros : []);
-            } catch {}
-          }
-        } catch (err) {
-          setParticipantes([]);
-        } finally {
-          setLoadingParticipantes(false);
-        }
+        await loadParticipantes(foundEvent.id);
+        await loadTarefas(foundEvent.id);
       }
     } catch (err: any) {
       setError(err.message || "Erro ao carregar evento");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadParticipantes = async (eventoId: string) => {
+    setLoadingParticipantes(true);
+    try {
+      const lista = await listarParticipantes(eventoId);
+      setParticipantes(Array.isArray(lista) ? lista : []);
+      
+      if (user?.equipe) {
+        try {
+          const membros = await getEquipeMembros(user.equipe);
+          setMembrosEquipe(Array.isArray(membros) ? membros : []);
+        } catch {}
+      }
+    } catch (err) {
+      setParticipantes([]);
+    } finally {
+      setLoadingParticipantes(false);
+    }
+  };
+
+  const loadTarefas = async (eventoId: string) => {
+    setLoadingTarefas(true);
+    try {
+      const lista = await listarTarefas(eventoId);
+      setTarefas(Array.isArray(lista) ? lista : []);
+    } catch (err) {
+      setTarefas([]);
+    } finally {
+      setLoadingTarefas(false);
     }
   };
 
@@ -97,11 +137,127 @@ const CalendarDetailsPage = () => {
     setDeleting(true);
     try {
       await deleteCalendarEvent(id!);
-      navigate("/calendar");
+      setFeedback({
+        type: "success",
+        message: "Evento excluído com sucesso!",
+      });
+      setTimeout(() => navigate("/calendar"), 1200);
     } catch (err: any) {
-      setError(err.message || "Erro ao deletar evento");
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao deletar evento",
+      });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleParticipar = async () => {
+    setParticiparLoading(true);
+    setFeedback(null);
+    try {
+      await participarEvento(event.id, {
+        membroId: parseInt(user?.id || "0"),
+        status: participarStatus,
+        observacao: participarObs,
+      });
+      setShowParticipar(false);
+      setParticiparObs("");
+      setParticiparStatus("confirmado");
+      setFeedback({
+        type: "success",
+        message: "Participação confirmada com sucesso!",
+      });
+      await loadParticipantes(event.id);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao confirmar participação",
+      });
+    } finally {
+      setParticiparLoading(false);
+    }
+  };
+
+  const handleAtualizarStatus = async (participanteId: number, novoStatus: string) => {
+    try {
+      await atualizarParticipante(participanteId, { status: novoStatus as any });
+      setFeedback({
+        type: "success",
+        message: "Status atualizado com sucesso!",
+      });
+      await loadParticipantes(event.id);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao atualizar status",
+      });
+    }
+  };
+
+  const handleAdicionarTarefa = async () => {
+    if (!novaTarefaDescricao.trim() || novaTarefaMembroId === "") {
+      setFeedback({
+        type: "error",
+        message: "Preencha todos os campos obrigatórios",
+      });
+      return;
+    }
+
+    setTarefaLoading(true);
+    setFeedback(null);
+    try {
+      await adicionarTarefa(event.id, {
+        membroId: novaTarefaMembroId as number,
+        descricao: novaTarefaDescricao,
+      });
+      setShowNovaTarefa(false);
+      setNovaTarefaDescricao("");
+      setNovaTarefaMembroId("");
+      setFeedback({
+        type: "success",
+        message: "Tarefa adicionada com sucesso!",
+      });
+      await loadTarefas(event.id);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao adicionar tarefa",
+      });
+    } finally {
+      setTarefaLoading(false);
+    }
+  };
+
+  const handleToggleTarefa = async (tarefaId: number, concluido: boolean) => {
+    try {
+      await atualizarTarefa(tarefaId, { concluido });
+      setFeedback({
+        type: "success",
+        message: concluido ? "Tarefa concluída!" : "Tarefa reaberta",
+      });
+      await loadTarefas(event.id);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao atualizar tarefa",
+      });
+    }
+  };
+
+  const handleEditarTarefaDescricao = async (tarefaId: number, novaDescricao: string) => {
+    try {
+      await atualizarTarefa(tarefaId, { descricao: novaDescricao });
+      setFeedback({
+        type: "success",
+        message: "Tarefa atualizada com sucesso!",
+      });
+      await loadTarefas(event.id);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Erro ao atualizar tarefa",
+      });
     }
   };
 
@@ -115,16 +271,6 @@ const CalendarDetailsPage = () => {
 
   const formatTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -145,6 +291,28 @@ const CalendarDetailsPage = () => {
       return `${minutes}min`;
     }
   };
+
+  const getStatusBadgeType = (status: string) => {
+    switch (status) {
+      case "confirmado":
+        return "success";
+      case "recusado":
+        return "danger";
+      case "pendente":
+        return "warning";
+      default:
+        return "default";
+    }
+  };
+
+  const getMemberName = (membroId: number) => {
+    const membro = membrosEquipe.find((m) => m.id === membroId);
+    return membro ? membro.nomeCompleto : `ID: ${membroId}`;
+  };
+
+  const userParticipante = participantes.find(
+    (p) => p.membroId === parseInt(user?.id || "0")
+  );
 
   if (loading) {
     return (
@@ -176,30 +344,36 @@ const CalendarDetailsPage = () => {
 
   return (
     <Layout>
+      {feedback && (
+        <Feedback type={feedback.type} message={feedback.message} />
+      )}
+
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <BackButton to="/calendar" />
 
-          {user?.role === "lider" && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate(`/calendar/edit/${event.id}`)}
-                className="btn btn-primary gap-2 flex-1 sm:flex-initial"
-              >
-                <PencilIcon className="w-4 h-4" />
-                Editar
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="btn btn-error gap-2 flex-1 sm:flex-initial"
-              >
-                <TrashIcon className="w-4 h-4" />
-                {deleting ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            {user?.role === "lider" && (
+              <>
+                <button
+                  onClick={() => navigate(`/calendar/edit/${event.id}`)}
+                  className="btn btn-primary gap-2 flex-1 sm:flex-initial"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  Editar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="btn btn-error gap-2 flex-1 sm:flex-initial"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  {deleting ? "Excluindo..." : "Excluir"}
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Card Principal */}
@@ -285,15 +459,6 @@ const CalendarDetailsPage = () => {
                   </span>
                 }
               />
-
-              <DetailItem
-                label="Criado em"
-                value={
-                  <span className="text-sm text-gray-600">
-                    {formatDateTime(event.created || "")}
-                  </span>
-                }
-              />
             </DetailGrid>
           </DetailSection>
 
@@ -317,138 +482,313 @@ const CalendarDetailsPage = () => {
               </a>
             </div>
           )}
-          <br />
-          {/* Participantes do Evento */}
-          <DetailSection title="Participantes">
+        </Card>
+
+        {/* Card de Participantes */}
+        <Card>
+          <DetailSection>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <UserGroupIcon className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-bold">Participantes</h2>
+              </div>
+              
+              {!userParticipante && (
+                <button
+                  onClick={() => setShowParticipar(true)}
+                  className="btn btn-primary btn-sm gap-2"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                  Participar
+                </button>
+              )}
+            </div>
+
             {loadingParticipantes ? (
-              <div className="py-4 text-center text-gray-400">
-                Carregando participantes...
+              <div className="py-8 text-center text-gray-400">
+                <div className="loading loading-spinner loading-md mx-auto mb-2"></div>
+                <p>Carregando participantes...</p>
               </div>
             ) : participantes.length === 0 ? (
-              <div className="py-4 text-center text-gray-400">
-                Nenhum participante
-              </div>
+              <EmptyState
+                icon={UserGroupIcon}
+                title="Nenhum participante ainda"
+                description="Seja o primeiro a confirmar presença neste evento!"
+              />
             ) : (
-              <ul className="divide-y">
-                {participantes.map((p) => {
-                  const membro = membrosEquipe.find((m) => m.id === p.membroId);
-                  return (
-                    <li
-                      key={p.id}
-                      className="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <span className="font-semibold">
-                        {membro ? membro.nomeCompleto : p.membroId}
-                      </span>
-                      <span className="text-xs px-2 py-1 rounded bg-gray-100 ml-2">
-                        {p.status}
-                      </span>
-                      {p.observacao && (
-                        <span className="text-xs text-gray-500 ml-2">
-                          {p.observacao}
+              <div className="space-y-3">
+                {participantes.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <span className="font-semibold text-blue-600">
+                          {getMemberName(p.membroId).charAt(0)}
                         </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            {/* Botão para participar do evento */}
-            <div className="mt-4 text-center">
-              <button
-                className="btn btn-accent"
-                onClick={() => setShowParticipar(true)}
-              >
-                Participar / Confirmar Presença
-              </button>
-            </div>
-            {/* Modal simples para participação */}
-            {showParticipar && (
-              <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-                  <h3 className="text-lg font-bold mb-2">
-                    Participar do Evento
-                  </h3>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium mb-1">
-                      Status:
-                    </label>
-                    <select
-                      value={participarStatus}
-                      onChange={(e) =>
-                        setParticiparStatus(e.target.value as any)
-                      }
-                      className="input input-bordered w-full"
-                    >
-                      <option value="confirmado">Confirmado</option>
-                      <option value="pendente">Pendente</option>
-                      <option value="recusado">Recusado</option>
-                    </select>
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium mb-1">
-                      Observação:
-                    </label>
-                    <input
-                      type="text"
-                      value={participarObs}
-                      onChange={(e) => setParticiparObs(e.target.value)}
-                      className="input input-bordered w-full"
-                    />
-                  </div>
-                  {participarFeedback && (
-                    <div className="text-red-500 text-sm mb-2">
-                      {participarFeedback}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold truncate">
+                          {getMemberName(p.membroId)}
+                        </p>
+                        {p.observacao && (
+                          <p className="text-xs text-gray-500 truncate">
+                            {p.observacao}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      className="btn btn-primary flex-1"
-                      disabled={participarLoading}
-                      onClick={async () => {
-                        setParticiparLoading(true);
-                        setParticiparFeedback(null);
-                        try {
-                          await participarEvento(event.id, {
-                            membroId: user?.id,
-                            status: participarStatus,
-                            observacao: participarObs,
-                          });
-                          setShowParticipar(false);
-                          setParticiparObs("");
-                          setParticiparStatus("confirmado");
-                          // Atualiza lista de participantes
-                          setLoadingParticipantes(true);
-                          try {
-                            const lista = await listarParticipantes(event.id);
-                            setParticipantes(Array.isArray(lista) ? lista : []);
-                          } catch {}
-                          setLoadingParticipantes(false);
-                        } catch (err: any) {
-                          setParticiparFeedback(
-                            err.message || "Erro ao participar"
-                          );
-                        } finally {
-                          setParticiparLoading(false);
-                        }
-                      }}
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      className="btn btn-ghost flex-1"
-                      onClick={() => setShowParticipar(false)}
-                      disabled={participarLoading}
-                    >
-                      Cancelar
-                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      <StatusBadge
+                        status={p.status}
+                        type={getStatusBadgeType(p.status)}
+                      />
+                      
+                      {/* Ações rápidas para líder */}
+                      {user?.role === "lider" && p.status === "pendente" && (
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleAtualizarStatus(p.id, "confirmado")}
+                            className="btn btn-success btn-xs btn-circle"
+                            title="Confirmar"
+                          >
+                            <CheckIcon className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleAtualizarStatus(p.id, "recusado")}
+                            className="btn btn-error btn-xs btn-circle"
+                            title="Recusar"
+                          >
+                            <XMarkIcon className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            )}
+          </DetailSection>
+        </Card>
+        {/* Card de Tarefas */}
+        <Card>
+          <DetailSection>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />
+                <h2 className="text-xl font-bold">Tarefas do Evento</h2>
+              </div>
+              
+              {user?.role === "lider" && (
+                <button
+                  onClick={() => setShowNovaTarefa(true)}
+                  className="btn btn-primary btn-sm gap-2"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Nova Tarefa
+                </button>
+              )}
+            </div>
+
+            {loadingTarefas ? (
+              <div className="py-8 text-center text-gray-400">
+                <div className="loading loading-spinner loading-md mx-auto mb-2"></div>
+                <p>Carregando tarefas...</p>
+              </div>
+            ) : tarefas.length === 0 ? (
+              <EmptyState
+                icon={ClipboardDocumentListIcon}
+                title="Nenhuma tarefa criada"
+                description="Adicione tarefas para organizar as responsabilidades do evento!"
+              />
+            ) : (
+              <div className="space-y-3">
+                {tarefas.map((tarefa) => (
+                  <div
+                    key={tarefa.id}
+                    className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
+                      tarefa.concluida ? "bg-gray-50 opacity-75" : "hover:bg-gray-50"
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={tarefa.concluida}
+                      onChange={(e) => handleToggleTarefa(tarefa.id, e.target.checked)}
+                      className="checkbox checkbox-primary mt-1 flex-shrink-0"
+                    />
+
+                    {/* Conteúdo */}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`font-medium ${
+                          tarefa.concluida ? "line-through text-gray-500" : ""
+                        }`}
+                      >
+                        {tarefa.descricao}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-semibold text-purple-600">
+                            {getMemberName(tarefa.membroId).charAt(0)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 truncate">
+                          {getMemberName(tarefa.membroId)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Ações */}
+                    {user?.role === "lider" && (
+                      <button
+                        onClick={() => {
+                          const novaDescricao = prompt(
+                            "Editar descrição:",
+                            tarefa.descricao
+                          );
+                          if (novaDescricao && novaDescricao.trim()) {
+                            handleEditarTarefaDescricao(tarefa.id, novaDescricao);
+                          }
+                        }}
+                        className="btn btn-ghost btn-xs"
+                        title="Editar"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </DetailSection>
         </Card>
       </div>
+
+      {/* Modal de Participação */}
+      {showParticipar && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Confirmar Participação</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Status *
+                </label>
+                <select
+                  value={participarStatus}
+                  onChange={(e) => setParticiparStatus(e.target.value as any)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="confirmado">Confirmado</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="recusado">Não vou participar</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Observação (opcional)
+                </label>
+                <textarea
+                  value={participarObs}
+                  onChange={(e) => setParticiparObs(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  placeholder="Adicione uma observação..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleParticipar}
+                disabled={participarLoading}
+                className="btn btn-primary flex-1"
+              >
+                {participarLoading ? "Salvando..." : "Confirmar"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowParticipar(false);
+                  setParticiparObs("");
+                  setParticiparStatus("confirmado");
+                }}
+                disabled={participarLoading}
+                className="btn btn-ghost flex-1"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Nova Tarefa */}
+      {showNovaTarefa && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Nova Tarefa</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Descrição *
+                </label>
+                <textarea
+                  value={novaTarefaDescricao}
+                  onChange={(e) => setNovaTarefaDescricao(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  placeholder="Descreva a tarefa..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Responsável *
+                </label>
+                <select
+                  value={novaTarefaMembroId}
+                  onChange={(e) => setNovaTarefaMembroId(e.target.value ? parseInt(e.target.value) : "")}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Selecione um membro</option>
+                  {membrosEquipe.map((membro) => (
+                    <option key={membro.id} value={membro.id}>
+                      {membro.nomeCompleto}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleAdicionarTarefa}
+                disabled={tarefaLoading}
+                className="btn btn-primary flex-1"
+              >
+                {tarefaLoading ? "Salvando..." : "Adicionar"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowNovaTarefa(false);
+                  setNovaTarefaDescricao("");
+                  setNovaTarefaMembroId("");
+                }}
+                disabled={tarefaLoading}
+                className="btn btn-ghost flex-1"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

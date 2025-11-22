@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "../../../components/LayoutComponent";
 import { useAuth } from "../../../context/AuthContext";
 import { fetchCalendarEvents } from "../../../services/googleCalendarService";
+import { listarParticipantes } from "../../../services/eventoService";
 import {
   PageHeader,
   Card,
   SearchBar,
   EmptyState,
+  StatCard,
 } from "../../../components/ui";
 import {
   CalendarIcon,
@@ -15,6 +17,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 interface CalendarEvent {
@@ -35,6 +38,7 @@ const CalendarListPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [participantesCount, setParticipantesCount] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadEvents();
@@ -45,7 +49,6 @@ const CalendarListPage = () => {
       setLoading(true);
       setError(null);
       const data = await fetchCalendarEvents(user?.equipe);
-      console.log("Eventos recebidos:", data);
       const eventos = Array.isArray((data as any).eventos)
         ? (data as any).eventos
         : [];
@@ -59,6 +62,19 @@ const CalendarListPage = () => {
         createdAt: ev.created || "",
       }));
       setEvents(mapped);
+
+      // Carrega contagem de participantes para cada evento
+      const counts: Record<string, number> = {};
+      for (const evt of mapped) {
+        try {
+          const participantes = await listarParticipantes(evt.id);
+          counts[evt.id] = Array.isArray(participantes) ? participantes.length : 0;
+        } catch {
+          counts[evt.id] = 0;
+        }
+      }
+      setParticipantesCount(counts);
+
       if (!Array.isArray((data as any).eventos)) {
         setError(
           "Resposta inesperada do backend: propriedade 'eventos' não é um array"
@@ -75,7 +91,6 @@ const CalendarListPage = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    // Garante que events é um array
     const eventsArray = Array.isArray(events) ? events : [];
     const q = searchTerm.trim().toLowerCase();
     if (!q) return eventsArray;
@@ -85,6 +100,13 @@ const CalendarListPage = () => {
         (ev.descricao || "").toLowerCase().includes(q)
     );
   }, [events, searchTerm]);
+
+  // Estatísticas
+  const totalEvents = filteredEvents.length;
+  const upcomingEvents = filteredEvents.filter(
+    (ev) => new Date(ev.startDatetime) >= new Date()
+  ).length;
+  const pastEvents = totalEvents - upcomingEvents;
 
   // Gera dias do mês atual
   const year = currentDate.getFullYear();
@@ -96,7 +118,6 @@ const CalendarListPage = () => {
 
   // Gera array de dias com eventos
   const calendarDays = useMemo(() => {
-    // Garante que filteredEvents é um array
     const eventsArray = Array.isArray(filteredEvents) ? filteredEvents : [];
     const days = [];
 
@@ -189,6 +210,28 @@ const CalendarListPage = () => {
             </button>
           )}
         </PageHeader>
+
+        {/* Estatísticas */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard
+            label="Total de Eventos"
+            value={totalEvents}
+            icon={CalendarIcon}
+            color="blue"
+          />
+          <StatCard
+            label="Próximos Eventos"
+            value={upcomingEvents}
+            icon={ClockIcon}
+            color="green"
+          />
+          <StatCard
+            label="Eventos Passados"
+            value={pastEvents}
+            icon={CalendarIcon}
+            color="purple"
+          />
+        </div>
 
         {error && (
           <Card>
@@ -360,6 +403,10 @@ const CalendarListPage = () => {
                                 "pt-BR",
                                 { hour: "2-digit", minute: "2-digit" }
                               )}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <UserGroupIcon className="w-4 h-4" />
+                              {participantesCount[event.id] || 0} participantes
                             </span>
                           </div>
                         </div>
