@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useState, useMemo } from "react";
 import {
   HomeIcon,
@@ -15,7 +15,7 @@ import {
   CalendarIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
-import { usePermissions } from "../hooks/usePermissions";
+import { usePermissions } from "../../hooks/usePermissions";
 
 interface LayoutProps {
   children: ReactNode;

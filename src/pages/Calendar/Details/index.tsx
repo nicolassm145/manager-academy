@@ -1,53 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
-import {
-  Card,
-  BackButton,
-  DetailSection,
-  DetailItem,
-  DetailGrid,
-  EmptyState,
-  StatusBadge,
-} from "../../../components/ui";
+import { Layout } from "../../../components/layout/LayoutComponent";
+import { Card, BackButton, DetailSection, DetailItem, DetailGrid, EmptyState, StatusBadge } from "../../../components/ui";
 import { useAuth } from "../../../context/AuthContext";
 import { Feedback } from "../../../components/ui/FeedbackComponent";
-import {
-  fetchCalendarEvents,
-  deleteCalendarEvent,
-} from "../../../services/googleCalendarService";
-import {
-  listarParticipantes,
-  atualizarParticipante,
-} from "../../../services/eventoService";
-import {
-  listarTarefas,
-  atualizarTarefa,
-  type Tarefa,
-} from "../../../services/tarefaService";
+import { fetchCalendarEvents, deleteCalendarEvent } from "../../../services/googleCalendarService";
+import { listarParticipantes, atualizarParticipante } from "../../../services/eventoService";
+import { listarTarefas, atualizarTarefa, type Tarefa } from "../../../services/tarefaService";
 import { getEquipeMembros } from "../../../services/equipeService";
-import {
-  PencilIcon,
-  TrashIcon,
-  CalendarIcon,
-  ClockIcon,
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-} from "@heroicons/react/24/outline";
+import { PencilIcon, TrashIcon, CalendarIcon, ClockIcon, UserGroupIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 
 const CalendarDetailsPage = () => {
   const [membrosEquipe, setMembrosEquipe] = useState<any[]>([]);
   const [showParticipar, setShowParticipar] = useState(false);
-  const [participarStatus, setParticiparStatus] = useState<
-    "pendente" | "confirmado" | "recusado"
-  >("confirmado");
+  const [participarStatus, setParticiparStatus] = useState<"pendente" | "confirmado" | "recusado">("confirmado");
   const [participarObs, setParticiparObs] = useState("");
   const [participarLoading, setParticiparLoading] = useState(false);
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loadingParticipantes, setLoadingParticipantes] = useState(true);
-  const [participanteAtualId, setParticipanteAtualId] = useState<number | null>(
-    null
-  );
+  const [participanteAtualId, setParticipanteAtualId] = useState<number | null>(null);
 
   // Estados para tarefas
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
@@ -59,6 +30,7 @@ const CalendarDetailsPage = () => {
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "error" | "success";
@@ -75,9 +47,7 @@ const CalendarDetailsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const data: CalendarEventsResponse = await fetchCalendarEvents(
-        user?.equipe
-      );
+      const data: CalendarEventsResponse = await fetchCalendarEvents(user?.equipe);
       let eventsArray: any[] = [];
       if (Array.isArray(data)) {
         eventsArray = data;
@@ -130,8 +100,6 @@ const CalendarDetailsPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Tem certeza que deseja excluir este evento?")) return;
-
     setDeleting(true);
     try {
       await deleteCalendarEvent(id!);
@@ -139,6 +107,7 @@ const CalendarDetailsPage = () => {
         type: "success",
         message: "Evento excluído com sucesso!",
       });
+      setShowDeleteModal(false);
       setTimeout(() => navigate("/calendar"), 1200);
     } catch (err: any) {
       setFeedback({
@@ -203,10 +172,7 @@ const CalendarDetailsPage = () => {
     }
   };
 
-  const handleEditarTarefaDescricao = async (
-    tarefaId: number,
-    novaDescricao: string
-  ) => {
+  const handleEditarTarefaDescricao = async (tarefaId: number, novaDescricao: string) => {
     try {
       await atualizarTarefa(tarefaId, { descricao: novaDescricao });
       setFeedback({
@@ -271,9 +237,7 @@ const CalendarDetailsPage = () => {
     return membro ? membro.nomeCompleto : `ID: ${membroId}`;
   };
 
-  const userParticipante = participantes.find(
-    (p) => p.membroId === parseInt(user?.id || "0")
-  );
+  const userParticipante = participantes.find((p) => p.membroId === parseInt(user?.id || "0"));
 
   if (loading) {
     return (
@@ -315,20 +279,13 @@ const CalendarDetailsPage = () => {
           <div className="flex gap-2">
             {user?.role === "lider" && (
               <>
-                <button
-                  onClick={() => navigate(`/calendar/edit/${event.id}`)}
-                  className="btn btn-primary gap-2 flex-1 sm:flex-initial"
-                >
+                <button onClick={() => navigate(`/calendar/edit/${event.id}`)} className="btn btn-primary gap-2 flex-1 sm:flex-initial">
                   <PencilIcon className="w-4 h-4" />
                   Editar
                 </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="btn btn-error gap-2 flex-1 sm:flex-initial"
-                >
+                <button className="btn btn-error" onClick={() => setShowDeleteModal(true)} disabled={deleting}>
                   <TrashIcon className="w-4 h-4" />
-                  {deleting ? "Excluindo..." : "Excluir"}
+                  Excluir Evento
                 </button>
               </>
             )}
@@ -344,14 +301,8 @@ const CalendarDetailsPage = () => {
                 <CalendarIcon className="w-8 h-8 text-blue-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-                  {event.titulo}
-                </h1>
-                {event.descricao && (
-                  <p className="text-base sm:text-lg text-gray-600">
-                    {event.descricao}
-                  </p>
-                )}
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{event.titulo}</h1>
+                {event.descricao && <p className="text-base sm:text-lg text-gray-600">{event.descricao}</p>}
               </div>
             </div>
           </div>
@@ -364,9 +315,7 @@ const CalendarDetailsPage = () => {
                 value={
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5 text-blue-600" />
-                    <span className="font-semibold">
-                      {formatDate(event.start?.dateTime || "")}
-                    </span>
+                    <span className="font-semibold">{formatDate(event.start?.dateTime || "")}</span>
                   </div>
                 }
               />
@@ -376,9 +325,7 @@ const CalendarDetailsPage = () => {
                 value={
                   <div className="flex items-center gap-2">
                     <ClockIcon className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold">
-                      {formatTime(event.start?.dateTime || "")}
-                    </span>
+                    <span className="font-semibold">{formatTime(event.start?.dateTime || "")}</span>
                   </div>
                 }
               />
@@ -388,9 +335,7 @@ const CalendarDetailsPage = () => {
                 value={
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5 text-blue-600" />
-                    <span className="font-semibold">
-                      {formatDate(event.end?.dateTime || "")}
-                    </span>
+                    <span className="font-semibold">{formatDate(event.end?.dateTime || "")}</span>
                   </div>
                 }
               />
@@ -400,23 +345,14 @@ const CalendarDetailsPage = () => {
                 value={
                   <div className="flex items-center gap-2">
                     <ClockIcon className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold">
-                      {formatTime(event.end?.dateTime || "")}
-                    </span>
+                    <span className="font-semibold">{formatTime(event.end?.dateTime || "")}</span>
                   </div>
                 }
               />
 
               <DetailItem
                 label="Duração"
-                value={
-                  <span className="font-semibold text-purple-600">
-                    {getDuration(
-                      event.start?.dateTime || "",
-                      event.end?.dateTime || ""
-                    )}
-                  </span>
-                }
+                value={<span className="font-semibold text-purple-600">{getDuration(event.start?.dateTime || "", event.end?.dateTime || "")}</span>}
               />
             </DetailGrid>
           </DetailSection>
@@ -430,11 +366,7 @@ const CalendarDetailsPage = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
               >
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                 </svg>
                 Ver no Google Calendar
@@ -459,41 +391,23 @@ const CalendarDetailsPage = () => {
                 <p>Carregando participantes...</p>
               </div>
             ) : participantes.length === 0 ? (
-              <EmptyState
-                icon={UserGroupIcon}
-                title="Nenhum participante ainda"
-                description="Aguardando confirmação de presença"
-              />
+              <EmptyState icon={UserGroupIcon} title="Nenhum participante ainda" description="Aguardando confirmação de presença" />
             ) : (
               <div className="space-y-3">
                 {participantes.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
+                  <div key={p.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <span className="font-semibold text-blue-600">
-                          {getMemberName(p.membroId).charAt(0)}
-                        </span>
+                        <span className="font-semibold text-blue-600">{getMemberName(p.membroId).charAt(0)}</span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold truncate">
-                          {getMemberName(p.membroId)}
-                        </p>
-                        {p.observacao && (
-                          <p className="text-xs text-gray-500 truncate">
-                            {p.observacao}
-                          </p>
-                        )}
+                        <p className="font-semibold truncate">{getMemberName(p.membroId)}</p>
+                        {p.observacao && <p className="text-xs text-gray-500 truncate">{p.observacao}</p>}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <StatusBadge
-                        status={p.status}
-                        type={getStatusBadgeType(p.status)}
-                      />
+                      <StatusBadge status={p.status} type={getStatusBadgeType(p.status)} />
 
                       {/* Botão para editar própria participação */}
                       {p.membroId === parseInt(user?.id || "0") && (
@@ -534,63 +448,37 @@ const CalendarDetailsPage = () => {
                 <p>Carregando tarefas...</p>
               </div>
             ) : tarefas.length === 0 ? (
-              <EmptyState
-                icon={ClipboardDocumentListIcon}
-                title="Nenhuma tarefa criada"
-                description="Não há tarefas associadas a este evento"
-              />
+              <EmptyState icon={ClipboardDocumentListIcon} title="Nenhuma tarefa criada" description="Não há tarefas associadas a este evento" />
             ) : (
               <div className="space-y-3">
                 {tarefas.map((tarefa) => {
-                  const podeMarcar =
-                    user?.role === "lider" ||
-                    tarefa.membroId === parseInt(user?.id || "0");
+                  const podeMarcar = user?.role === "lider" || tarefa.membroId === parseInt(user?.id || "0");
 
                   return (
                     <div
                       key={tarefa.id}
                       className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
-                        tarefa.concluido
-                          ? "bg-gray-50 opacity-75"
-                          : "hover:bg-gray-50"
+                        tarefa.concluido ? "bg-gray-50 opacity-75" : "hover:bg-gray-50"
                       }`}
                     >
                       {/* Checkbox */}
                       <input
                         type="checkbox"
                         checked={tarefa.concluido}
-                        onChange={(e) =>
-                          handleToggleTarefa(tarefa.id, e.target.checked)
-                        }
+                        onChange={(e) => handleToggleTarefa(tarefa.id, e.target.checked)}
                         disabled={!podeMarcar}
-                        className={`checkbox checkbox-primary mt-1 flex-shrink-0 ${
-                          !podeMarcar ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        title={
-                          podeMarcar
-                            ? "Marcar como concluída/não concluída"
-                            : "Apenas o responsável ou líder pode marcar"
-                        }
+                        className={`checkbox checkbox-primary mt-1 flex-shrink-0 ${!podeMarcar ? "opacity-50 cursor-not-allowed" : ""}`}
+                        title={podeMarcar ? "Marcar como concluída/não concluída" : "Apenas o responsável ou líder pode marcar"}
                       />
 
                       {/* Conteúdo */}
                       <div className="flex-1 min-w-0">
-                        <p
-                          className={`font-medium ${
-                            tarefa.concluido ? "line-through text-gray-500" : ""
-                          }`}
-                        >
-                          {tarefa.descricao}
-                        </p>
+                        <p className={`font-medium ${tarefa.concluido ? "line-through text-gray-500" : ""}`}>{tarefa.descricao}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-semibold text-purple-600">
-                              {getMemberName(tarefa.membroId).charAt(0)}
-                            </span>
+                            <span className="text-xs font-semibold text-purple-600">{getMemberName(tarefa.membroId).charAt(0)}</span>
                           </div>
-                          <p className="text-xs text-gray-600 truncate">
-                            {getMemberName(tarefa.membroId)}
-                          </p>
+                          <p className="text-xs text-gray-600 truncate">{getMemberName(tarefa.membroId)}</p>
                         </div>
                       </div>
 
@@ -598,15 +486,9 @@ const CalendarDetailsPage = () => {
                       {user?.role === "lider" && (
                         <button
                           onClick={() => {
-                            const novaDescricao = prompt(
-                              "Editar descrição:",
-                              tarefa.descricao
-                            );
+                            const novaDescricao = prompt("Editar descrição:", tarefa.descricao);
                             if (novaDescricao && novaDescricao.trim()) {
-                              handleEditarTarefaDescricao(
-                                tarefa.id,
-                                novaDescricao
-                              );
+                              handleEditarTarefaDescricao(tarefa.id, novaDescricao);
                             }
                           }}
                           className="btn btn-ghost btn-xs"
@@ -632,9 +514,7 @@ const CalendarDetailsPage = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Status *
-                </label>
+                <label className="block text-sm font-medium mb-2">Status *</label>
                 <select
                   value={participarStatus}
                   onChange={(e) => setParticiparStatus(e.target.value as any)}
@@ -647,9 +527,7 @@ const CalendarDetailsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Observação (opcional)
-                </label>
+                <label className="block text-sm font-medium mb-2">Observação (opcional)</label>
                 <textarea
                   value={participarObs}
                   onChange={(e) => setParticiparObs(e.target.value)}
@@ -661,11 +539,7 @@ const CalendarDetailsPage = () => {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleParticipar}
-                disabled={participarLoading}
-                className="btn btn-primary flex-1"
-              >
+              <button onClick={handleParticipar} disabled={participarLoading} className="btn btn-primary flex-1">
                 {participarLoading ? "Salvando..." : "Salvar"}
               </button>
               <button
@@ -681,6 +555,22 @@ const CalendarDetailsPage = () => {
                 Cancelar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm relative">
+            <button className="absolute top-2 right-2 btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
+              ✕
+            </button>
+            <h2 className="text-lg font-bold mb-4">Confirmar exclusão</h2>
+            <p className="mb-4">Tem certeza que deseja excluir este evento?</p>
+            <button className="btn btn-error w-full" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Excluindo..." : "Excluir"}
+            </button>
           </div>
         </div>
       )}

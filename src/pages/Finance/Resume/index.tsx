@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StatCard, Card } from "../../../components/ui";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import {
   getFinanceSummary,
   getFinanceCategories,

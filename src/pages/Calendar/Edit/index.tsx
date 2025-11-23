@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import { Card, FormField, BackButton } from "../../../components/ui";
 import { useAuth } from "../../../context/AuthContext";
 import { Feedback } from "../../../components/ui/FeedbackComponent";

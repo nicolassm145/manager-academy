@@ -37,6 +37,7 @@ import CalendarListPage from "../pages/Calendar/List";
 import CalendarEditPage from "../pages/Calendar/Edit";
 import CalendarDetailsPage from "../pages/Calendar/Details";
 
+
 const router = createBrowserRouter([
   {
     path: "/",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Layout } from "../../components/LayoutComponent";
+import { Layout } from "../../components/layout/LayoutComponent";
 import { useAuth } from "../../context/AuthContext";
 
 import {
@@ -8,6 +8,8 @@ import {
   downloadFile,
   getAuthorizationUrl,
   deleteDriveFile,
+  createDriveFolder,
+  renameDriveFile,
   type DriveFile,
 } from "../../services/googleDriveService";
 import {
@@ -27,22 +29,23 @@ import {
   CloudArrowUpIcon,
   CloudIcon,
   ArrowDownTrayIcon,
-  LinkIcon,
-  EyeIcon,
-  TrashIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
-  FolderIcon,
-  DocumentIcon,
-  PhotoIcon,
-  VideoCameraIcon,
-  MusicalNoteIcon,
-  DocumentTextIcon,
-  TableCellsIcon,
   PresentationChartLineIcon,
   ArchiveBoxIcon,
   CodeBracketIcon,
   ChevronRightIcon,
+  PencilSquareIcon,
+  FolderIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+  MusicalNoteIcon,
+  TableCellsIcon,
+  DocumentTextIcon,
+  DocumentIcon,
+  LinkIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  TrashIcon,
+  // EyeIcon removed (unused)
 } from "@heroicons/react/24/outline";
 
 import { Feedback } from "../../components/ui/FeedbackComponent";
@@ -51,12 +54,8 @@ const FileListPage = () => {
   const { user } = useAuth();
 
   const [files, setFiles] = useState<DriveFile[]>([]);
-  const [currentFolderId, setCurrentFolderId] = useState<string | undefined>(
-    undefined
-  );
-  const [folderStack, setFolderStack] = useState<
-    Array<{ id: string | undefined; name: string }>
-  >([{ id: undefined, name: "Raiz" }]);
+  const [currentFolderId, setCurrentFolderId] = useState<string | undefined>(undefined);
+  const [folderStack, setFolderStack] = useState<Array<{ id: string | undefined; name: string }>>([{ id: undefined, name: "Raiz" }]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [driveConnected, setDriveConnected] = useState(true);
@@ -72,6 +71,50 @@ const FileListPage = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<DriveFile | null>(null);
+  const [newFileName, setNewFileName] = useState("");
+  const [renaming, setRenaming] = useState(false);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<{ id: string | null; name: string }>({ id: null, name: "" });
+  const [deleting, setDeleting] = useState(false);
+
+  const handleRename = async () => {
+    if (!renameTarget || !newFileName.trim() || !user?.equipe) return;
+    setRenaming(true);
+    try {
+      const equipeIdNumber = Number(user.equipe);
+      await renameDriveFile(equipeIdNumber, renameTarget.id, newFileName.trim());
+      setFeedback({ type: "success", message: "Nome alterado com sucesso!" });
+      setShowRenameModal(false);
+      setRenameTarget(null);
+      setNewFileName("");
+      await loadFiles(currentFolderId);
+    } catch (error: any) {
+      setFeedback({ type: "error", message: error?.message || "Erro ao renomear" });
+    } finally {
+      setRenaming(false);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim() || !user?.equipe) return;
+    setCreatingFolder(true);
+    try {
+      const equipeIdNumber = Number(user.equipe);
+      await createDriveFolder(newFolderName.trim(), equipeIdNumber, currentFolderId);
+      setFeedback({ type: "success", message: "Pasta criada com sucesso!" });
+      setShowCreateFolder(false);
+      setNewFolderName("");
+      await loadFiles(currentFolderId);
+    } catch (error: any) {
+      setFeedback({ type: "error", message: error?.message || "Erro ao criar pasta" });
+    } finally {
+      setCreatingFolder(false);
+    }
+  };
 
   useEffect(() => {
     loadFiles(currentFolderId);
@@ -85,10 +128,7 @@ const FileListPage = () => {
       setFiles(data);
       setDriveConnected(true);
     } catch (error: any) {
-      if (
-        error?.message?.includes("Drive vinculado") ||
-        error?.message?.includes("404")
-      ) {
+      if (error?.message?.includes("Drive vinculado") || error?.message?.includes("404")) {
         setDriveConnected(false);
         setFiles([]);
       } else {
@@ -107,13 +147,7 @@ const FileListPage = () => {
     setFolderStack((prev) => [...prev, { id: folder.id, name: folder.name }]);
   };
 
-  const handleGoBack = () => {
-    if (folderStack.length > 1) {
-      const newStack = folderStack.slice(0, -1);
-      setFolderStack(newStack);
-      setCurrentFolderId(newStack[newStack.length - 1].id);
-    }
-  };
+  // handleGoBack removed (unused)
 
   const handleConnect = async () => {
     try {
@@ -168,7 +202,7 @@ const FileListPage = () => {
         setUploading(false);
         return;
       }
-      await uploadFile(file, equipeIdNumber);
+      await uploadFile(file, equipeIdNumber, currentFolderId || undefined);
       setFeedback({
         type: "success",
         message: "Arquivo enviado com sucesso!",
@@ -223,36 +257,27 @@ const FileListPage = () => {
   };
 
   const handleDelete = async (fileId: string) => {
-    if (!window.confirm("Tem certeza que deseja excluir este arquivo?")) return;
-    setDeletingId(fileId);
+    setDeleting(true);
     try {
       await deleteDriveFile(fileId);
       setFeedback({
         type: "success",
         message: "Arquivo excluído com sucesso!",
       });
+      setShowDeleteModal({ id: null, name: "" });
       await loadFiles(currentFolderId);
     } catch (error) {
       setFeedback({ type: "error", message: "Erro ao excluir arquivo" });
     } finally {
+      setDeleting(false);
       setDeletingId(null);
     }
   };
 
   const handleCardClick = (file: DriveFile) => {
     const isFolder = file.mimeType === "application/vnd.google-apps.folder";
-    const isImage = file.mimeType?.startsWith("image/");
-
     if (isFolder) {
       handleEnterFolder(file);
-    } else if (isImage) {
-      setPreviewImage(
-        typeof file.webViewLink === "string"
-          ? file.webViewLink
-          : typeof file.thumbnailLink === "string"
-          ? file.thumbnailLink
-          : null
-      );
     } else if (file.webViewLink) {
       window.open(file.webViewLink, "_blank");
     }
@@ -305,11 +330,7 @@ const FileListPage = () => {
       };
     }
 
-    if (
-      subtype?.includes("zip") ||
-      subtype?.includes("rar") ||
-      subtype?.includes("compressed")
-    ) {
+    if (subtype?.includes("zip") || subtype?.includes("rar") || subtype?.includes("compressed")) {
       return {
         icon: ArchiveBoxIcon,
         color: "text-amber-600",
@@ -317,12 +338,7 @@ const FileListPage = () => {
       };
     }
 
-    if (
-      type === "text" &&
-      (subtype?.includes("javascript") ||
-        subtype?.includes("python") ||
-        subtype?.includes("html"))
-    ) {
+    if (type === "text" && (subtype?.includes("javascript") || subtype?.includes("python") || subtype?.includes("html"))) {
       return {
         icon: CodeBracketIcon,
         color: "text-cyan-600",
@@ -359,6 +375,15 @@ const FileListPage = () => {
     });
   };
 
+  const SUBTYPE_LABELS: Record<string, string> = {
+    "vnd.google-apps.folder": "folder",
+    pdf: "PDF",
+    markdown: "Markdown",
+    "svg+xml": "SVG",
+    "vnd.openxmlformats-officedocument.wordprocessingml.document": "Word",
+    // Adicione outros mapeamentos conforme necessário
+  };
+
   const allTypes = useMemo(
     () =>
       Array.from(
@@ -381,7 +406,12 @@ const FileListPage = () => {
             return s;
           })
         )
-      ).filter(Boolean),
+      )
+        .filter(Boolean)
+        .map((subtype) => ({
+          value: subtype,
+          label: SUBTYPE_LABELS[subtype] || subtype,
+        })),
     [files]
   );
 
@@ -403,12 +433,8 @@ const FileListPage = () => {
     });
 
     return {
-      folders: filtered.filter(
-        (f) => f.mimeType === "application/vnd.google-apps.folder"
-      ),
-      regularFiles: filtered.filter(
-        (f) => f.mimeType !== "application/vnd.google-apps.folder"
-      ),
+      folders: filtered.filter((f) => f.mimeType === "application/vnd.google-apps.folder"),
+      regularFiles: filtered.filter((f) => f.mimeType !== "application/vnd.google-apps.folder"),
     };
   }, [files, filterType, filterSubtype, searchTerm]);
 
@@ -429,10 +455,7 @@ const FileListPage = () => {
     return (
       <Layout>
         <div className="space-y-6">
-          <PageHeader
-            title="Gerenciamento de Arquivos"
-            description="Integração com Google Drive da equipe"
-          />
+          <PageHeader title="Gerenciamento de Arquivos" description="Integração com Google Drive da equipe" />
           <Card>
             <EmptyState
               icon={CloudIcon}
@@ -444,10 +467,7 @@ const FileListPage = () => {
               }
             >
               {user?.role === "lider" && (
-                <button
-                  onClick={handleConnect}
-                  className="btn btn-primary mt-4"
-                >
+                <button onClick={handleConnect} className="btn btn-primary mt-4">
                   <LinkIcon className="w-5 h-5 mr-2" />
                   Conectar Google Drive
                 </button>
@@ -461,74 +481,82 @@ const FileListPage = () => {
 
   return (
     <Layout>
-      <div
-        className="space-y-4 sm:space-y-6"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        {feedback && (
-          <Feedback type={feedback.type} message={feedback.message} />
-        )}
+      <div className="space-y-4 sm:space-y-6" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+        {feedback && <Feedback type={feedback.type} message={feedback.message} />}
 
         {isDragging && user?.role === "lider" && (
           <div className="fixed inset-0 bg-blue-500/20 backdrop-blur-sm z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-dashed border-blue-500">
               <CloudArrowUpIcon className="w-20 h-20 text-blue-500 mx-auto mb-4" />
-              <p className="text-2xl font-bold text-gray-800">
-                Solte o arquivo aqui
-              </p>
+              <p className="text-2xl font-bold text-gray-800">Solte o arquivo aqui</p>
             </div>
           </div>
         )}
 
-        <PageHeader
-          title="Gerenciamento de Arquivos"
-          description={`Arquivos da pasta da equipe ${user?.equipeNome || ""}`}
-        >
+        <PageHeader title="Gerenciamento de Arquivos" description={`Arquivos da pasta da equipe ${user?.equipeNome || ""}`}>
           <div className="flex items-center gap-2">
             {user?.role === "lider" && (
-              <label className="flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap">
-                <CloudArrowUpIcon className="w-5 h-5" />
-                {uploading ? "Enviando..." : "Enviar"}
-                <input
-                  type="file"
-                  onChange={handleFileInput}
-                  disabled={uploading}
-                  className="hidden"
-                />
-              </label>
+              <>
+                <label className="flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap">
+                  <CloudArrowUpIcon className="w-5 h-5" />
+                  {uploading ? "Enviando..." : "Enviar"}
+                  <input type="file" onChange={handleFileInput} disabled={uploading} className="hidden" />
+                </label>
+                <button className="btn btn-secondary ml-2" onClick={() => setShowCreateFolder(true)} disabled={creatingFolder}>
+                  <FolderIcon className="w-5 h-5 mr-1" />
+                  Nova Pasta
+                </button>
+              </>
             )}
           </div>
         </PageHeader>
+        {showCreateFolder && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm relative">
+              <button className="absolute top-2 right-2 btn btn-ghost btn-sm" onClick={() => setShowCreateFolder(false)} disabled={creatingFolder}>
+                ✕
+              </button>
+              <h2 className="text-lg font-bold mb-4">Criar nova pasta</h2>
+              <input
+                type="text"
+                className="input input-bordered w-full mb-4"
+                placeholder="Nome da pasta"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                disabled={creatingFolder}
+                autoFocus
+              />
+              <button className="btn btn-primary w-full" onClick={handleCreateFolder} disabled={creatingFolder || !newFolderName.trim()}>
+                {creatingFolder ? "Criando..." : "Criar"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <Card>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 items-center">
               <div>
-                <SearchBar
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  placeholder="Buscar por nome, tipo..."
+                <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Buscar por nome, tipo..." />
+              </div>
+              <div>
+                <FilterSelect
+                  value={filterType}
+                  onChange={setFilterType}
+                  options={allTypes.map((type) => ({ value: type, label: type }))}
+                  placeholder="Todos os Tipos"
+                  className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm text-sm"
                 />
               </div>
-
-              <FilterSelect
-                value={filterType}
-                onChange={setFilterType}
-                options={allTypes.map((type) => ({ value: type, label: type }))}
-                placeholder="Todos os Tipos"
-              />
-
-              <FilterSelect
-                value={filterSubtype}
-                onChange={setFilterSubtype}
-                options={allSubtypes.map((subtype) => ({
-                  value: subtype,
-                  label: subtype,
-                }))}
-                placeholder="Todos os Subtipos"
-              />
+              <div>
+                <FilterSelect
+                  value={filterSubtype}
+                  onChange={setFilterSubtype}
+                  options={[{ value: "", label: "Todos os Subtipos" }, ...allSubtypes]}
+                  placeholder="Todos os Subtipos"
+                  className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm text-sm"
+                />
+              </div>
             </div>
           </div>
         </Card>
@@ -536,14 +564,10 @@ const FileListPage = () => {
           <nav className="flex items-center gap-1 text-sm">
             {folderStack.map((folder, idx) => (
               <React.Fragment key={folder.id || `root-${idx}`}>
-                {idx > 0 && (
-                  <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-                )}
+                {idx > 0 && <ChevronRightIcon className="w-4 h-4 text-gray-400" />}
                 <button
                   className={`px-2 py-1 rounded hover:bg-gray-100 transition-colors ${
-                    idx === folderStack.length - 1
-                      ? "font-bold text-blue-600"
-                      : "text-gray-600"
+                    idx === folderStack.length - 1 ? "font-bold text-blue-600" : "text-gray-600"
                   }`}
                   onClick={() => {
                     if (idx === folderStack.length - 1) return;
@@ -559,22 +583,10 @@ const FileListPage = () => {
 
           <div className="flex items-center gap-2 ml-auto">
             <div className="btn-group">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`btn btn-sm ${
-                  viewMode === "grid" ? "btn-active" : "btn-ghost"
-                }`}
-                title="Grid"
-              >
+              <button onClick={() => setViewMode("grid")} className={`btn btn-sm ${viewMode === "grid" ? "btn-active" : "btn-ghost"}`} title="Grid">
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`btn btn-sm ${
-                  viewMode === "list" ? "btn-active" : "btn-ghost"
-                }`}
-                title="Lista"
-              >
+              <button onClick={() => setViewMode("list")} className={`btn btn-sm ${viewMode === "list" ? "btn-active" : "btn-ghost"}`} title="Lista">
                 <ListBulletIcon className="w-5 h-5" />
               </button>
             </div>
@@ -593,29 +605,50 @@ const FileListPage = () => {
             {/* Pastas */}
             {folders.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-600 mb-3 px-1">
-                  Pastas
-                </h3>
+                <h3 className="text-sm font-semibold text-gray-600 mb-3 px-1">Pastas</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {folders.map((folder) => (
                     <div
                       key={folder.id}
-                      onClick={() => handleEnterFolder(folder)}
                       className="group relative bg-white rounded-lg border-2 border-gray-100 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer p-4 flex items-center gap-3"
                     >
                       <div className="bg-yellow-50 p-3 rounded-lg">
                         <FolderIcon className="w-8 h-8 text-yellow-500" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3
-                          className="font-semibold text-sm text-gray-800 truncate"
-                          title={folder.name}
-                        >
+                      <div className="flex-1 min-w-0" onClick={() => handleEnterFolder(folder)}>
+                        <h3 className="font-semibold text-sm text-gray-800 truncate" title={folder.name}>
                           {folder.name}
                         </h3>
-                        <p className="text-xs text-gray-500 truncate">
-                          {formatDate(folder.modifiedTime)}
-                        </p>
+                        <p className="text-xs text-gray-500 truncate">{formatDate(folder.modifiedTime)}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        {user?.role === "lider" && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRenameTarget(folder);
+                                setNewFileName(folder.name);
+                                setShowRenameModal(true);
+                              }}
+                              className="btn btn-info btn-sm btn-circle"
+                              title="Renomear pasta"
+                            >
+                              <PencilSquareIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDeleteModal({ id: folder.id, name: folder.name });
+                              }}
+                              className="btn btn-error btn-sm btn-circle"
+                              disabled={deletingId === folder.id}
+                              title="Excluir pasta"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                       <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
                     </div>
@@ -627,16 +660,10 @@ const FileListPage = () => {
             {/* Arquivos */}
             {regularFiles.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-600 mb-3 px-1">
-                  Arquivos
-                </h3>
+                <h3 className="text-sm font-semibold text-gray-600 mb-3 px-1">Arquivos</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {regularFiles.map((file) => {
-                    const {
-                      icon: Icon,
-                      color,
-                      bg,
-                    } = getFileIcon(file.mimeType || "");
+                    const { icon: Icon, color, bg } = getFileIcon(file.mimeType || "");
                     const isImage = file.mimeType?.startsWith("image/");
 
                     return (
@@ -645,9 +672,7 @@ const FileListPage = () => {
                         onClick={() => handleCardClick(file)}
                         className="group relative bg-white rounded-xl border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col cursor-pointer"
                       >
-                        <div
-                          className={`${bg} h-32 flex items-center justify-center relative flex-shrink-0`}
-                        >
+                        <div className={`${bg} h-32 flex items-center justify-center relative flex-shrink-0`}>
                           {isImage && file.thumbnailLink ? (
                             <div
                               className="w-full h-full bg-cover bg-center"
@@ -664,15 +689,18 @@ const FileListPage = () => {
                         </div>
 
                         <div className="p-3 h-16 flex flex-col justify-center">
-                          <h3
-                            className="font-semibold text-sm text-gray-800 truncate mb-1"
+                          <button
+                            className="font-semibold text-sm text-blue-600 truncate mb-1 text-left bg-transparent border-none p-0 m-0 cursor-pointer hover:underline"
+                            style={{ background: "none" }}
                             title={file.name}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (file.webViewLink) window.open(file.webViewLink, "_blank");
+                            }}
                           >
                             {file.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 truncate">
-                            {formatDate(file.modifiedTime)}
-                          </p>
+                          </button>
+                          <p className="text-xs text-gray-500 truncate">{formatDate(file.modifiedTime)}</p>
                         </div>
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-3 gap-2">
@@ -686,19 +714,32 @@ const FileListPage = () => {
                           >
                             <ArrowDownTrayIcon className="w-4 h-4" />
                           </button>
-
                           {user?.role === "lider" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(file.id);
-                              }}
-                              className="btn btn-error btn-sm btn-circle"
-                              disabled={deletingId === file.id}
-                              title="Excluir"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRenameTarget(file);
+                                  setNewFileName(file.name);
+                                  setShowRenameModal(true);
+                                }}
+                                className="btn btn-info btn-sm btn-circle"
+                                title="Renomear"
+                              >
+                                <PencilSquareIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowDeleteModal({ id: file.id, name: file.name });
+                                }}
+                                className="btn btn-error btn-sm btn-circle"
+                                disabled={deletingId === file.id}
+                                title="Excluir"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -720,85 +761,78 @@ const FileListPage = () => {
               </TableHeader>
               <TableBody>
                 {[...folders, ...regularFiles].map((file) => {
-                  const { icon: Icon, color } = getFileIcon(
-                    file.mimeType || ""
-                  );
-                  const [type = "-", subtype = "-"] = (
-                    file.mimeType || "-"
-                  ).split("/");
+                  const { icon: Icon, color } = getFileIcon(file.mimeType || "");
+                  const [, subtype = "-"] = (file.mimeType || "-").split("/");
                   const prettySubtype = subtype.split(".").pop();
-                  const isFolder =
-                    file.mimeType === "application/vnd.google-apps.folder";
+                  const isFolder = file.mimeType === "application/vnd.google-apps.folder";
 
                   return (
-                    <TableRow
-                      key={file.id}
-                      className={
-                        isFolder ? "cursor-pointer hover:bg-gray-50" : ""
-                      }
-                    >
+                    <TableRow key={file.id} className={isFolder ? "cursor-pointer hover:bg-gray-50" : ""}>
                       <TableCell>
-                        <div
-                          className={`flex items-center gap-3 ${isFolder ? "cursor-pointer" : ""}`}
-                          onClick={() => isFolder ? handleEnterFolder(file) : undefined}
-                        >
+                        <div className="flex items-center gap-3">
                           <Icon className={`w-6 h-6 ${color} flex-shrink-0`} />
-                          <div className="font-medium truncate max-w-xs">
+                          <button
+                            className={`font-medium truncate max-w-xs text-left bg-transparent border-none p-0 m-0 cursor-pointer ${
+                              isFolder ? "" : "text-blue-600 hover:underline"
+                            }`}
+                            style={{ background: "none" }}
+                            onClick={() => {
+                              if (isFolder) {
+                                handleEnterFolder(file);
+                              } else if (file.webViewLink) {
+                                window.open(file.webViewLink, "_blank");
+                              }
+                            }}
+                          >
                             {file.name}
-                          </div>
+                          </button>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="badge badge-ghost">
-                          {isFolder ? "Pasta" : prettySubtype}
-                        </span>
+                        <span className="badge badge-ghost">{isFolder ? "Pasta" : prettySubtype}</span>
                       </TableCell>
-                      <TableCell>
-                        {isFolder ? "-" : formatFileSize(file.size)}
-                      </TableCell>
+                      <TableCell>{isFolder ? "-" : formatFileSize(file.size)}</TableCell>
                       <TableCell>{formatDate(file.modifiedTime)}</TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {!isFolder && (
+                          {user?.role === "lider" && (
                             <>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDownload(file.id, file.name);
+                                  setRenameTarget(file);
+                                  setNewFileName(file.name);
+                                  setShowRenameModal(true);
                                 }}
-                                className="btn btn-primary btn-xs"
-                                title="Baixar"
+                                className="btn btn-info btn-xs"
+                                title={isFolder ? "Renomear pasta" : "Renomear"}
                               >
-                                <ArrowDownTrayIcon className="w-4 h-4" />
+                                <PencilSquareIcon className="w-4 h-4" />
                               </button>
-
-                              {file.webViewLink && (
-                                <a
-                                  href={file.webViewLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="btn btn-accent btn-xs"
-                                  title="Visualizar"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <EyeIcon className="w-4 h-4" />
-                                </a>
-                              )}
-
-                              {user?.role === "lider" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(file.id);
-                                  }}
-                                  className="btn btn-error btn-xs"
-                                  disabled={deletingId === file.id}
-                                  title="Excluir"
-                                >
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
-                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowDeleteModal({ id: file.id, name: file.name });
+                                }}
+                                className="btn btn-error btn-xs"
+                                disabled={deletingId === file.id}
+                                title={isFolder ? "Excluir pasta" : "Excluir"}
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
                             </>
+                          )}
+                          {!isFolder && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(file.id, file.name);
+                              }}
+                              className="btn btn-primary btn-xs"
+                              title="Baixar"
+                            >
+                              <ArrowDownTrayIcon className="w-4 h-4" />
+                            </button>
                           )}
                         </div>
                       </TableCell>
@@ -811,22 +845,54 @@ const FileListPage = () => {
         )}
 
         {previewImage && (
-          <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setPreviewImage(null)}
-          >
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPreviewImage(null)}>
             <div className="relative max-w-4xl max-h-[90vh]">
+              <button onClick={() => setPreviewImage(null)} className="absolute -top-12 right-0 btn btn-circle btn-ghost text-white">
+                ✕
+              </button>
+              <img src={previewImage} alt="Preview" className="max-w-full max-h-[85vh] rounded-lg shadow-2xl" />
+            </div>
+          </div>
+        )}
+
+        {showRenameModal && renameTarget && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm relative">
+              <button className="absolute top-2 right-2 btn btn-ghost btn-sm" onClick={() => setShowRenameModal(false)} disabled={renaming}>
+                ✕
+              </button>
+              <h2 className="text-lg font-bold mb-4">Renomear</h2>
+              <input
+                type="text"
+                className="input input-bordered w-full mb-4"
+                placeholder="Novo nome"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                disabled={renaming}
+                autoFocus
+              />
+              <button className="btn btn-primary w-full" onClick={handleRename} disabled={renaming || !newFileName.trim()}>
+                {renaming ? "Renomeando..." : "Renomear"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showDeleteModal.id && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm relative">
               <button
-                onClick={() => setPreviewImage(null)}
-                className="absolute -top-12 right-0 btn btn-circle btn-ghost text-white"
+                className="absolute top-2 right-2 btn btn-ghost btn-sm"
+                onClick={() => setShowDeleteModal({ id: null, name: "" })}
+                disabled={deleting}
               >
                 ✕
               </button>
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="max-w-full max-h-[85vh] rounded-lg shadow-2xl"
-              />
+              <h2 className="text-lg font-bold mb-4">Confirmar exclusão</h2>
+              <p className="mb-4">Tem certeza que deseja excluir "{showDeleteModal.name}"?</p>
+              <button className="btn btn-error w-full" onClick={() => handleDelete(showDeleteModal.id!)} disabled={deleting}>
+                {deleting ? "Excluindo..." : "Excluir"}
+              </button>
             </div>
           </div>
         )}

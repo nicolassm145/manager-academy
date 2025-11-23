@@ -12,8 +12,8 @@ export interface User {
   email: string;
   role: UserRole;
   equipe?: string;
-  equipeNome?: string; // Nome da equipe para exibição
-  cargo?: string; // Para distinguir professor
+  equipeNome?: string; 
+  cargo?: string; 
 }
 
 interface AuthContextType {

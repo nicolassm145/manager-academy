@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { ConfirmDialog } from "../../../components/ui/ConfirmDialogComponent";
 import { Link } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import {
   getInventoryItems,
   deleteInventoryItem,
