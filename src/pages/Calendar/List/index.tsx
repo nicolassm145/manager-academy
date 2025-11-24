@@ -224,11 +224,7 @@ const CalendarListPage = () => {
                           ? "border-blue-200 hover:border-blue-400 cursor-pointer hover:shadow-md"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
-                      onClick={() => {
-                        if (dayEvents.length > 0) {
-                          navigate(`/calendar/resume?date=${day.dateStr}`);
-                        }
-                      }}
+                      // Removido onClick que levava para o resume
                     >
                       <div className={`text-xs sm:text-sm font-semibold mb-1 ${today ? "text-blue-600" : "text-gray-700"}`}>{date.getDate()}</div>
 
