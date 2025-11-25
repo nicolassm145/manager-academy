@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import { getMembers, deleteMember } from "../../../services/memberService";
 import { getTeams } from "../../../services/teamService";
 import type { Member } from "../../../types/member";

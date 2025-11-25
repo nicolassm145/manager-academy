@@ -1,3 +1,5 @@
+# Arquivos de ambiente
+.env
 # Logs
 logs
 *.log
@@ -26,3 +28,4 @@ dist-ssr
 # Test directory - ignore everything except Release*.py files
 test/*
 !test/Release*.py
+.prettierrc

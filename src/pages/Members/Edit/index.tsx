@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import { getMemberById, updateMember } from "../../../services/memberService";
 import { getTeams } from "../../../services/teamService";
 import type { Team } from "../../../types/admin";

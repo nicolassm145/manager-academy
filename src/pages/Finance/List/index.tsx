@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import {
   getTransactions,
   deleteTransaction,
@@ -205,7 +205,7 @@ const FinanceListPage = () => {
         </PageHeader>
 
         <Card>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}

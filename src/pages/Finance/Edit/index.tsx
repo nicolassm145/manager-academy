@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Feedback } from "../../../components/ui/FeedbackComponent";
 import { useNavigate, useParams } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import {
   getTransactionById,
   updateTransaction,

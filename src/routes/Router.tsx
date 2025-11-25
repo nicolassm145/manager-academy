@@ -28,7 +28,15 @@ import InventoryListPage from "../pages/Inventory/List";
 import InventoryNewPage from "../pages/Inventory/New";
 import InventoryDetailPage from "../pages/Inventory/Detail";
 import InventoryEditPage from "../pages/Inventory/Edit";
+
+// Crud de Arquivos
+import FileListPage from "../pages/Files";
+// (futuro: importar New/Edit/Detail se necessário)
 import FinanceResumePage from "../pages/Finance/Resume";
+import CalendarListPage from "../pages/Calendar/List";
+import CalendarEditPage from "../pages/Calendar/Edit";
+import CalendarDetailsPage from "../pages/Calendar/Details";
+
 
 const router = createBrowserRouter([
   {
@@ -212,6 +220,46 @@ const router = createBrowserRouter([
     ),
   },
 
+  {
+    path: "/files",
+    element: (
+      <ProtectedRoute>
+        <FileListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar",
+    element: (
+      <ProtectedRoute>
+        <CalendarListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/edit",
+    element: (
+      <ProtectedRoute requiredPermission="canCreateCalendar">
+        <CalendarEditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/edit/:id",
+    element: (
+      <ProtectedRoute requiredPermission="canEditCalendarEvent">
+        <CalendarEditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar/details/:id",
+    element: (
+      <ProtectedRoute>
+        <CalendarDetailsPage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "*",
     element: <NotFoundPage />,

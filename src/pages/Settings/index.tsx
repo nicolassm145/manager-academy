@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layout } from "../../components/LayoutComponent";
+import { Layout } from "../../components/layout/LayoutComponent";
 import { useAuth } from "../../context/AuthContext";
 import { updateMember } from "../../services/memberService";
 import {

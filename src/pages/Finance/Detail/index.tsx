@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Layout } from "../../../components/LayoutComponent";
+import { Layout } from "../../../components/layout/LayoutComponent";
 import { getTransactionById } from "../../../services/financeService";
 import { getUserById } from "../../../services/userService";
 import type { Transaction } from "../../../types/finance";

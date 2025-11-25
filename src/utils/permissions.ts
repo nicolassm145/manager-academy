@@ -1,7 +1,41 @@
 import type { UserRole } from "../context/AuthContext";
 
 // Define as permissões para cada cargo
-export const PERMISSIONS = {
+type PermissionMap = {
+  canViewDashboard: boolean;
+  canViewMembers: boolean;
+  canCreateMember: boolean;
+  canEditMember: boolean;
+  canDeleteMember: boolean;
+  canViewUsers: boolean;
+  canCreateUser: boolean;
+  canEditUser: boolean;
+  canDeleteUser: boolean;
+  canViewTeams: boolean;
+  canCreateTeam: boolean;
+  canEditTeam: boolean;
+  canDeleteTeam: boolean;
+  canViewFinance: boolean;
+  canCreateFinance: boolean;
+  canEditFinance: boolean;
+  canDeleteFinance: boolean;
+  canViewInventory: boolean;
+  canCreateInventory: boolean;
+  canEditInventory: boolean;
+  canDeleteInventory: boolean;
+  canUploadFiles: boolean;
+  canDeleteFiles: boolean;
+  canViewFiles: boolean;
+  canViewCalendar: boolean;
+  canCreateCalendar: boolean;
+  canEditCalendar: boolean;
+  canDeleteCalendar: boolean;
+  canCreateCalendarEvent: boolean;
+  canEditCalendarEvent: boolean;
+};
+
+export const PERMISSIONS: Record<UserRole, PermissionMap> = {
+  // Admin tem acesso total
   admin: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -17,14 +51,25 @@ export const PERMISSIONS = {
     canEditTeam: true,
     canDeleteTeam: true,
     canViewFinance: true,
-    canCreateFinance: false,
-    canEditFinance: false,
-    canDeleteFinance: false,
+    canCreateFinance: true,
+    canEditFinance: true,
+    canDeleteFinance: true,
     canViewInventory: true,
-    canCreateInventory: false,
-    canEditInventory: false,
-    canDeleteInventory: false,
+    canCreateInventory: true,
+    canEditInventory: true,
+    canDeleteInventory: true,
+    canUploadFiles: true,
+    canDeleteFiles: true,
+    canViewFiles: false,
+    canCreateCalendar: true,
+    canViewCalendar: false,
+    canEditCalendar: true,
+    canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
+
+  // Líder pode gerenciar membros, finanças e inventário da sua equipe
   lider: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -47,7 +92,18 @@ export const PERMISSIONS = {
     canCreateInventory: true,
     canEditInventory: true,
     canDeleteInventory: true,
+    canUploadFiles: true,
+    canDeleteFiles: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
+    canViewCalendar: true,
+    canEditCalendar: true,
+    canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
+
+  // Professor tem as mesmas permissões que Líder
   professor: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -70,7 +126,18 @@ export const PERMISSIONS = {
     canCreateInventory: true,
     canEditInventory: true,
     canDeleteInventory: true,
+    canUploadFiles: true,
+    canDeleteFiles: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
+    canViewCalendar: true,
+    canEditCalendar: true,
+    canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
+
+  // Diretor pode ver finanças
   diretor: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -86,14 +153,25 @@ export const PERMISSIONS = {
     canEditTeam: false,
     canDeleteTeam: false,
     canViewFinance: true,
-    canCreateFinance: true,
-    canEditFinance: true,
-    canDeleteFinance: true,
+    canCreateFinance: false,
+    canEditFinance: false,
+    canDeleteFinance: false,
     canViewInventory: false,
     canCreateInventory: false,
     canEditInventory: false,
     canDeleteInventory: false,
+    canUploadFiles: true,
+    canDeleteFiles: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
+    canViewCalendar: true,
+    canEditCalendar: true,
+    canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
+
+  // Membro pode ver membros e equipes (mas sem editar/criar/deletar)
   membro: {
     canViewDashboard: true,
     canViewMembers: true,
@@ -113,9 +191,18 @@ export const PERMISSIONS = {
     canEditFinance: false,
     canDeleteFinance: false,
     canViewInventory: true,
-    canCreateInventory: true,
-    canEditInventory: true,
+    canCreateInventory: false,
+    canEditInventory: false,
     canDeleteInventory: false,
+    canUploadFiles: true,
+    canDeleteFiles: true,
+    canViewFiles: true,
+    canCreateCalendar: true,
+    canViewCalendar: true,
+    canEditCalendar: true,
+    canDeleteCalendar: true,
+    canCreateCalendarEvent: true,
+    canEditCalendarEvent: true,
   },
 } as const;
 
